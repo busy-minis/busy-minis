@@ -153,11 +153,11 @@ const SocialsBlock = () => (
 const AboutBlock = () => (
   <Block className="col-span-12 text-3xl leading-snug">
     <p>
-      My passion is building cool stuff.{" "}
+      Our passion is in helping others.
       <span className="text-neutral-400">
-        I build primarily with React, Tailwind CSS, and Framer Motion. I love
-        this stack so much that I even built a website about it. Ive made over a
-        hundred videos on the subject across YouTube and TikTok.
+        {" "}
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Consequatur
+        ipsam doloremque deleniti dolorum sint dolore.
       </span>
     </p>
   </Block>
@@ -166,13 +166,13 @@ const AboutBlock = () => (
 const LocationBlock = () => (
   <Block className="col-span-12 flex flex-col items-center gap-4 md:col-span-3">
     <MapPin className="text-3xl" />
-    <p className="text-center text-lg text-neutral-400">Cyberspace</p>
+    <p className="text-center text-lg text-neutral-400">Georgia</p>
   </Block>
 );
 
 const EmailListBlock = () => (
   <Block className="col-span-12 md:col-span-9">
-    <p className="mb-3 text-lg">Join my mailing list</p>
+    <p className="mb-3 text-lg">Join our mailing list</p>
     <form
       onSubmit={(e) => e.preventDefault()}
       className="flex items-center gap-2"

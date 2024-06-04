@@ -18,9 +18,9 @@ export default function Hero() {
         and families by providing safe, reliable, and convenient transportation
         services for various activities and occasions.
       </p>
-      <div className="bg-neutral-900 text-neutral-100 px-10 py-4 mt-8">
+      <button className="bg-neutral-900 rounded-3xl hover:bg-orange-500 transition-all duration-500 text-neutral-100 px-10 py-4 mt-8">
         Get Started
-      </div>
+      </button>
     </div>
   );
 }
