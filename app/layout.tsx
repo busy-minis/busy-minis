@@ -11,6 +11,7 @@ import "@fontsource/poppins/700.css";
 import "@fontsource/poppins/800.css";
 import "@fontsource/poppins/900.css";
 import "@fontsource/chicle";
+import Links from "./components/Links";
 export const metadata: Metadata = {
   title: "Busy Minis",
   description:
@@ -24,7 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="max-w-7xl mx-auto bg-neutral-200 text-neutral-900">
+      <body className=" mx-auto bg-neutral-100 text-neutral-900">
         {children}
       </body>
     </html>

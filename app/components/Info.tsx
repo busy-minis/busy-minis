@@ -126,10 +126,7 @@ const SocialsBlock = () => (
       }}
       className="col-span-6 bg-neutral-50 md:col-span-3"
     >
-      <a
-        href="#"
-        className="grid h-full place-content-center text-3xl text-black"
-      >
+      <a href="#" className="grid h-full place-content-center text-3xl ">
         <TiktokLogo />
       </a>
     </Block>

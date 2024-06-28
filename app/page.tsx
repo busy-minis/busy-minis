@@ -4,14 +4,15 @@ import Hero from "./components/Hero";
 import Schedule from "./components/Schedule";
 import Steps from "./components/Steps";
 import { RevealBento } from "./components/Info";
+import Footer from "./components/Footer";
 export default function Home() {
   return (
     <main>
       <NavBar />
       <Hero />
-      <Schedule />
+      {/* <Schedule /> */}
       <Steps />
-      <RevealBento />
+      <Footer />
     </main>
   );
 }

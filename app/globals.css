@@ -9,7 +9,9 @@ body {
 .title {
   font-family: "Chicle", system-ui;
 }
-
+.gradient {
+  background: linear-gradient(to top, #c471f5 0%, #fa71cd 100%);
+}
 .hero {
   background-size: 20px 20px;
   background-image: linear-gradient(
@@ -18,4 +20,11 @@ body {
       transparent 1px
     ),
     linear-gradient(to bottom, rgb(210, 210, 210) 1px, transparent 1px);
+}
+
+.bg {
+  opacity: 1;
+  background-image: linear-gradient(#9b9b9b14 1px, transparent 1px),
+    linear-gradient(to right, #56565632 1px, #e5e5f700 1px);
+  background-size: 20px 20px;
 }
