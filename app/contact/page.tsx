@@ -1,6 +1,6 @@
 import React from "react";
-import { RevealBento } from "../components/Info";
-import { NavBar } from "../components/NavBar";
+import { RevealBento } from "../components/ui/Info";
+import { NavBar } from "../components/ui/NavBar";
 
 export default function page() {
   return (

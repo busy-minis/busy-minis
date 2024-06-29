@@ -1,7 +1,7 @@
 import React from "react";
-import Footer from "../components/Footer";
+import Footer from "../components/ui/Footer";
 import { TextParallaxContentExample } from "../components/ui/TextScroll";
-import { NavBar } from "../components/NavBar";
+import { NavBar } from "../components/ui/NavBar";
 import HoverDevCards from "../components/ui/Cards";
 export default function page() {
   return (
@@ -53,8 +53,8 @@ export default function page() {
             }
           />
         </div>
+        <div className="text-5xl">Facts And Questions</div>
       </main>
-
       <Footer />
     </div>
   );

@@ -2,6 +2,7 @@
 import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { MapPin } from "@phosphor-icons/react";
 export default function Hero() {
   return (
     <div className="max-w-7xl mx-auto items-center justify-center mt-24">
@@ -23,7 +24,7 @@ export default function Hero() {
             transportation for children.
           </p>
           <button className="border-2 hover:rounded-3xl  border-dashed border-neutral-800 transition-all duration-500  px-10 py-4 mt-16 font-bold text-2xl">
-            Book Now
+            Schedule A Ride
           </button>
         </section>
         <aside>
@@ -36,6 +37,11 @@ export default function Hero() {
               height={1000}
               width={1000}
             />
+          </div>
+          <div className="flex opacity-80  mt-4 gap-2 justify-end  items-center   w-full">
+            <MapPin className="text-red-500" />
+
+            <p className="">Serving Coweta, Fayette, and Clayton counties </p>
           </div>
         </aside>
       </div>

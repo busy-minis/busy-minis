@@ -1,7 +1,7 @@
 "use client";
 import React, { Dispatch, SetStateAction, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import Toggle from "./ui/Toggle";
+import Toggle from "./Toggle";
 import Link from "next/link";
 export const NavBar = () => {
   return (
@@ -20,7 +20,7 @@ export const NavBar = () => {
       </ul>
       <section className="flex gap-4">
         <button className="bg-neutral-900 text-white uppercase font-semibold px-4 py-1 ">
-          Book a Ride
+          Schedule a Ride
         </button>
         <button className="bg-neutral-900 text-white  uppercase font-semibold    px-4 py-1 ">
           Login

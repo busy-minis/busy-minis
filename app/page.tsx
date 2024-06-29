@@ -1,16 +1,18 @@
-import Image from "next/image";
-import { NavBar } from "./components/NavBar";
-import Hero from "./components/Hero";
-import Schedule from "./components/Schedule";
+import { NavBar } from "./components/ui/NavBar";
+import Hero from "./components/Home/Hero";
 import Steps from "./components/Steps";
-import { RevealBento } from "./components/Info";
-import Footer from "./components/Footer";
+import Footer from "./components/ui/Footer";
+import HowItWorks from "./components/Home/HowItWorks";
+import WhatWeOffer from "./components/Home/WhatWeOffer";
+import WhyChooseUs from "./components/Home/WhyChooseUs";
 export default function Home() {
   return (
     <main>
       <NavBar />
       <Hero />
-      {/* <Schedule /> */}
+      <WhyChooseUs />
+      <HowItWorks />
+      <WhatWeOffer />
       <Steps />
       <Footer />
     </main>
