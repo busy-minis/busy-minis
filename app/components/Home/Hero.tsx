@@ -1,6 +1,5 @@
 "use client";
 import React, { useEffect } from "react";
-import { motion } from "framer-motion";
 import Image from "next/image";
 import { MapPin } from "@phosphor-icons/react";
 export default function Hero() {
@@ -23,7 +22,7 @@ export default function Hero() {
             . Your trusted partner for safe, reliable, and convenient
             transportation for children.
           </p>
-          <button className="border-2 hover:rounded-3xl  border-dashed border-neutral-800 transition-all duration-500  px-10 py-4 mt-16 font-bold text-2xl">
+          <button className=" border-neutral-800 transition-all duration-500  px-10 py-4 mt-16 font-bold text-2xl">
             Schedule A Ride
           </button>
         </section>

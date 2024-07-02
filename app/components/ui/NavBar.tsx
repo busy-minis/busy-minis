@@ -13,9 +13,7 @@ export const NavBar = () => {
           Pricing
         </Link>
         <Link href={"/about"}>About</Link>
-        <Link className="line-through" href={"/"}>
-          Services
-        </Link>
+        <Link href={"/services"}>Services</Link>
         <Link href={"/contact"}>Contact</Link>
       </ul>
       <section className="flex gap-4">

@@ -1,6 +1,7 @@
+"use client";
 import { CashRegister } from "@phosphor-icons/react/dist/ssr";
 import React from "react";
-
+import { motion } from "framer-motion";
 export default function HowItWorks() {
   return (
     <div className=" max-w-7xl mx-auto text-lg  rounded-3xl  mt-48  pt-36">
@@ -76,12 +77,18 @@ export default function HowItWorks() {
 
 const Step = (props: any) => {
   return (
-    <div className="flex  pb-48">
+    <motion.div
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.5 }}
+      className="flex  pb-48"
+    >
       <CashRegister className="text-7xl" />
       <section className="pl-12">
         <h2 className="text-5xl  tracking-tighter">{props.title}</h2>
         <p className="mt-4">{props.text}</p>
       </section>
-    </div>
+    </motion.div>
   );
 };
