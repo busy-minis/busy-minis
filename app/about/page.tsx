@@ -6,76 +6,59 @@ import { NavBar } from "../components/ui/NavBar";
 import HoverDevCards from "../components/ui/Cards";
 import classNames from "classnames";
 import Image from "next/image";
+import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
+
 import { ArrowDown, ArrowFatDown } from "@phosphor-icons/react";
 export default function page() {
   return (
     <div className="">
       <NavBar />
-
-      <main className="max-w-7xl mx-auto  mt-32 relative">
-        <div className="flex">
-          <section className="relative">
-            <div className="h-[600px] w-[500px] bg-orange-400"></div>
-            <h1 className="text-8xl bg-neutral-800 text-neutral-200 px-4 font-bold  tracking-tighter absolute top-12 whitespace-nowrap -right-72">
-              ABOUT US
-            </h1>
-          </section>
-          <article className="p-24 grid place-content-center">
-            <p className="mt-8 max-w-4xl text-lg  leading-relaxed">
-              Welcome to Busy Minis Transportation, your trusted partner in safe
-              and reliable transportation solutions for children in Coweta,
-              Fayette, and Clayton counties. <br /> <br /> At Busy Minis, we
-              understand the challenges faced by busy parents juggling work
-              schedules and their children{"'"}s diverse activities. Our mission
-              is to provide peace of mind by offering secure and convenient
-              transportation tailored specifically for young passengers.
-            </p>
-          </article>
-        </div>
-        <div className="bg-neutral-800  text-neutral-200  py-12 mt-24">
-          <h2 className="text-5xl  text-center">Our Mission</h2>
-          <p className="mt-8 leading-relaxed max-w-3xl text-lg mx-auto text-center">
-            Busy Minis Transportation aims to be the #1 Community Trusted
-            Transportation alternative, meeting the ever-changing needs of
-            children and families. We strive to uphold our commitment to safety,
-            reliability, and exceptional service while accommodating a variety
-            of transportation needs—from tutoring sessions to birthday parties,
-            and everything in between.
-          </p>
-          <div className="grid place-content-center">
-            <button className="mt-24 bg-orange-400 font-bold text-xl  text-neutral-900 px-4 py-2 ">
-              GET A QUOTE
-            </button>
+      <div className="bg-theme-orange py-24 text-white">
+        <main className="max-w-7xl mx-auto  ">
+          <h1 className="text-8xl   px-4 font-bold  tracking-tighter whitespace-nowrap ">
+            ABOUT US
+          </h1>
+          <div className="flex mt-24">
+            <article className="p-24 grid place-content-center">
+              <p className="mt-8 max-w-4xl text-lg  leading-relaxed">
+                Welcome to Busy Minis Transportation, your trusted partner in
+                safe and reliable transportation solutions for children in
+                Coweta, Fayette, and Clayton counties. <br /> <br /> At Busy
+                Minis, we understand the challenges faced by busy parents
+                juggling work schedules and their children{"'"}s diverse
+                activities. Our mission is to provide peace of mind by offering
+                secure and convenient transportation tailored specifically for
+                young passengers.
+              </p>
+            </article>
+            <section className="relative">
+              <Image
+                src={"/assets/09.png"}
+                alt=""
+                height={800}
+                width={800}
+                quality={100}
+              />
+            </section>
           </div>
-        </div>
-
-        <h2 className="text-5xl mt-36 text-center   w-fit mx-auto px-8 py-2">
-          What Sets Us Apart
-        </h2>
-      </main>
-      <div className="bg-neutral-300 p-8 max-w-7xl mx-auto rounded-3xl  gap-4 mt-8 ">
-        <Item
-          color={"blue"}
-          title={"Safety First"}
-          text={
-            "We prioritize safety with certified drivers and trained Shuttle Aids on every ride. Our vehicles are equipped with dual dash cams, daily inspections, and first aid kits to ensure a secure journey for every child."
-          }
-        />
-        <Item
-          color={"red"}
-          title={"Customized Service"}
-          text={
-            "We offer flexible routes and scheduling options designed to fit your family’s unique needs. Whether it&apos;s a regular tutoring session or a last-minute pick-up, Busy Minis is here to help. "
-          }
-        />
-        <Item
-          color={"green"}
-          title={"Community Focus"}
-          text={
-            "Proudly serving the South Atlanta Area, we build trust through transparent communication, rigorous safety protocols, and personalized customer care."
-          }
-        />
+          <div className="bg-neutral-800 rounded-3xl  text-neutral-200  py-12 mt-24">
+            <h2 className="text-5xl  text-center">Our Mission</h2>
+            <p className="mt-8 leading-relaxed max-w-3xl text-lg mx-auto text-center">
+              At Busy Minis Transportation, we understand the demands of busy
+              families. Our mission is to provide safe, reliable, and convenient
+              transportation for your children, giving you peace of mind and
+              more time to focus on what matters most. We’re here to ensure your
+              kids get to their activities safely and on time, every time.
+            </p>
+            <div className="grid place-content-center">
+              <button className="mt-24 bg-orange-400 font-bold text-xl  text-neutral-900 px-4 py-2 ">
+                GET A QUOTE
+              </button>
+            </div>
+          </div>
+        </main>
       </div>
+
       <div className=" max-w-7xl mx-auto mt-48 text-lg">
         <p className="text-center text-3xl pb-12">Frequently asked questions</p>
 
@@ -137,6 +120,33 @@ const Item = (props: any) => {
     <div className={` p-8  rounded-t-3xl w-full`}>
       <p className="  text-3xl  w-full">{props.title}</p>
       <p className="text-xl pb-24 mt-12  ">{props.text}</p>
+    </div>
+  );
+};
+
+const Wrap = () => {
+  return (
+    <section className="relative w-fit py-6 -left-4 ">
+      <div className="bg-white absolute -rotate-1 text-2xl py-1 border-2  border-neutral-900 text-neutral-900 font-bold tracking-tighter uppercase flex gap-4 items-center whitespace-nowrap overflow-hidden w-fit">
+        Minis <Arr /> Transportation <Arr /> Busy <Arr />
+        Minis <Arr /> Transportation <Arr /> Busy <Arr />
+        Minis <Arr /> Transportation <Arr /> Busy <Arr />
+        Minis <Arr /> Transportation <Arr /> Busy <Arr />
+      </div>
+      <div className="bg-white rotate-1 absolute text-2xl  border-2 py-1  border-neutral-900 text-neutral-900 font-bold tracking-tighter uppercase flex gap-4 items-center whitespace-nowrap overflow-hidden w-fit ">
+        Busy <Arr /> Minis <Arr /> Transportation <Arr />
+        Busy <Arr /> Minis <Arr /> Transportation <Arr />
+        Busy <Arr /> Minis <Arr /> Transportation <Arr />
+        Busy <Arr /> Minis <Arr /> Transportation <Arr />
+      </div>
+    </section>
+  );
+};
+
+const Arr = () => {
+  return (
+    <div className="flex justify-center bg-neutral-900 text-white rounded-full p-1 w-fit text-lg ">
+      <ArrowRight />
     </div>
   );
 };

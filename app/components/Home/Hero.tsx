@@ -4,14 +4,36 @@ import Image from "next/image";
 import { MapPin } from "@phosphor-icons/react";
 export default function Hero() {
   return (
-    <div className="max-w-7xl mx-auto items-center justify-center mt-24">
+    <div className=" mx-auto  items-center relative justify-center py-36">
+      {/* <Image
+        src={"/assets/01.jpg"}
+        alt=""
+        height={500}
+        width={500}
+        className="absolute -bottom-24 left-24"
+      />
+      <Image
+        src={"/assets/01.jpg"}
+        alt=""
+        height={500}
+        width={500}
+        className="absolute bottom-24 right-24"
+      /> */}
+      <Image
+        src={"/assets/01.jpg"}
+        alt=""
+        width={500}
+        height={500}
+        className="-z-10  absolute left-4 rounded-full "
+        quality={100}
+      />
       <div className="flex">
-        <section className="max-w-3xl">
-          <ChangingText />
+        <section className="max-w-3xl mx-auto flex flex-col items-center text-center">
+          {/* <ChangingText /> */}
           <section className="  border-neutral-400 rounded-2xl">
-            <h1 className="text-8xl tracking-tighter font-semibold  mt-4 ">
+            <h1 className="text-8xl tracking-tighter  font-semibold  mt-4 ">
               Safe Rides,{" "}
-              <span className="text-neutral-700"> Smiling Kids</span>
+              <span className="text-theme-teal "> Smiling Kids</span>
             </h1>
           </section>
           <p className="max-w-2xl text-xl  leading-loose mt-8 ">
@@ -22,13 +44,17 @@ export default function Hero() {
             . Your trusted partner for safe, reliable, and convenient
             transportation for children.
           </p>
-          <button className=" border-neutral-800 transition-all duration-500  px-10 py-4 mt-16 font-bold text-2xl">
-            Schedule A Ride
+          <div className="flex justify-center font-bold opacity-90 text-sm  mt-16 gap-2  items-center   w-full">
+            <MapPin className="text-red-500" />
+
+            <p className="">Serving Coweta, Fayette, and Clayton counties </p>
+          </div>
+          <button className="  border-zinc-800 border-2   rounded-full  transition-all duration-500  px-10 py-4 mt-8 font-bold text-2xl">
+            Sign Up
           </button>
         </section>
-        <aside>
+        {/* <aside>
           <div className="border-zinc-400 rounded-3xl p-1  border-2 relative ">
-            <div className="px-80 py-24 size-96 bg-neutral-600/50 absolute top-0 rounded-full blur-3xl -z-10"></div>
             <Image
               src={"/assets/taxi.png"}
               className="border-2 border-zinc-800 rounded-3xl opacity-80"
@@ -37,12 +63,7 @@ export default function Hero() {
               width={1000}
             />
           </div>
-          <div className="flex opacity-80  mt-4 gap-2 justify-end  items-center   w-full">
-            <MapPin className="text-red-500" />
-
-            <p className="">Serving Coweta, Fayette, and Clayton counties </p>
-          </div>
-        </aside>
+        </aside> */}
       </div>
     </div>
   );

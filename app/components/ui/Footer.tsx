@@ -1,57 +1,50 @@
-import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
+import Image from "next/image";
 const Footer = () => {
   return (
-    <footer className="bg-neutral-900 overflow-x-hidden text-neutral-300  mt-24 pb-24">
-      <Wrap />
-      <section className=" py-12 mt-8 flex  gap-48  container mx-auto leading-relaxed">
-        <div className="space-y-2">
-          <h3 className="text-8xl pr-2 bg-gradient-to-r from-neutral-100 via-yellow-100 to-neutral-400 inline-block text-transparent bg-clip-text drop-shadow-[0_1.2px_1.2px_rgba(255,255,255,.8)]  font-bold tracking-tighter uppercase ">
-            Busy Minis
-          </h3>
+    <footer className="   ">
+      {/* <Wrap /> */}
+      <footer className="rounded-lg    m-4  mt-24">
+        <div className="w-full max-w-screen-2xl mx-auto p-4 md:py-8">
+          <div className="sm:flex sm:items-center sm:justify-between">
+            <span className="self-center text-2xl font-semibold whitespace-nowrap ">
+              BusyMinis
+            </span>
 
-          <p>
+            <ul className="flex flex-wrap items-center mb-6 text-sm font-medium  sm:mb-0 ">
+              <li>
+                <a href="#" className="hover:underline me-4 md:me-6">
+                  Home
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:underline me-4 md:me-6">
+                  Pricing
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:underline me-4 md:me-6">
+                  About
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:underline  me-4 md:me-6">
+                  Services
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:underline ">
+                  Contact
+                </a>
+              </li>
+            </ul>
+          </div>
+          <hr className="my-6 border-theme-orange/50 sm:mx-auto  lg:my-8" />
+          <span className="block text-sm  sm:text-center ">
             &copy; 2024 Busy Minis Transportation Company. All rights reserved.
-          </p>
-          <p>000 University Avenue, Fayetteville, GA 30214</p>
-          <p>Telephone: 000-595-1911 | Email: lia@busyminis.com</p>
+          </span>
         </div>
-        <aside className="text-base space-y-2">
-          <h3 className="font-bold mt-4 text-xl">Menu</h3>
-          <p>Home</p>
-          <p>Pricing</p>
-          <p>About</p>
-          <p>Drivers</p>
-          <p>Services</p>
-        </aside>
-      </section>
+      </footer>
     </footer>
-  );
-};
-
-const Wrap = () => {
-  return (
-    <section className="relative w-fit py-6 -left-4 ">
-      <div className="bg-white absolute -rotate-1 text-2xl py-1 border-2  border-neutral-900 text-neutral-900 font-bold tracking-tighter uppercase flex gap-4 items-center whitespace-nowrap overflow-hidden w-fit">
-        Minis <Arr /> Transportation <Arr /> Busy <Arr />
-        Minis <Arr /> Transportation <Arr /> Busy <Arr />
-        Minis <Arr /> Transportation <Arr /> Busy <Arr />
-        Minis <Arr /> Transportation <Arr /> Busy <Arr />
-      </div>
-      <div className="bg-white rotate-1 absolute text-2xl  border-2 py-1  border-neutral-900 text-neutral-900 font-bold tracking-tighter uppercase flex gap-4 items-center whitespace-nowrap overflow-hidden w-fit ">
-        Busy <Arr /> Minis <Arr /> Transportation <Arr />
-        Busy <Arr /> Minis <Arr /> Transportation <Arr />
-        Busy <Arr /> Minis <Arr /> Transportation <Arr />
-        Busy <Arr /> Minis <Arr /> Transportation <Arr />
-      </div>
-    </section>
-  );
-};
-
-const Arr = () => {
-  return (
-    <div className="flex justify-center bg-neutral-900 text-white rounded-full p-1 w-fit text-lg ">
-      <ArrowRight />
-    </div>
   );
 };
 

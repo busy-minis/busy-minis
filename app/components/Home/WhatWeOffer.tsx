@@ -1,13 +1,14 @@
 import React from "react";
-import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
+import { ArrowRight, Star } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 export default function WhatWeOffer() {
   return (
-    <div className="max-w-7xl mt-48 rounded-3xl mx-auto bg-neutral-800 text-neutral-200 py-12 p-8">
+    <div className="max-w-7xl mt-48 rounded-3xl mx-auto bg-theme-orange text-neutral-200 py-24 p-8">
       <div className="text-center">
-        <p>Services</p>
-        <h2 className="mt-4 text-4xl">What do we Offer</h2>
-        <p className="mt-12 text-sm max-w-3xl text-center mx-auto leading-relaxed">
+        <h2 className="mt-4 text-5xl tracking-tighter text-theme-yellow font-bold">
+          What do we Offer ?
+        </h2>
+        <p className="mt-12 text-lg max-w-3xl text-center mx-auto leading-relaxed">
           Busy Minis Transportation offers a wide range of services tailored to
           fit your family&apos;s needs. From daily school commutes to
           last-minute pickups and special events, our flexible scheduling and
@@ -19,7 +20,6 @@ export default function WhatWeOffer() {
       <ul className="mt-36 grid grid-cols-2 gap-y-8 text-xl gap-x-24 w-fit  mx-auto">
         <Offer title={"Tutoring/After School Tutorials Transportation"} />
         <Offer title={"Summer Camp Transportation"} />
-
         <Offer title={"Last Minute or Sick Child Pick Up"} />
         <Offer title={"Transportation for Children with Special Needs"} />
         <Offer title={"Transportation for Sports/Extracurricular Activities"} />
@@ -34,7 +34,7 @@ export default function WhatWeOffer() {
 
       <Link
         href={"/services"}
-        className="cursor-pointer  flex mx-auto bg-orange-500 px-8 py-2 gap-4 rounded-3xl w-fit items-center"
+        className="cursor-pointer  flex mx-auto bg-theme-yellow text-zinc-950 px-8 py-2 gap-4 rounded-3xl w-fit items-center"
       >
         <p>Find Out More</p>
 
@@ -50,7 +50,10 @@ export default function WhatWeOffer() {
 const Offer = (props: any) => {
   return (
     <div className="flex">
-      <p> {props.text}</p>
+      <div className="flex gap-4 items-center">
+        <Star className="text-theme-yellow" />
+        <p className="font-bold"> {props.text}</p>
+      </div>
       <h3 className="">{props.title}</h3>
     </div>
   );

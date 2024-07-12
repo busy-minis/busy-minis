@@ -1,15 +1,19 @@
 "use client";
 import React, { Dispatch, SetStateAction, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import Toggle from "./Toggle";
 import Link from "next/link";
+import { UserCircle } from "@phosphor-icons/react";
+import Image from "next/image";
 export const NavBar = () => {
   return (
-    <nav className="flex z-10 sticky top-0 backdrop-blur-2xl bg-neutral-100/50 border-neutral-600  justify-between items-center py-4 px-24  border-b-2">
+    <nav className="flex z-10 sticky top-0 bg-neutral-100  justify-between items-center  px-24  ">
       <Logo />
-      <ul className="space-x-8">
+      <ul
+        className="space-x-8 
+      "
+      >
         <Link href={"/"}>Home</Link>
-        <Link className="line-through" href={"/"}>
+        <Link className="hover:bg-theme-orange px-2 py-1 " href={"/"}>
           Pricing
         </Link>
         <Link href={"/about"}>About</Link>
@@ -17,12 +21,15 @@ export const NavBar = () => {
         <Link href={"/contact"}>Contact</Link>
       </ul>
       <section className="flex gap-4">
-        <button className="bg-neutral-900 text-white uppercase font-semibold px-4 py-1 ">
+        <button className="bg-theme-orange rounded-full  text-white uppercase font-semibold px-4 py-1 ">
           Schedule a Ride
         </button>
-        <button className="bg-neutral-900 text-white  uppercase font-semibold    px-4 py-1 ">
+        <button className="bg-neutral-900 rounded-full text-white  uppercase font-semibold    px-4 py-1 ">
           Login
         </button>
+        {/* <Link href={"/dashboard"}>
+          <UserCircle size={40} />
+        </Link> */}
       </section>
     </nav>
   );
@@ -30,9 +37,15 @@ export const NavBar = () => {
 
 const Logo = () => {
   return (
-    <h3 className="uppercase tracking-tighter font-bold text-4xl ">
-      Busy Minis
-    </h3>
+    <div>
+      <Image
+        src={"/logo-small.png"}
+        alt=""
+        width={80}
+        height={200}
+        quality={100}
+      />
+    </div>
   );
 };
 

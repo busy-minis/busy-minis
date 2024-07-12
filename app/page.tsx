@@ -14,7 +14,6 @@ export default function Home() {
       <WhyChooseUs />
       <HowItWorks />
       <WhatWeOffer />
-
       <CTA />
       <Footer />
     </main>
