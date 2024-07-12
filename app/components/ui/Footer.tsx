@@ -38,7 +38,7 @@ const Footer = () => {
               </li>
             </ul>
           </div>
-          <hr className="my-6 border-theme-orange/50 sm:mx-auto  lg:my-8" />
+          <hr className="my-6 border-black   sm:mx-auto  lg:my-8" />
           <span className="block text-sm  sm:text-center ">
             &copy; 2024 Busy Minis Transportation Company. All rights reserved.
           </span>

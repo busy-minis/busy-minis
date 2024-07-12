@@ -19,12 +19,23 @@ export default function Hero() {
         width={500}
         className="absolute bottom-24 right-24"
       /> */}
+      <div className="h-[24rem] w-[40rem] left-12 top-1/2 bg-theme-orange/10 -z-20 blur-3xl absolute "></div>
+      <div className="h-[24rem] w-[40rem] right-0 bottom-0 bg-theme-teal/20 -z-20 blur-3xl absolute "></div>
+
       <Image
         src={"/assets/01.jpg"}
         alt=""
         width={500}
         height={500}
-        className="-z-10  absolute left-4 rounded-full "
+        className="-z-10  absolute left-12 rounded-full "
+        quality={100}
+      />
+      <Image
+        src={"/assets/09.png"}
+        alt=""
+        width={300}
+        height={300}
+        className="-z-10  absolute right-48 top-24 rounded-full "
         quality={100}
       />
       <div className="flex">
@@ -45,7 +56,7 @@ export default function Hero() {
             transportation for children.
           </p>
           <div className="flex justify-center font-bold opacity-90 text-sm  mt-16 gap-2  items-center   w-full">
-            <MapPin className="text-red-500" />
+            <MapPin className="text-red-500 animate-bounce" size={25} />
 
             <p className="">Serving Coweta, Fayette, and Clayton counties </p>
           </div>

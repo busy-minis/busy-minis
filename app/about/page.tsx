@@ -13,14 +13,18 @@ export default function page() {
   return (
     <div className="">
       <NavBar />
-      <div className="bg-theme-orange py-24 text-white">
+      <div className=" py-24 ">
         <main className="max-w-7xl mx-auto  ">
-          <h1 className="text-8xl   px-4 font-bold  tracking-tighter whitespace-nowrap ">
-            ABOUT US
-          </h1>
-          <div className="flex mt-24">
-            <article className="p-24 grid place-content-center">
-              <p className="mt-8 max-w-4xl text-lg  leading-relaxed">
+          <div className="relative">
+            <h1 className="text-8xl   px-4 font-bold  tracking-tighter whitespace-nowrap ">
+              ABOUT <span className="text-theme-teal"> US</span>
+              <div className="size-10 bg-theme-orange rounded-tl-3xl absolute top-0 left-0 -z-10"></div>
+            </h1>
+          </div>
+
+          <div className="flex justify-between mt-12">
+            <article className=" ">
+              <p className="mt-8 max-w-2xl text-lg  leading-relaxed">
                 Welcome to Busy Minis Transportation, your trusted partner in
                 safe and reliable transportation solutions for children in
                 Coweta, Fayette, and Clayton counties. <br /> <br /> At Busy
@@ -35,14 +39,18 @@ export default function page() {
               <Image
                 src={"/assets/09.png"}
                 alt=""
-                height={800}
-                width={800}
+                className="rounded-tl-full"
+                height={400}
+                width={400}
                 quality={100}
               />
             </section>
           </div>
+
           <div className="bg-neutral-800 rounded-3xl  text-neutral-200  py-12 mt-24">
-            <h2 className="text-5xl  text-center">Our Mission</h2>
+            <h2 className="text-5xl  text-center text-theme-orange font-bold">
+              Our Mission
+            </h2>
             <p className="mt-8 leading-relaxed max-w-3xl text-lg mx-auto text-center">
               At Busy Minis Transportation, we understand the demands of busy
               families. Our mission is to provide safe, reliable, and convenient
@@ -51,7 +59,7 @@ export default function page() {
               kids get to their activities safely and on time, every time.
             </p>
             <div className="grid place-content-center">
-              <button className="mt-24 bg-orange-400 font-bold text-xl  text-neutral-900 px-4 py-2 ">
+              <button className="mt-24 rounded-3xl bg-theme-orange font-bold text-xl  text-white px-10 py-2 ">
                 GET A QUOTE
               </button>
             </div>
