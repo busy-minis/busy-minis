@@ -3,7 +3,7 @@ import React from "react";
 import { Shield } from "@phosphor-icons/react/dist/ssr";
 import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { Car, ShieldPlus } from "@phosphor-icons/react";
+import { Car, Check, ShieldPlus } from "@phosphor-icons/react";
 
 export default function WhyChooseUs() {
   const sections = [
@@ -32,33 +32,79 @@ export default function WhyChooseUs() {
   const x = useTransform(scrollYProgress, [0, 0.1], [-1000, 0]);
 
   return (
-    <div className="bg-theme-teal  rounded-t-[4rem] rounded-b-[4rem] py-36 relative">
+    <div className="bg-theme-teal z-10 rounded-t-[4rem] rounded-b-[4rem] py-36 relative">
       <div className="h-96 w-96 bg-white/20 absolute top-24 left-5 rounded-full"></div>
       <div className="h-64 w-64 bg-white/20 absolute bottom-12 right-5 rounded-full"></div>
 
       <div className="max-w-7xl mx-auto relative">
-        <div className="flex justify-center py-8 pb-24 stick top-36 -z-10">
-          <h2 className="text-right text-white font-bold px-4 py-2 text-6xl tracking-tighter w-fit">
-            Why Choose Us?
-          </h2>
-        </div>
+        <h2 className="text-center text-white font-bold px-4 py-2 text-6xl tracking-tighter  pb-24">
+          Why Choose Us?
+        </h2>
+        {/* <Image
+          src={"/assets/mac.jpg"}
+          alt=""
+          height={400}
+          width={400}
+          className="rounded-full mx-auto my-24 absolute top-48 left-24 -z-10"
+        /> */}
 
-        <div className="flex gap-8">
-          {sections.map((section, index) => (
-            <motion.section
-              key={index}
-              className={`text-center  text-white *:w-full pb-48 border-2  transition-all duration-300 hover:shadow-[10px_10px_0px_0px_#262626] relative rounded-3xl pt-24 max-w-md px-8 `}
-              style={{ y, x }}
-            >
-              <ShieldPlus size={80} weight="thin" className="mx-auto" />
-              <h2 className="text-4xl font-semibold mt-16 ">{section.title}</h2>
-              <p className="mt-8 leading-relaxed text-lg ">
-                {section.description}
-              </p>
-            </motion.section>
-          ))}
-        </div>
+        <DriverSafetyComponent />
       </div>
     </div>
   );
 }
+
+const DriverSafetyComponent = () => {
+  const safetyFeatures = [
+    {
+      title: "Experienced & Compassionate Drivers",
+      description: "Clean driving records and genuine care for children.",
+    },
+    {
+      title: "Rigorous Background Checks",
+      description: "Ensuring trustworthy and reliable staff.",
+    },
+    {
+      title: "First Aid Kits & Safety Equipment",
+      description: "Always on board.",
+    },
+    {
+      title: "Regular Evaluations",
+      description:
+        "Continuous performance assessments to maintain high standards.",
+    },
+    {
+      title: "Pick-Up/Drop-Off Notices",
+      description: "Timely updates for parents.",
+    },
+    {
+      title: "Dual Dash Cams",
+      description: "Monitoring road and cabin views for safety.",
+    },
+    {
+      title: "Marked Vehicles",
+      description: "Easily identifiable for safety.",
+    },
+    {
+      title: "Uniformed Drivers",
+      description: "Professional and easily recognizable.",
+    },
+  ];
+
+  return (
+    <div className="grid grid-cols-2 gap-12 ">
+      {safetyFeatures.map((feature, index) => (
+        <div key={index} className="flex  bg-white/30 px-4 py-6 rounded-3xl">
+          <div className="bg-theme-yellow h-6 mr-4 w-6 grid place-content-center rounded-full">
+            <Check className="text-white" weight="bold" />
+          </div>
+          <section className="">
+            <h3 className="font-bold leading-tight">{feature.title}</h3>
+
+            <p>{feature.description}</p>
+          </section>
+        </div>
+      ))}
+    </div>
+  );
+};
