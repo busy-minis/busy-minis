@@ -1,15 +1,15 @@
 "use client";
-import React, { Dispatch, SetStateAction, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { UserCircle } from "@phosphor-icons/react";
+import { Hamburger, UserCircle } from "@phosphor-icons/react";
 import Image from "next/image";
 export const NavBar = () => {
   return (
-    <nav className="flex z-10 sticky top-0 bg-neutral-100  justify-between items-center  px-24  ">
+    <nav className="flex z-10 sticky top-0 bg-neutral-100  justify-between items-center px-4  lg:px-24  ">
       <Logo />
       <ul
-        className="space-x-8 
+        className="space-x-8 hidden lg:block 
       "
       >
         <Link href={"/"}>Home</Link>
@@ -20,7 +20,7 @@ export const NavBar = () => {
         <Link href={"/services"}>Services</Link>
         <Link href={"/contact"}>Contact</Link>
       </ul>
-      <section className="flex gap-4">
+      <section className="lg:flex gap-4 hidden">
         <button className="bg-theme-orange rounded-full  text-white uppercase font-semibold px-4 py-1 ">
           Schedule a Ride
         </button>
@@ -31,13 +31,22 @@ export const NavBar = () => {
           <UserCircle size={40} />
         </Link> */}
       </section>
+      <MobileMenu />
+    </nav>
+  );
+};
+
+const MobileMenu = () => {
+  return (
+    <nav className="lg:hidden">
+      <Hamburger size={40} />
     </nav>
   );
 };
 
 const Logo = () => {
   return (
-    <div>
+    <div className="">
       <Image
         src={"/logo-small.png"}
         alt=""
@@ -49,76 +58,76 @@ const Logo = () => {
   );
 };
 
-const SlideTabs = () => {
-  const [position, setPosition] = useState<Position>({
-    left: 0,
-    width: 0,
-    opacity: 0,
-  });
+// const SlideTabs = () => {
+//   const [position, setPosition] = useState<Position>({
+//     left: 0,
+//     width: 0,
+//     opacity: 0,
+//   });
 
-  return (
-    <ul
-      onMouseLeave={() => {
-        setPosition((pv) => ({
-          ...pv,
-          opacity: 0,
-        }));
-      }}
-      className="relative mx-auto flex w-fit rounded-full border-2 border-neutral-800  p-1"
-    >
-      <Tab setPosition={setPosition}>Home</Tab>
-      <Tab setPosition={setPosition}>Pricing</Tab>
-      <Tab setPosition={setPosition}>About</Tab>
-      <Tab setPosition={setPosition}>Services</Tab>
+//   return (
+//     <ul
+//       onMouseLeave={() => {
+//         setPosition((pv) => ({
+//           ...pv,
+//           opacity: 0,
+//         }));
+//       }}
+//       className="relative mx-auto flex w-fit rounded-full border-2 border-neutral-800  p-1"
+//     >
+//       <Tab setPosition={setPosition}>Home</Tab>
+//       <Tab setPosition={setPosition}>Pricing</Tab>
+//       <Tab setPosition={setPosition}>About</Tab>
+//       <Tab setPosition={setPosition}>Services</Tab>
 
-      <Tab setPosition={setPosition}>Contact</Tab>
+//       <Tab setPosition={setPosition}>Contact</Tab>
 
-      <Cursor position={position} />
-    </ul>
-  );
-};
+//       <Cursor position={position} />
+//     </ul>
+//   );
+// };
 
-const Tab = ({
-  children,
-  setPosition,
-}: {
-  children: string;
-  setPosition: Dispatch<SetStateAction<Position>>;
-}) => {
-  const ref = useRef<null | HTMLLIElement>(null);
+// const Tab = ({
+//   children,
+//   setPosition,
+// }: {
+//   children: string;
+//   setPosition: Dispatch<SetStateAction<Position>>;
+// }) => {
+//   const ref = useRef<null | HTMLLIElement>(null);
 
-  return (
-    <li
-      ref={ref}
-      onMouseEnter={() => {
-        if (!ref?.current) return;
-        const { width } = ref.current.getBoundingClientRect();
-        setPosition({
-          left: ref.current.offsetLeft,
-          width,
-          opacity: 1,
-        });
-      }}
-      className="relative z-10 block cursor-pointer px-3 py-1.5 text-xs uppercase text-white mix-blend-difference md:px-5 md:py-3 md:text-base"
-    >
-      {children}
-    </li>
-  );
-};
+//   return (
+//     <li
+//       ref={ref}
+//       onMouseEnter={() => {
+//         if (!ref?.current) return;
+//         const { width } = ref.current.getBoundingClientRect();
+//         setPosition({
+//           left: ref.current.offsetLeft,
+//           width,
+//           opacity: 1,
+//         });
+//       }}
+//       className="relative z-10 block cursor-pointer px-3 py-1.5 text-xs uppercase text-white mix-blend-difference md:px-5 md:py-3 md:text-base"
+//     >
+//       {children}
+//     </li>
+//   );
+// };
 
-const Cursor = ({ position }: { position: Position }) => {
-  return (
-    <motion.li
-      animate={{
-        ...position,
-      }}
-      className="absolute z-0 h-7 rounded-full bg-neutral-800 md:h-12"
-    />
-  );
-};
+// const Cursor = ({ position }: { position: Position }) => {
+//   return (
+//     <motion.li
+//       animate={{
+//         ...position,
+//       }}
+//       className="absolute z-0 h-7 rounded-full bg-neutral-800 md:h-12"
+//     />
+//   );
+// };
 
-type Position = {
-  left: number;
-  width: number;
-  opacity: number;
-};
+// type Position = {
+//   left: number;
+//   width: number;
+//   opacity: number;
+// };

@@ -32,12 +32,12 @@ export default function WhyChooseUs() {
   const x = useTransform(scrollYProgress, [0, 0.1], [-1000, 0]);
 
   return (
-    <div className="bg-theme-teal z-10 rounded-t-[4rem] rounded-b-[4rem] py-36 relative">
-      <div className="h-96 w-96 bg-white/20 absolute top-24 left-5 rounded-full"></div>
-      <div className="h-64 w-64 bg-white/20 absolute bottom-12 right-5 rounded-full"></div>
+    <div className="bg-theme-teal md:rounded-t-[4rem] md:rounded-b-[4rem]  py-36 relative">
+      <div className="md:h-96 md:w-96 bg-white/20 absolute top-24 left-5 rounded-full"></div>
+      <div className="md:h-64 md:w-64 bg-white/20 absolute bottom-12 right-5 rounded-full"></div>
 
       <div className="max-w-7xl mx-auto relative">
-        <h2 className="text-center text-white font-bold px-4 py-2 text-6xl tracking-tighter  pb-24">
+        <h2 className="text-center text-white font-bold px-4 py-2 text-3xl  sm:text-4xl md:text-6xl tracking-tighter  pb-24">
           Why Choose Us?
         </h2>
         {/* <Image
@@ -92,16 +92,18 @@ const DriverSafetyComponent = () => {
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-12 ">
+    <div className="px-4 md:px-0 grid grid-cols-1  md:grid-cols-2 gap-4 md:gap-12 ">
       {safetyFeatures.map((feature, index) => (
         <div key={index} className="flex  bg-white/30 px-4 py-6 rounded-3xl">
           <div className="bg-theme-yellow h-6 mr-4 w-6 grid place-content-center rounded-full">
             <Check className="text-white" weight="bold" />
           </div>
           <section className="">
-            <h3 className="font-bold leading-tight">{feature.title}</h3>
+            <h3 className="font-bold text-sm md:text-base  leading-tight">
+              {feature.title}
+            </h3>
 
-            <p>{feature.description}</p>
+            <p className="text-xs md:text-base">{feature.description}</p>
           </section>
         </div>
       ))}

@@ -4,11 +4,11 @@ import React, { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 export default function HowItWorks() {
   return (
-    <div className=" max-w-7xl mx-auto text-lg  rounded-3xl  mt-48  pt-36">
-      <h2 className="text-5xl font-semibold text-center">
+    <div className="px-4 md:px-0 max-w-7xl mx-auto text-lg  rounded-3xl  mt-24  md:mt-48  pt-36">
+      <h2 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tighter text-center">
         How Busy Mini Works
       </h2>
-      <p className="text-center mt-8 ">
+      <p className="text-center mt-8 text-sm ">
         Prepare to fall in love . We make it easy to reach us and get started
       </p>
       <div className="flex justify-center mt-24">
@@ -17,8 +17,8 @@ export default function HowItWorks() {
         </button>
       </div>
       <div className="w-full h-1 bg-zinc-200 mt-48"></div>
-      <div className="flex mt-36">
-        <aside className="pr-24 border-r-2 ">
+      <div className="flex  mt-36">
+        <aside className="pr-24 border-r-2 hidden md:block ">
           <ul className="space-y-8 sticky top-48 ">
             <div className="flex items-center gap-2 ">
               <div className="h-6 w-6 bg-neutral-300 text-base  grid place-content-center rounded-full">
@@ -46,7 +46,7 @@ export default function HowItWorks() {
             </div>
           </ul>
         </aside>
-        <section className="pl-24  relative">
+        <section className="md:pl-24  relative">
           <Step
             title={"Register your rider"}
             text={
@@ -78,17 +78,13 @@ export default function HowItWorks() {
 }
 
 const Step = (props: any) => {
-  const targetRef = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: targetRef,
-    offset: ["start", "end"],
-  });
-  const opacity = useTransform(scrollYProgress, [0, 1], ["2", "0"]);
   return (
     <div className="flex  pb-48   ">
-      <CashRegister className="text-7xl" />
-      <section className="pl-12">
-        <h2 className="text-5xl  tracking-tighter">{props.title}</h2>
+      <CashRegister className="hidden md:block text-5xl" />
+      <section className="pl-4  md:pl-12">
+        <h2 className="text-2xl sm:text-3xl  md:text-4xl  tracking-tighter">
+          {props.title}
+        </h2>
         <p className="mt-4">{props.text}</p>
       </section>
     </div>

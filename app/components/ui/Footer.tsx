@@ -5,10 +5,10 @@ const Footer = () => {
       {/* <Wrap /> */}
       <footer className="rounded-lg    m-4  mt-24">
         <div className="w-full max-w-screen-2xl mx-auto p-4 md:py-8">
-          <div className="sm:flex sm:items-center sm:justify-between">
-            <span className="self-center text-2xl font-semibold whitespace-nowrap ">
-              BusyMinis
-            </span>
+          <div className="flex flex-col items-center  sm:flex-row  sm:items-center sm:justify-between">
+            <div className="flex pb-4 sm:pb-0 items-center  text-2xl font-semibold whitespace-nowrap ">
+              <p>BusyMinis</p>
+            </div>
 
             <ul className="flex flex-wrap items-center mb-6 text-sm font-medium  sm:mb-0 ">
               <li>
@@ -39,9 +39,9 @@ const Footer = () => {
             </ul>
           </div>
           <hr className="my-6 border-black   sm:mx-auto  lg:my-8" />
-          <span className="block text-sm  sm:text-center ">
+          <div className="block whitespace-nowrap overflow-x-hidden text-center text-xs sm:text-sm  sm:text-center ">
             &copy; 2024 Busy Minis Transportation Company. All rights reserved.
-          </span>
+          </div>
         </div>
       </footer>
     </footer>

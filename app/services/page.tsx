@@ -1,3 +1,5 @@
+"use client";
+import { useState } from "react";
 import React from "react";
 import { NavBar } from "../components/ui/NavBar";
 import Footer from "../components/ui/Footer";
@@ -73,11 +75,11 @@ export default function page() {
 
 const QuoteCalculator = () => {
   return (
-    <div className="p-8 px-12 bg-neutral-900 max-w-sm text-base space-y-8 rounded-3xl text-neutral-200">
+    <div className="p-8 rounded-bl-[15rem] rounded-tr-[15rem] py-24 px-12  shadow-lg max-w-sm text-base space-y-8 border-zinc-500 border-2 rounded-lg ">
       <section className="space-y-2">
         <p>Distance in Miles</p>
         <input
-          className="px-2 py-1  rounded-md"
+          className="px-2 py-1  rounded-md border-zinc-500 border-2"
           name="distance"
           type="text"
           placeholder="miles"
@@ -85,18 +87,27 @@ const QuoteCalculator = () => {
       </section>
       <section className="">
         <label htmlFor="passengers">Number of Passengers</label>
-        <section className="flex gap-2 mt-2 text-neutral-100">
+        <section className="flex gap-2 mt-2 ">
           <Number number={"1-2"} />
           <Number number={"3"} /> <Number number={"4"} />
         </section>
+        <div className="grid place-content-center">
+          <button className="bg-theme-orange text-white text-xl  px-14 py-2 mt-8 mx-auto rounded-3xl">
+            Submit
+          </button>
+        </div>
       </section>
     </div>
   );
 };
 
 const Number = (props: any) => {
+  const [clicked, setClicked] = useState(false);
   return (
-    <div className="px-8 py-1 border border-neutral-500  rounded-lg  ">
+    <div
+      onClick={() => setClicked(true)}
+      className={`px-8 py-1 shadow-sm border bg-white ${clicked}  border-neutral-500 cursor-pointer rounded-lg`}
+    >
       {props.number}
     </div>
   );

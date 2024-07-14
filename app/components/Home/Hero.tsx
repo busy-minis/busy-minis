@@ -4,7 +4,7 @@ import Image from "next/image";
 import { MapPin } from "@phosphor-icons/react";
 export default function Hero() {
   return (
-    <div className=" mx-auto  items-center relative justify-center py-36">
+    <div className=" mx-auto overflow-hidden items-center relative justify-center py-36">
       {/* <Image
         src={"/assets/01.jpg"}
         alt=""
@@ -27,7 +27,7 @@ export default function Hero() {
         alt=""
         width={500}
         height={500}
-        className="-z-10  absolute left-12 rounded-full "
+        className="-z-10 hidden   absolute left-12 rounded-full "
         quality={100}
       />
       <Image
@@ -35,19 +35,19 @@ export default function Hero() {
         alt=""
         width={300}
         height={300}
-        className="-z-10  absolute right-48 top-24 rounded-full "
+        className="-z-10 hidden absolute right-48 top-24 rounded-full "
         quality={100}
       />
       <div className="flex">
-        <section className="max-w-3xl mx-auto flex flex-col items-center text-center">
+        <section className="px-4 md:px-0 max-w-3xl mx-auto flex flex-col items-center text-center">
           {/* <ChangingText /> */}
           <section className="  border-neutral-400 rounded-2xl">
-            <h1 className="text-8xl tracking-tighter  font-semibold  mt-4 ">
-              Safe Rides,{" "}
+            <h1 className="text-4xl sm:text-6xl  md:text-8xl tracking-tighter  font-semibold  mt-4 ">
+              Safe Rides, <br />
               <span className="text-theme-teal "> Smiling Kids</span>
             </h1>
           </section>
-          <p className="max-w-2xl text-xl  leading-loose mt-8 ">
+          <p className="max-w-2xl text-sm md:text-xl  leading-loose mt-8 ">
             Meet{" "}
             <span className="font-bold tracking-tighter">
               Busy Minis Transportation
@@ -55,12 +55,12 @@ export default function Hero() {
             . Your trusted partner for safe, reliable, and convenient
             transportation for children.
           </p>
-          <div className="flex justify-center font-bold opacity-90 text-sm  mt-16 gap-2  items-center   w-full">
+          <div className="flex justify-center font-bold opacity-90 text-xs md:text-sm  mt-16 gap-2  items-center   w-full">
             <MapPin className="text-red-500 animate-bounce" size={25} />
 
             <p className="">Serving Coweta, Fayette, and Clayton counties </p>
           </div>
-          <button className="  border-zinc-800 border-2   rounded-full  transition-all duration-500  px-10 py-4 mt-8 font-bold text-2xl">
+          <button className="  border-zinc-800 border-2   rounded-full  transition-all duration-500  px-4  md:px-10 py-2 md:py-4 mt-8 font-bold text-lg md:text-2xl">
             Sign Up
           </button>
         </section>

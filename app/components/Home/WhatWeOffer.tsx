@@ -5,10 +5,10 @@ export default function WhatWeOffer() {
   return (
     <div className="max-w-7xl mt-48 rounded-3xl mx-auto bg-theme-orange text-neutral-200 py-24 p-8">
       <div className="text-center">
-        <h2 className="mt-4 text-5xl tracking-tighter text-theme-yellow font-bold">
+        <h2 className="mt-4 text-2xl sm:text-4xl md:text-5xl tracking-tighter text-theme-yellow font-bold">
           What do we Offer ?
         </h2>
-        <p className="mt-12 text-lg max-w-3xl text-center mx-auto leading-relaxed">
+        <p className="mt-12  text-sm md:text-lg max-w-3xl text-center mx-auto leading-relaxed">
           Busy Minis Transportation offers a wide range of services tailored to
           fit your family&apos;s needs. From daily school commutes to
           last-minute pickups and special events, our flexible scheduling and
@@ -36,11 +36,11 @@ export default function WhatWeOffer() {
         href={"/services"}
         className="cursor-pointer  flex mx-auto bg-theme-yellow text-zinc-950 px-8 py-2 gap-4 rounded-3xl w-fit items-center"
       >
-        <p>Find Out More</p>
+        <p className="font-bold ">Find Out More</p>
 
         <ArrowRight
           size={30}
-          className="p-2 font-bold text-neutral-900 bg-neutral-200 rounded-full"
+          className="p-2 font-semibold tracking-tighter text-neutral-900 bg-white rounded-full"
         />
       </Link>
     </div>
@@ -49,10 +49,9 @@ export default function WhatWeOffer() {
 
 const Offer = (props: any) => {
   return (
-    <div className="flex">
-      <div className="flex gap-4 items-center">
-        <Star className="text-theme-yellow" />
-        <p className="font-bold"> {props.text}</p>
+    <div className="flex  gap-4 text-sm md:text-lg">
+      <div className="  pt-1">
+        <Star className="" color="yellow" />
       </div>
       <h3 className="">{props.title}</h3>
     </div>
