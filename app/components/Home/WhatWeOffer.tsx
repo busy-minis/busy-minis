@@ -17,7 +17,7 @@ export default function WhatWeOffer() {
         </p>
       </div>
 
-      <ul className="mt-36 grid grid-cols-2 gap-y-8 text-xl gap-x-24 w-fit  mx-auto">
+      <ul className="mt-36 grid grid-cols-2 gap-y-8 text-xl gap-x-4 md:gap-x-24 w-fit  mx-auto">
         <Offer title={"Tutoring/After School Tutorials Transportation"} />
         <Offer title={"Summer Camp Transportation"} />
         <Offer title={"Last Minute or Sick Child Pick Up"} />

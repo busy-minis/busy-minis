@@ -2,7 +2,7 @@
 import React, { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Hamburger, UserCircle } from "@phosphor-icons/react";
+import { Cross, Hamburger, UserCircle, X } from "@phosphor-icons/react";
 import Image from "next/image";
 export const NavBar = () => {
   return (
@@ -21,12 +21,18 @@ export const NavBar = () => {
         <Link href={"/contact"}>Contact</Link>
       </ul>
       <section className="lg:flex gap-4 hidden">
-        <button className="bg-theme-orange rounded-full  text-white uppercase font-semibold px-4 py-1 ">
+        <Link
+          href={"/login"}
+          className="bg-theme-orange rounded-md  text-white  px-4 py-1 "
+        >
           Schedule a Ride
-        </button>
-        <button className="bg-neutral-900 rounded-full text-white  uppercase font-semibold    px-4 py-1 ">
+        </Link>
+        <Link
+          href={"/login"}
+          className="bg-neutral-900 rounded-md text-white    px-4 py-1 "
+        >
           Login
-        </button>
+        </Link>
         {/* <Link href={"/dashboard"}>
           <UserCircle size={40} />
         </Link> */}
@@ -37,9 +43,32 @@ export const NavBar = () => {
 };
 
 const MobileMenu = () => {
+  const [open, setOpen] = useState(false);
   return (
     <nav className="lg:hidden">
-      <Hamburger size={40} />
+      <Hamburger size={40} onClick={() => setOpen(true)} />
+      {open && (
+        <div className="h-screen fixed top-0 left-0 w-screen bg-white">
+          <div
+            onClick={() => setOpen(false)}
+            className="flex  justify-end mt-4 pr-8"
+          >
+            <X size={25} weight="bold" className="hover:cursor-pointer" />
+          </div>
+          <ul
+            className="flex flex-col text-3xl items-center gap-4  mt-8
+      "
+          >
+            <Link href={"/"}>Home</Link>
+            <Link className="hover:bg-theme-orange px-2 py-1 " href={"/"}>
+              Pricing
+            </Link>
+            <Link href={"/about"}>About</Link>
+            <Link href={"/services"}>Services</Link>
+            <Link href={"/contact"}>Contact</Link>
+          </ul>
+        </div>
+      )}
     </nav>
   );
 };

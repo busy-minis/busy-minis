@@ -48,7 +48,8 @@ export default function page() {
             </div>
           </div>
 
-          <QuoteCalculator />
+          {/* <QuoteCalculator /> */}
+          <QuoteCalculatorr />
         </section>
         <h2 className="text-5xl mt-24">Our Services</h2>
         <p className=" max-w-3xl mt-8 leading-relaxed">
@@ -73,9 +74,126 @@ export default function page() {
   );
 }
 
+const QuoteCalculatorr = () => {
+  // State variables to hold user inputs
+  const [rideType, setRideType] = useState("one-time"); // 'one-time' or 'regular'
+  const [mileage, setMileage] = useState(5); // default mileage
+  const [passengers, setPassengers] = useState(1); // default passengers
+  const [additionalStops, setAdditionalStops] = useState(0); // additional stops
+  const [extendedHours, setExtendedHours] = useState(false); // extended hours flag
+  const [lastMinuteBooking, setLastMinuteBooking] = useState(false); // last minute booking flag
+
+  // Constants for pricing details
+  const baseFareOneTime = 16.0;
+  const baseFareRegular = 13.0;
+  const bookingFee = 3.0;
+  const extendedHoursCharge = 10.0;
+  const extendedMilesCharge = 2.0;
+  const additionalStopCharge = 5.0;
+  const additionalPassengerCharge = 5.0;
+  const waitTimeCharge = 1.0;
+  const lastMinuteBookingCharge = 25.0;
+
+  // Calculate total fare
+  const calculateTotalFare = () => {
+    let totalFare = 0;
+
+    // Base fare based on ride type
+    const baseFare =
+      rideType === "one-time" ? baseFareOneTime : baseFareRegular;
+
+    // Apply extended hours charge
+    if (extendedHours) {
+      totalFare += extendedHoursCharge;
+    }
+
+    // Apply extended miles charge
+    if (mileage > 5) {
+      totalFare += (mileage - 5) * extendedMilesCharge;
+    }
+
+    // Apply additional stops charge
+    totalFare += additionalStops * additionalStopCharge;
+
+    // Apply additional passengers charge
+    totalFare += (passengers - 1) * additionalPassengerCharge;
+
+    // Apply wait time charge (up to 10 minutes)
+    // Assuming we apply this charge for each minute beyond the grace period
+    // In a real scenario, logic for exact wait time calculation may vary
+
+    // Apply last minute booking charge
+    if (lastMinuteBooking) {
+      totalFare += lastMinuteBookingCharge;
+    }
+
+    // Add base fare and booking fee
+    totalFare += baseFare + bookingFee;
+
+    return totalFare.toFixed(2);
+  };
+
+  // Handle form submission (optional)
+  const handleSubmit = (e: any) => {
+    e.preventDefault();
+    const totalFare = calculateTotalFare();
+    // Handle further actions like displaying total or sending data
+  };
+
+  return (
+    <div className="max-w-xl mx-auto mt-8">
+      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+        <form onSubmit={handleSubmit}>
+          {/* Input fields */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Ride Type
+            </label>
+            <select
+              className="form-select block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              value={rideType}
+              onChange={(e) => setRideType(e.target.value)}
+            >
+              <option value="one-time">One Time Ride</option>
+              <option value="regular">Regular Ride</option>
+            </select>
+          </div>
+
+          {/* Additional input fields */}
+          {/* (Add more fields as per your design, such as mileage, passengers, checkboxes for extended hours, etc.) */}
+
+          {/* Button to calculate */}
+          <button
+            type="submit"
+            className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            Calculate Quote
+          </button>
+        </form>
+      </div>
+
+      {/* Display total fare */}
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <h3 className="text-lg font-semibold mb-2">Estimated Quote:</h3>
+        <p className="text-2xl text-blue-600 font-bold">
+          ${calculateTotalFare()}
+        </p>
+      </div>
+
+      {/* Additional information */}
+      <p className="mt-4 text-gray-600">
+        We have a ten minute grace period from the designated pickup to start
+        time, as we know there can be delays with carpool lines and activities.
+        Rides are subject to additional fees for excess wait and travel time.
+      </p>
+      <p className="mt-2 text-gray-600">Have a question? Contact us anytime!</p>
+    </div>
+  );
+};
+
 const QuoteCalculator = () => {
   return (
-    <div className="p-8 rounded-bl-[15rem] rounded-tr-[15rem] py-24 px-12  shadow-lg max-w-sm text-base space-y-8 border-zinc-500 border-2 rounded-lg ">
+    <div className="p-8  py-24 px-12  shadow-lg max-w-sm text-base space-y-8 border-zinc-500 border-2 rounded-lg ">
       <section className="space-y-2">
         <p>Distance in Miles</p>
         <input

@@ -5,7 +5,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 export default function HowItWorks() {
   return (
     <div className="px-4 md:px-0 max-w-7xl mx-auto text-lg  rounded-3xl  mt-24  md:mt-48  pt-36">
-      <h2 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tighter text-center">
+      <h2 className="text-4xl sm:text-4xl md:text-6xl font-light tracking-tighter text-center">
         How Busy Mini Works
       </h2>
       <p className="text-center mt-8 text-sm ">
@@ -82,7 +82,7 @@ const Step = (props: any) => {
     <div className="flex  pb-48   ">
       <CashRegister className="hidden md:block text-5xl" />
       <section className="pl-4  md:pl-12">
-        <h2 className="text-2xl sm:text-3xl  md:text-4xl  tracking-tighter">
+        <h2 className="text-2xl sm:text-3xl  md:text-4xl font-light  tracking-tighter">
           {props.title}
         </h2>
         <p className="mt-4">{props.text}</p>

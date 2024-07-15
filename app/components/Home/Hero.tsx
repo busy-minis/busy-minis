@@ -27,7 +27,7 @@ export default function Hero() {
         alt=""
         width={500}
         height={500}
-        className="-z-10 hidden   absolute left-12 rounded-full "
+        className="-z-10 hidden 2xl:block absolute left-12 rounded-full "
         quality={100}
       />
       <Image
@@ -35,7 +35,7 @@ export default function Hero() {
         alt=""
         width={300}
         height={300}
-        className="-z-10 hidden absolute right-48 top-24 rounded-full "
+        className="-z-10 hidden absolute 2xl:block right-48 top-24 rounded-full "
         quality={100}
       />
       <div className="flex">

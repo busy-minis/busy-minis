@@ -16,42 +16,42 @@ export default function page() {
       <div className=" py-24 ">
         <main className="max-w-7xl mx-auto  ">
           <div className="relative">
-            <h1 className="text-8xl   px-4 font-bold  tracking-tighter whitespace-nowrap ">
-              ABOUT <span className="text-theme-teal"> US</span>
-              <div className="size-10 bg-theme-orange rounded-tl-3xl absolute top-0 left-0 -z-10"></div>
+            <h1 className="  text-4xl sm:text-5xl md:text-7xl  md:px-0  px-4 font-bold  tracking-tighter whitespace-nowrap ">
+              About <span className="text-theme-teal"> Us</span>
+              {/* <div className="size-10 hidden md:block bg-theme-orange  absolute top-0 -left-4 -z-10"></div> */}
             </h1>
           </div>
 
-          <div className="flex justify-between mt-12">
+          <div className="flex justify-between mt-12 px-4 md:px-0">
             <article className=" ">
-              <p className="mt-8 max-w-2xl text-lg  leading-relaxed">
-                Welcome to Busy Minis Transportation, your trusted partner in
-                safe and reliable transportation solutions for children in
-                Coweta, Fayette, and Clayton counties. <br /> <br /> At Busy
-                Minis, we understand the challenges faced by busy parents
-                juggling work schedules and their children{"'"}s diverse
-                activities. Our mission is to provide peace of mind by offering
-                secure and convenient transportation tailored specifically for
-                young passengers.
+              <p className="mt-8 max-w-2xl md:text-lg text-base  leading-relaxed">
+                Busy Minis was founded by Lia, a working mother of two, who
+                struggled to balance her work commitments with her
+                children&apos;s busy schedules. When she realized there were no
+                reliable options to get her kids to and from their activities,
+                Lia decided to create a solution herself. With extensive
+                research and planning, Busy Minis was born to help parents
+                achieve a better work-life balance without compromising their
+                children&apos;s activities.
               </p>
             </article>
             <section className="relative">
-              <Image
+              {/* <Image
                 src={"/assets/09.png"}
                 alt=""
-                className="rounded-tl-full"
-                height={400}
-                width={400}
+                className="rounded-full hidden md:block"
+                height={500}
+                width={500}
                 quality={100}
-              />
+              /> */}
             </section>
           </div>
 
-          <div className="bg-neutral-800 rounded-3xl  text-neutral-200  py-12 mt-24">
-            <h2 className="text-5xl  text-center text-theme-orange font-bold">
+          <div className="border-2 shadow-sm rounded-3xl px-4 md:px-0  bg-theme-teal/10 py-12 mt-24">
+            <h2 className="text-2xl sm:text-4xl md:text-5xl  text-center text-theme-teal font-bold">
               Our Mission
             </h2>
-            <p className="mt-8 leading-relaxed max-w-3xl text-lg mx-auto text-center">
+            <p className="mt-8 leading-relaxed max-w-3xl text-sm sm:text-base md:text-lg mx-auto text-center ">
               At Busy Minis Transportation, we understand the demands of busy
               families. Our mission is to provide safe, reliable, and convenient
               transportation for your children, giving you peace of mind and
@@ -59,41 +59,27 @@ export default function page() {
               kids get to their activities safely and on time, every time.
             </p>
             <div className="grid place-content-center">
-              <button className="mt-24 rounded-3xl bg-theme-orange font-bold text-xl  text-white px-10 py-2 ">
-                GET A QUOTE
+              <button className="mt-24 rounded-md bg-theme-teal text-base md:text-xl  text-white px-10 py-2 ">
+                Get a Quote
               </button>
             </div>
           </div>
         </main>
       </div>
-
-      <div className=" max-w-7xl mx-auto mt-48 text-lg">
-        <p className="text-center text-3xl pb-12">Frequently asked questions</p>
-
-        <Question
-          question={"How do I register my child?"}
-          answer={
-            "Fill out our online registration form to create your rider profile."
-          }
-        />
-        <Question
-          question={"What happens after I register?"}
-          answer={
-            "Meet with our team to discuss service options, safety protocols, and any questions you may have."
-          }
-        />
-        <Question
-          question={"How do I schedule a ride?"}
-          answer={
-            "You can easily schedule rides through our website, and receive all necessary details and confirmations."
-          }
-        />
-        <Question
-          question={"What if I need to cancel a ride?"}
-          answer={
-            "You can easily cancel rides through our website, and receive confirmation of the cancellation."
-          }
-        />
+      <DriverSafetyInfo />
+      <div className=" max-w-7xl mx-auto mt-48 text-lg px-4 md:px-0">
+        <p className="text-center font-light text-3xl pb-12">
+          Frequently asked questions
+        </p>
+        <div>
+          {faqData.map((item, index) => (
+            <Question
+              key={index}
+              question={item.question}
+              answer={item.answer}
+            />
+          ))}
+        </div>
       </div>
 
       <Footer />
@@ -109,52 +95,211 @@ const Question = (props: any) => {
         onClick={() => setOpen(!open)}
         className="flex justify-between py-6 w-full  items-center"
       >
-        <h3 className="font-semibold">{props.question}</h3>
+        <h3 className=" text-sm sm:text-base md:text-lg font-medium ">
+          {props.question}
+        </h3>
         <ArrowDown />
       </section>
 
-      {open && <p className="pb-6 text-neutral-500"> {props.answer}</p>}
+      {open && (
+        <p className="pb-6 text-neutral-600  text-sm sm:text-base md:text-lg ">
+          {" "}
+          {props.answer}
+        </p>
+      )}
+    </div>
+  );
+};
+const driverSafetyData = [
+  {
+    title: "Driver Verification Process",
+    description:
+      "Includes in-person interviews, county, state, and national criminal record checks, FBI-approved fingerprinting background checks, drug tests, motor vehicle reviews, and a minimum of five years of caregiving experience.",
+  },
+  // {
+  //   title: "Female Drivers",
+  //   description: "Most of our drivers are female.",
+  // },
+  {
+    title: "Safe Driver Training",
+    description: "All drivers undergo comprehensive safety training.",
+  },
+  {
+    title: "Dual Dash Cam",
+    description:
+      "Our vehicles are equipped with dual dash cams for road and cabin views.",
+  },
+  {
+    title: "Pick-Up/Drop-Off Notice",
+    description:
+      "Parents receive notifications when their child is picked up and dropped off.",
+  },
+  {
+    title: "Marked Vehicles",
+    description: "All vehicles are clearly marked for easy identification.",
+  },
+  {
+    title: "Uniformed Drivers",
+    description: "Our drivers wear uniforms for easy recognition.",
+  },
+  {
+    title: "First Aid Kits and Safety Equipment",
+    description:
+      "Each vehicle is equipped with first aid kits and necessary safety equipment.",
+  },
+  {
+    title: "Regular Vehicle Maintenance",
+    description:
+      "We conduct regular maintenance and safety inspections on all our vehicles.",
+  },
+];
+
+// Component for displaying title and description in a grid layout
+const TitleDescriptionGrid = (props: any) => {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4   md:gap-8 px-2 md:px-0">
+      {props.data.map((item: any, index: any) => (
+        <div
+          key={index}
+          className="border border-gray-300 p-4 rounded-lg text-xs md:text-base"
+        >
+          <h3 className="font-semibold">{item.title}</h3>
+          <p className="text-gray-600 mt-2">{item.description}</p>
+        </div>
+      ))}
     </div>
   );
 };
 
-const Item = (props: any) => {
-  const colorClass = classNames({
-    "bg-blue-400": props.color === "blue",
-    "bg-red-400": props.color === "red",
-    "bg-green-400": props.color === "green",
-  });
+// FAQ component that renders the TitleDescriptionGrid
+const DriverSafetyInfo = () => {
   return (
-    <div className={` p-8  rounded-t-3xl w-full`}>
-      <p className="  text-3xl  w-full">{props.title}</p>
-      <p className="text-xl pb-24 mt-12  ">{props.text}</p>
+    <div className="max-w-7xl mx-auto">
+      <h2 className=" text-2xl sm:text-3xl md:text-4xl text-center font-light pb-6 pt-36">
+        Drivers and Safety
+      </h2>
+      <p className="pb-24 text-center max-w-4xl mx-auto ">
+        At Busy Minis,{" "}
+        <span className="text-theme-teal font-semibold">
+          safety is our top priority
+        </span>{" "}
+        . We have implemented rigorous safety protocols to ensure the well-being
+        of your children.
+      </p>
+      <TitleDescriptionGrid data={driverSafetyData} />
     </div>
   );
 };
 
-const Wrap = () => {
-  return (
-    <section className="relative w-fit py-6 -left-4 ">
-      <div className="bg-white absolute -rotate-1 text-2xl py-1 border-2  border-neutral-900 text-neutral-900 font-bold tracking-tighter uppercase flex gap-4 items-center whitespace-nowrap overflow-hidden w-fit">
-        Minis <Arr /> Transportation <Arr /> Busy <Arr />
-        Minis <Arr /> Transportation <Arr /> Busy <Arr />
-        Minis <Arr /> Transportation <Arr /> Busy <Arr />
-        Minis <Arr /> Transportation <Arr /> Busy <Arr />
-      </div>
-      <div className="bg-white rotate-1 absolute text-2xl  border-2 py-1  border-neutral-900 text-neutral-900 font-bold tracking-tighter uppercase flex gap-4 items-center whitespace-nowrap overflow-hidden w-fit ">
-        Busy <Arr /> Minis <Arr /> Transportation <Arr />
-        Busy <Arr /> Minis <Arr /> Transportation <Arr />
-        Busy <Arr /> Minis <Arr /> Transportation <Arr />
-        Busy <Arr /> Minis <Arr /> Transportation <Arr />
-      </div>
-    </section>
-  );
-};
-
-const Arr = () => {
-  return (
-    <div className="flex justify-center bg-neutral-900 text-white rounded-full p-1 w-fit text-lg ">
-      <ArrowRight />
-    </div>
-  );
-};
+const faqData = [
+  {
+    question: "Can I request the same driver?",
+    answer:
+      "Yes, you can request a specific driver when booking. If the requested driver is unavailable, the ride will be released to other drivers in the area. All regular ride customers will have the same driver each week.",
+  },
+  {
+    question: "How much does a ride cost?",
+    answer:
+      "Rides start at $19 plus a $3 booking fee. The total fare depends on mileage, the number of passengers and stops, and any excess wait or additional travel miles. You can easily get a quote through our website.",
+  },
+  {
+    question: "How does the booking process work?",
+    answer:
+      "Visit the Busy Minis website, provide rider information, and specify the pick-up and drop-off locations. Parents can leave special instructions and check ride status on the website. First time riders must complete a 30-minute orientation where they will meet their driver.",
+  },
+  {
+    question: "How will my child recognize their driver?",
+    answer:
+      "You will receive the driver's information and photo once the ride is claimed. We encourage sharing this information with your child. All drivers display the Busy Minis logo on their windshields.",
+  },
+  {
+    question: "Can I book more than one ride at a time?",
+    answer:
+      "Rides need to be booked individually, but our regular rides services can be scheduled through a quick phone call.",
+  },
+  {
+    question: "How does Busy Minis vet their drivers?",
+    answer:
+      "We only hire drivers who meet our high standards. The vetting process includes multi-jurisdictional background checks, DMV screens, vehicle approvals, interviews, and inspections. All drivers must have up-to-date vehicle registration and insurance, and a valid driver's license.",
+  },
+  {
+    question: "What if I need to cancel a ride?",
+    answer:
+      "You can easily cancel rides through the website. Depending on the timing, a full or partial refund will be issued. Rides canceled within two hours of pickup are non-refundable.",
+  },
+  {
+    question: "How will I know when my ride is claimed?",
+    answer:
+      "You will receive a notification once a driver claims your ride. You can also check ride status on the website.",
+  },
+  {
+    question: "Does Busy Minis offer discounts?",
+    answer:
+      "Yes, regular clients can enjoy discounted rates. Additionally, our community VIPs (Volunteers, Instructor's, Public Servants) receive a discount for their service! Contact us at hello@busyminis.com for more information.",
+  },
+  {
+    question: "What if my school requires a carpool tag?",
+    answer:
+      "We work with most schools to facilitate carpool pickups. You can send carpool tag information directly to your driver.",
+  },
+  {
+    question: "Do you provide booster seats?",
+    answer:
+      "Yes, indicate the need for a booster seat on the website. Not all drivers have booster seats, so it's important to specify this need in advance.",
+  },
+  {
+    question: "What are your hours of operation?",
+    answer:
+      "Our service operates from 6am-6pm EST, though driver availability may vary during early mornings, late evenings, weekends, and holidays. Customer support is available between 5am-7pm EST.",
+  },
+  {
+    question: "How far in advance can I book?",
+    answer:
+      "You can request rides as far in advance as needed. Early requests increase the likelihood of driver availability.",
+  },
+  {
+    question: "Is there a carpool option?",
+    answer:
+      "Yes, we support carpool requests. If you choose to put your Mini on the Move with other families, the cost for carpooling is reduced!",
+  },
+  {
+    question: "Can I meet my driver?",
+    answer:
+      "Yes, first time riders must complete orientation. During the 30-minute orientation you will have a meet-and-greet with your driver.",
+  },
+  {
+    question: "What are the wait time charges?",
+    answer:
+      "A 5-minute grace period is provided at pickup. After that, wait time charges of $1.00 per minute apply.",
+  },
+  {
+    question: "What areas do you service?",
+    answer:
+      "We proudly serve all areas of Coweta, Fayette, and Clayton Counties in the south Atlanta region. Contact us for specific inquiries.",
+  },
+  {
+    question: "What if I need to make a change to my ride?",
+    answer:
+      "If your ride has been claimed, contact the driver directly for minor time changes. For significant changes we ask that you cancel the ride and request a new one. Rides canceled within two hours of pickup are non-refundable.",
+  },
+  {
+    question: "What age range of kids do you pick up?",
+    answer:
+      "Right now we are supporting the busy schedules of Minis ages 7-17. Contact us for specific inquiries.",
+  },
+  {
+    question: "How many passengers can ride in a car?",
+    answer:
+      "All one-time ride vehicles support at least two to four passengers. Carpooling vehicles support up to 12 passengers.",
+  },
+  {
+    question: "Can I add a stop on the ride?",
+    answer:
+      "Yes, you can add extra pickup or drop-off stops on the website for an additional fee.",
+  },
+  {
+    question: "Can my child eat in the car?",
+    answer:
+      "Eating in the car is at the driver's discretion. We recommend eating before or after the ride and ensuring the car remains clean.",
+  },
+];
