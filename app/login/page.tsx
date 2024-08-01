@@ -65,12 +65,12 @@ export default function page() {
           <div className="py-12 text-center">
             <p className="whitespace-nowrap text-gray-600">
               Dont have an account?{" "}
-              <a
-                href="#"
+              <Link
+                href={"/signup"}
                 className="underline-offset-4 font-semibold text-gray-900 underline"
               >
                 Sign up for free.
-              </a>
+              </Link>
             </p>
           </div>
         </div>

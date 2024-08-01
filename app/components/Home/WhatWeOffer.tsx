@@ -3,12 +3,12 @@ import { ArrowRight, Star } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 export default function WhatWeOffer() {
   return (
-    <div className="max-w-7xl mt-48 rounded-3xl mx-auto bg-theme-orange text-neutral-200 py-24 p-8">
+    <div className="max-w-7xl mt-48 rounded-3xl mx-auto  bg-gradient-to-b from-emerald-200 to-orange-200 text-teal-950 py-24 p-8">
       <div className="text-center">
-        <h2 className="mt-4 text-2xl sm:text-4xl md:text-5xl tracking-tighter text-theme-yellow font-bold">
+        <h2 className="mt-4 text-2xl sm:text-4xl md:text-5xl tracking-tighter  ">
           What do we Offer ?
         </h2>
-        <p className="mt-12  text-sm md:text-lg max-w-3xl text-center mx-auto leading-relaxed">
+        <p className="mt-12  text-sm md:text-lg max-w-3xl text-center mx-auto  leading-relaxed">
           Busy Minis Transportation offers a wide range of services tailored to
           fit your family&apos;s needs. From daily school commutes to
           last-minute pickups and special events, our flexible scheduling and
@@ -34,14 +34,9 @@ export default function WhatWeOffer() {
 
       <Link
         href={"/services"}
-        className="cursor-pointer  flex mx-auto bg-theme-yellow text-zinc-950 px-8 py-2 gap-4 rounded-3xl w-fit items-center"
+        className="cursor-pointer  font-semibold  flex mx-auto bg-orange-300  px-8 py-2 gap-4 rounded-3xl w-fit items-center"
       >
-        <p className="font-bold ">Find Out More</p>
-
-        <ArrowRight
-          size={30}
-          className="p-2 font-semibold tracking-tighter text-neutral-900 bg-white rounded-full"
-        />
+        <p className=" ">Find Out More</p>
       </Link>
     </div>
   );
@@ -51,7 +46,7 @@ const Offer = (props: any) => {
   return (
     <div className="flex  gap-4 text-sm md:text-lg">
       <div className="  pt-1">
-        <Star className="" color="yellow" />
+        <Star className="text-theme-teal" weight="fill" />
       </div>
       <h3 className="">{props.title}</h3>
     </div>

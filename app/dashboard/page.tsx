@@ -1,50 +1,67 @@
 "use client";
 import React from "react";
-import { NavBar } from "../components/ui/NavBar";
+import {
+  Car,
+  HouseLine,
+  Note,
+  UserCircle,
+} from "@phosphor-icons/react/dist/ssr";
+import Image from "next/image";
+import Link from "next/link";
+import { Bell, CarProfile, Dot, Recycle } from "@phosphor-icons/react";
+import SideBar from "./SideBar";
+import DashboardNav from "./DashboardNav";
 
 export default function page() {
-  const rides = 0;
-  const scheduleARide = () => {
-    // TODO: Implement
-  };
   return (
-    <div className="">
-      <NavBar />
-      <div className="flex text-xl justify-around py-8 border-b-2 ">
-        <p>Rides</p>
-        <p>Schedule A Ride</p>
-        <p>Ride History</p>
-        <p>Settings</p>
-        <p>Help Center</p>
-      </div>
-
-      <div className="grid place-content-center py-48">
-        <Ride />
-        You have no scheduled rides at this time
-      </div>
+    <div className="space-y-4 w-full">
+      <h1 className="text-xl pb-4 text-white">Your Trips </h1>
+      <Ride />
+      <Ride />
+      <Ride />
+      <Ride />
     </div>
   );
 }
 
+const NoRidesFound = () => {
+  return (
+    <div className="grid text-center h-full bg-neutral-200 place-content-center py-48">
+      {/* <Ride /> */}
+      <p>You have no scheduled rides at this time.</p>
+      <button className="px-6 py-2 mt-4 w-fit mx-auto text-neutral-100 bg-theme-orange rounded-md">
+        Schedule A Ride
+      </button>
+    </div>
+  );
+};
+
 const Ride = () => {
   return (
-    <div className="flex gap-8 items-center justify-between border-2 rounded-lg p-4">
+    <div className="flex bg-white  gap-8 items-center justify-between border-2 rounded-lg p-4">
+      <div className="px-2">
+        <Car weight="fill" size={35} />
+      </div>
+
       <div>
-        <p>From: </p>
-        <p>263 Sedgewick Trail</p>
+        <p className="font-semibold text-lg">263 Sedgewick Trail</p>
+      </div>
+      {/* <div>
+            <p>123 Main Street</p>
+          </div> */}
+      <div className="flex items-center gap-1 text-sm">
+        <p>July 17th</p>
+        <Dot />
+        <p className="">1:45 pm </p>
       </div>
       <div>
-        <p>To: </p>
-        <p>123 Main Street</p>
+        <Recycle />
       </div>
-      <div>
-        <p>Time</p>
-        <p> 1:45 pm EST </p>
-      </div>
-      <button className="bg-red-800 text-white uppercase font-semibold px-4 py-1 ">
-        Change Details
+
+      <button className="bg-theme-orange text-sm rounded-md text-white uppercase font-semibold px-4 py-1 ">
+        View Details
       </button>
-      <button className="bg-red-800 text-white uppercase font-semibold px-4 py-1 ">
+      <button className="bg-red-800 text-sm rounded-md text-white uppercase font-semibold px-4 py-1 ">
         Cancel Ride
       </button>
     </div>

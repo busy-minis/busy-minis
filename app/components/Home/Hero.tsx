@@ -4,7 +4,7 @@ import Image from "next/image";
 import { MapPin } from "@phosphor-icons/react";
 export default function Hero() {
   return (
-    <div className=" mx-auto overflow-hidden items-center relative justify-center py-36">
+    <div className="mx-auto overflow-hidden items-center relative justify-center pt-36 pb-24 sm:pb-0">
       {/* <Image
         src={"/assets/01.jpg"}
         alt=""
@@ -19,8 +19,8 @@ export default function Hero() {
         width={500}
         className="absolute bottom-24 right-24"
       /> */}
-      <div className="h-[24rem] w-[40rem] left-12 top-1/2 bg-theme-orange/10 -z-20 blur-3xl absolute "></div>
-      <div className="h-[24rem] w-[40rem] right-0 bottom-0 bg-theme-teal/20 -z-20 blur-3xl absolute "></div>
+      {/* <div className="h-[24rem] w-[40rem] left-12 top-1/2 bg-theme-orange/10 -z-20 blur-3xl absolute "></div>
+      <div className="h-[24rem] w-[40rem] right-0 bottom-0 bg-theme-teal/20 -z-20 blur-3xl absolute "></div> */}
 
       <Image
         src={"/assets/01.jpg"}
@@ -28,6 +28,22 @@ export default function Hero() {
         width={500}
         height={500}
         className="-z-10 hidden 2xl:block absolute left-12 rounded-full "
+        quality={100}
+      />
+      <Image
+        src={"/assets/01.jpg"}
+        alt=""
+        width={150}
+        height={150}
+        className="-z-10 top-8 sm:hidden  absolute left-12 rounded-full "
+        quality={100}
+      />
+      <Image
+        src={"/assets/01.jpg"}
+        alt=""
+        width={150}
+        height={150}
+        className="-z-10 top-16 sm:hidden  absolute right-6 rounded-full "
         quality={100}
       />
       <Image
@@ -55,13 +71,13 @@ export default function Hero() {
             . Your trusted partner for safe, reliable, and convenient
             transportation for children.
           </p>
-          <div className="flex justify-center font-bold opacity-90 text-xs md:text-sm  mt-16 gap-2  items-center   w-full">
+          <div className="flex justify-center font-bold opacity-90 text-xs md:text-sm  mt-24 gap-2  items-center   w-full">
             <MapPin className="text-red-500 animate-bounce" size={25} />
 
             <p className="">Serving Coweta, Fayette, and Clayton counties </p>
           </div>
-          <button className="  border-zinc-800 border-2   rounded-full  transition-all duration-500  px-4  md:px-10 py-2 md:py-4 mt-8 font-bold text-lg md:text-2xl">
-            Sign Up
+          <button className="bg-neutral-900 transition-all duration-300  text-white  md:pb-4  rounded-full   px-4  md:px-10 py-1 md:py-3 mt-8 text-lg md:text-2xl">
+            Schedule a Ride
           </button>
         </section>
         {/* <aside>

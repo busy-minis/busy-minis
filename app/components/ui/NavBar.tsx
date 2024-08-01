@@ -2,40 +2,93 @@
 import React, { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Cross, Hamburger, UserCircle, X } from "@phosphor-icons/react";
+import {
+  Cross,
+  Hamburger,
+  List,
+  Person,
+  UserCircle,
+  UserRectangle,
+  X,
+} from "@phosphor-icons/react";
 import Image from "next/image";
-export const NavBar = () => {
+import NavLink from "./NavLink";
+export const NavBar = (props: { page: string }) => {
+  const { page } = props;
+
   return (
-    <nav className="flex z-10 sticky top-0 bg-neutral-100  justify-between items-center px-4  lg:px-24  ">
+    <nav className="flex z-10 sticky top-0 bg-neutral-100 justify-between px-4 md:justify-around items-center">
       <Logo />
-      <ul
-        className="space-x-8 hidden lg:block 
-      "
-      >
-        <Link href={"/"}>Home</Link>
-        <Link className="hover:bg-theme-orange px-2 py-1 " href={"/"}>
-          Pricing
+      <ul className="space-x-8 hidden lg:flex">
+        <Link
+          href="/"
+          className={`${
+            page === "home"
+              ? "text-theme-orange font-semibold"
+              : "text-gray-700"
+          } m-4 group relative w-max`}
+        >
+          <span>Home</span>
+          <span className="absolute -bottom-1 left-0 w-0 transition-all h-0.5 bg-theme-orange group-hover:w-full"></span>
         </Link>
-        <Link href={"/about"}>About</Link>
-        <Link href={"/services"}>Services</Link>
-        <Link href={"/contact"}>Contact</Link>
+        <Link
+          href="/pricing"
+          className={`${
+            page === "pricing"
+              ? "text-theme-orange font-semibold"
+              : "text-gray-700"
+          } m-4 group relative w-max`}
+        >
+          <span>Pricing</span>
+          <span className="absolute -bottom-1 left-0 w-0 transition-all h-0.5 bg-theme-orange group-hover:w-full"></span>
+        </Link>
+        <Link
+          href="/about"
+          className={`${
+            page === "about"
+              ? "text-theme-orange font-semibold"
+              : "text-gray-700"
+          } m-4 group relative w-max`}
+        >
+          <span>About</span>
+          <span className="absolute -bottom-1 left-0 w-0 transition-all h-0.5 bg-theme-orange group-hover:w-full"></span>
+        </Link>
+        <Link
+          href="/services"
+          className={`${
+            page === "services"
+              ? "text-theme-orange font-semibold"
+              : "text-gray-700"
+          } m-4 group relative w-max`}
+        >
+          <span>Services</span>
+          <span className="absolute -bottom-1 left-0 w-0 transition-all h-0.5 bg-theme-orange group-hover:w-full"></span>
+        </Link>
+        <Link
+          href="/contact"
+          className={`${
+            page === "contact"
+              ? "text-theme-orange font-semibold"
+              : "text-gray-700"
+          } m-4 group relative w-max`}
+        >
+          <span>Contact</span>
+          <span className="absolute -bottom-1 left-0 w-0 transition-all h-0.5 bg-theme-orange group-hover:w-full"></span>
+        </Link>
       </ul>
       <section className="lg:flex gap-4 hidden">
         <Link
-          href={"/login"}
-          className="bg-theme-orange rounded-md  text-white  px-4 py-1 "
+          href="/login"
+          className="bg-theme-orange rounded-md text-white px-4 py-1"
         >
           Schedule a Ride
         </Link>
         <Link
-          href={"/login"}
-          className="bg-neutral-900 rounded-md text-white    px-4 py-1 "
+          href="/login"
+          className="bg-neutral-900 rounded-md text-white px-4 py-1"
         >
           Login
         </Link>
-        {/* <Link href={"/dashboard"}>
-          <UserCircle size={40} />
-        </Link> */}
       </section>
       <MobileMenu />
     </nav>
@@ -46,7 +99,7 @@ const MobileMenu = () => {
   const [open, setOpen] = useState(false);
   return (
     <nav className="lg:hidden">
-      <Hamburger size={40} onClick={() => setOpen(true)} />
+      <List size={40} onClick={() => setOpen(true)} />
       {open && (
         <div className="h-screen fixed top-0 left-0 w-screen bg-white">
           <div

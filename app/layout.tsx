@@ -25,7 +25,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className=" mx-auto bg-neutral-100 text-zinc-900">{children}</body>
+      <body className=" mx-auto bg-neutral-100 text-neutral-900">
+        {children}
+      </body>
     </html>
   );
 }
