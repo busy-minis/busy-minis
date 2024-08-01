@@ -24,6 +24,7 @@ export default function page() {
           </p>
           <button className="-2 mt-8 flex items-center justify-center rounded-md border px-4 py-1 outline-none ring-gray-400 ring-offset-2 transition focus:ring-2 hover:border-transparent hover:bg-black hover:text-white">
             <img
+              alt="image"
               className="mr-2 h-5"
               src="https://static.cdnlogo.com/logos/g/35/google-icon.svg"
             />

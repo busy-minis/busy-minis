@@ -1,6 +1,7 @@
 import React from "react";
 import { RevealBento } from "../components/ui/Info";
 import { NavBar } from "../components/ui/NavBar";
+import Footer from "../components/ui/Footer";
 
 export default function page() {
   return (
@@ -70,6 +71,7 @@ export default function page() {
           </form>
         </div>
       </section>
+      <Footer />
     </div>
   );
 }
