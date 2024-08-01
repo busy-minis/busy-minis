@@ -12,7 +12,7 @@ import {
   X,
 } from "@phosphor-icons/react";
 import Image from "next/image";
-import NavLink from "./NavLink";
+
 export const NavBar = (props: { page: string }) => {
   const { page } = props;
 
