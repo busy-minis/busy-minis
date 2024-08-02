@@ -1,54 +1,53 @@
 "use client";
-import React, { useState, useCallback } from "react";
-import clsx from "clsx";
+import React, { useState, useRef, useCallback } from "react";
+import { Autocomplete, LoadScript } from "@react-google-maps/api";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
-import {
-  AddressAutofill,
-  AddressMinimap,
-  useConfirmAddress,
-} from "@mapbox/search-js-react";
+const GOOGLE_MAPS_API_KEY = "AIzaSyCUa2HZ94Us1drPt-7bdpWaEB-Eaa4lzlg";
 
-const MAPBOX_ACCESS_TOKEN =
-  "pk.eyJ1IjoiYnVzeW1pbmlzMyIsImEiOiJjbHo0NWtvMGMwOGV0Mm5vbXBrdWpzeTFsIn0.M7KP1szOMBQaDaS6RwXhWA";
+const libraries: ("places" | "drawing" | "geometry" | "visualization")[] = [
+  "places",
+];
 
-const MapboxAddressAutofill = ({ onAddressSelect }: any) => {
-  const [minimapFeature, setMinimapFeature] = useState();
-  const { formRef, showConfirm } = useConfirmAddress({
-    accessToken: MAPBOX_ACCESS_TOKEN,
-  });
+const GoogleMapsAddressAutofill = ({ onAddressSelect }: any) => {
+  const [pickupAddress, setPickupAddress] = useState("");
+  const [dropoffAddress, setDropoffAddress] = useState("");
+  const [stopAddresses, setStopAddresses] = useState<string[]>([]);
+  const autocompleteRefs = useRef<(google.maps.places.Autocomplete | null)[]>(
+    []
+  );
 
-  const handleAutofillRetrieve = (response: any) => {
-    setMinimapFeature(response.features[0]);
+  const handleAddressChange = (index: number, value: string) => {
+    const newAddresses = [...stopAddresses];
+    newAddresses[index] = value;
+    setStopAddresses(newAddresses);
+  };
+
+  const handleAddStop = () => {
+    setStopAddresses([...stopAddresses, ""]);
   };
 
   const handleFormSubmit = useCallback(
-    async (e: any) => {
+    (e: React.FormEvent) => {
       e.preventDefault();
-      const result = await showConfirm();
-
-      if (result.type === "nochange") {
-        onAddressSelect(
-          e.target.elements["pickupAddress"].value,
-          e.target.elements["dropoffAddress"].value
-        );
-      } else if (result.type === "change") {
-        onAddressSelect(
-          result.feature.properties.address,
-          result.feature.properties.address
-        );
-      }
+      const selectedAddresses = [
+        pickupAddress,
+        ...autocompleteRefs.current.map(
+          (ref, index) =>
+            ref?.getPlace()?.formatted_address || stopAddresses[index]
+        ),
+        dropoffAddress,
+      ];
+      onAddressSelect(selectedAddresses);
     },
-    [showConfirm, onAddressSelect]
+    [onAddressSelect, pickupAddress, dropoffAddress, stopAddresses]
   );
 
   return (
-    <div>
-      <form ref={formRef} onSubmit={handleFormSubmit} className="space-y-6">
-        <AddressAutofill
-          accessToken={MAPBOX_ACCESS_TOKEN}
-          onRetrieve={handleAutofillRetrieve}
-        >
+    <LoadScript googleMapsApiKey={GOOGLE_MAPS_API_KEY} libraries={libraries}>
+      <div>
+        <form onSubmit={handleFormSubmit} className="space-y-6">
           <div>
             <label
               htmlFor="pickupAddress"
@@ -56,55 +55,110 @@ const MapboxAddressAutofill = ({ onAddressSelect }: any) => {
             >
               Pickup Address
             </label>
-            <Input
-              id="pickupAddress"
-              name="pickupAddress"
-              type="text"
-              autoComplete="address-line1"
-              required
-              className=" block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-            />
+            <Autocomplete
+              onLoad={(autocomplete) =>
+                (autocompleteRefs.current[0] = autocomplete)
+              }
+              onPlaceChanged={() =>
+                setPickupAddress(
+                  autocompleteRefs.current[0]?.getPlace()?.formatted_address ||
+                    ""
+                )
+              }
+            >
+              <Input
+                id="pickupAddress"
+                name="pickupAddress"
+                type="text"
+                value={pickupAddress}
+                onChange={(e) => setPickupAddress(e.target.value)}
+                autoComplete="off"
+                required
+                className="block w-full shadow-sm sm:text-sm border-gray-300 bg-white  rounded-md"
+              />
+            </Autocomplete>
           </div>
-        </AddressAutofill>
-        <AddressAutofill
-          accessToken={MAPBOX_ACCESS_TOKEN}
-          onRetrieve={handleAutofillRetrieve}
-        >
-          <div className="mt-4">
+
+          {stopAddresses.map((address, index) => (
+            <Autocomplete
+              key={index}
+              onLoad={(autocomplete) =>
+                (autocompleteRefs.current[index + 1] = autocomplete)
+              }
+              onPlaceChanged={() =>
+                handleAddressChange(
+                  index,
+                  autocompleteRefs.current[index + 1]?.getPlace()
+                    ?.formatted_address || ""
+                )
+              }
+            >
+              <div>
+                <label
+                  htmlFor={`stopAddress-${index}`}
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Stop Address {index + 1}
+                </label>
+                <Input
+                  id={`stopAddress-${index}`}
+                  name={`stopAddress-${index}`}
+                  type="text"
+                  value={address}
+                  onChange={(e) => handleAddressChange(index, e.target.value)}
+                  autoComplete="off"
+                  className="block w-full shadow-sm sm:text-sm border-gray-300  bg-white rounded-md"
+                />
+              </div>
+            </Autocomplete>
+          ))}
+
+          <div>
             <label
               htmlFor="dropoffAddress"
               className="block text-sm font-medium text-gray-700"
             >
               Dropoff Address
             </label>
-            <Input
-              id="dropoffAddress"
-              name="dropoffAddress"
-              type="text"
-              autoComplete="address-line1"
-              required
-              className="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-            />
+            <Autocomplete
+              onLoad={(autocomplete) =>
+                (autocompleteRefs.current[stopAddresses.length + 1] =
+                  autocomplete)
+              }
+              onPlaceChanged={() =>
+                setDropoffAddress(
+                  autocompleteRefs.current[stopAddresses.length + 1]?.getPlace()
+                    ?.formatted_address || ""
+                )
+              }
+            >
+              <Input
+                id="dropoffAddress"
+                name="dropoffAddress"
+                type="text"
+                value={dropoffAddress}
+                onChange={(e) => setDropoffAddress(e.target.value)}
+                autoComplete="off"
+                required
+                className="block w-full shadow-sm sm:text-sm border-gray-300 bg-white rounded-md"
+              />
+            </Autocomplete>
           </div>
-        </AddressAutofill>
-        <div
-          id="minimap-container"
-          className={clsx("h180 wfull relative mt18 mb60", {
-            none: !minimapFeature,
-          })}
-        >
-          <AddressMinimap
-            feature={minimapFeature}
-            show={!!minimapFeature}
-            satelliteToggle
-            canAdjustMarker
-            footer
-            accessToken={MAPBOX_ACCESS_TOKEN}
-          />
-        </div>
-      </form>
-    </div>
+          <Button
+            type="button"
+            onClick={handleAddStop}
+            className="w-full bg-neutral-700"
+          >
+            Add Stop
+          </Button>
+
+          {/* <Button type="submit" className="w-full bg-theme-orange">
+            Submit Addresses
+          </Button> */}
+        </form>
+      </div>
+    </LoadScript>
   );
 };
 
-export default MapboxAddressAutofill;
+export default GoogleMapsAddressAutofill;
