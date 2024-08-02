@@ -27,6 +27,7 @@ const MobileMenu = () => {
             <Link href={"/about"}>About</Link>
             <Link href={"/services"}>Services</Link>
             <Link href={"/contact"}>Contact</Link>
+            <Link href={"/login"}>Login</Link>
           </ul>
         </div>
       )}
