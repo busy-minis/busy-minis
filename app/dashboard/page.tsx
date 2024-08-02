@@ -1,4 +1,3 @@
-"use client";
 import React from "react";
 import {
   Car,
@@ -6,11 +5,8 @@ import {
   Note,
   UserCircle,
 } from "@phosphor-icons/react/dist/ssr";
-import Image from "next/image";
-import Link from "next/link";
+
 import { Bell, CarProfile, Dot, Recycle } from "@phosphor-icons/react";
-import SideBar from "./SideBar";
-import DashboardNav from "./DashboardNav";
 
 export default function page() {
   return (
