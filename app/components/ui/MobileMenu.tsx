@@ -21,7 +21,10 @@ const MobileMenu = () => {
       "
           >
             <Link href={"/"}>Home</Link>
-            <Link className="hover:bg-theme-orange px-2 py-1 " href={"/"}>
+            <Link
+              className="hover:bg-theme-orange px-2 py-1 "
+              href={"/pricing"}
+            >
               Pricing
             </Link>
             <Link href={"/about"}>About</Link>
