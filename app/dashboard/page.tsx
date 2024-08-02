@@ -3,8 +3,10 @@ import { Car, Recycle, Dot } from "@phosphor-icons/react/dist/ssr";
 
 export default function page() {
   return (
-    <div className="space-y-4 w-full">
-      <h1 className="text-xl pb-4 text-white">Your Trips </h1>
+    <div className="space-y-4 w-full relative">
+      <h1 className="text-3xl pb-4 tracking-tighter font-semibold text-gray-700">
+        Your Trips{" "}
+      </h1>
       <NoRidesFound />
     </div>
   );
@@ -12,7 +14,7 @@ export default function page() {
 
 const NoRidesFound = () => {
   return (
-    <div className="grid text-center h-full bg-neutral-200 place-content-center py-48">
+    <div className="grid text-center h-full bg-white   place-content-center  py-24 rounded-md shadow-sm border">
       {/* <Ride /> */}
       <p>You have no scheduled rides at this time.</p>
       <button className="px-6 py-2 mt-4 w-fit mx-auto text-neutral-100 bg-theme-orange rounded-md">
