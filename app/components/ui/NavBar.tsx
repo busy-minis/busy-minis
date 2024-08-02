@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
-import { createClient } from "@/app/supabase/server";
+// import { redirect } from "next/navigation";
+// import { createClient } from "@/app/supabase/server";
 import Link from "next/link";
 import {
   Cross,
@@ -14,12 +14,12 @@ import Image from "next/image";
 import MobileMenu from "./MobileMenu";
 
 export const NavBar = async (props: { page: string }) => {
-  const supabase = createClient();
+  // const supabase = createClient();
 
-  const { data, error } = await supabase.auth.getUser();
-  if (error || !data?.user) {
-    redirect("/login");
-  }
+  // const { data, error } = await supabase.auth.getUser();
+  // if (error || !data?.user) {
+  //   redirect("/login");
+  // }
 
   const { page } = props;
 
