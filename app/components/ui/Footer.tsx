@@ -3,7 +3,7 @@ const Footer = () => {
   return (
     <footer className="  bg-neutral-100 ">
       {/* <Wrap /> */}
-      <footer className="rounded-lg  text-teal-800   m-4  mt-24">
+      <footer className="rounded-lg  text-orange-900  m-4  mt-24">
         <div className="w-full max-w-screen-2xl mx-auto p-4 md:py-8">
           <div className="flex flex-col items-center  sm:flex-row  sm:items-center sm:justify-between">
             <div className="flex pb-4 sm:pb-0 items-center  text-2xl font-semibold whitespace-nowrap ">

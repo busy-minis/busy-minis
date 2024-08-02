@@ -16,11 +16,11 @@ export default function page() {
       <About1 />
       <div className="  ">
         <main className="max-w-7xl mx-auto  ">
-          <div className="border-2 shadow-sm rounded-3xl px-4 md:px-0  bg-theme-teal/10 py-12 mt-24">
-            <h2 className="text-2xl sm:text-4xl md:text-5xl  text-center text-theme-teal font-bold">
+          <div className="border-2 rounded-xl px-4 md:px-0  shadow-lg py-12 mt-24">
+            <h2 className="text-2xl sm:text-4xl md:text-5xl  text-center text-theme-orange font-light">
               Our Mission
             </h2>
-            <p className="mt-8 leading-relaxed max-w-3xl text-sm sm:text-base md:text-lg mx-auto text-center ">
+            <p className="mt-8 leading-relaxed max-w-3xl text-gray-700  text-sm sm:text-base md:text-lg mx-auto text-center ">
               At Busy Minis Transportation, we understand the demands of busy
               families. Our mission is to provide safe, reliable, and convenient
               transportation for your children, giving you peace of mind and
@@ -28,7 +28,7 @@ export default function page() {
               kids get to their activities safely and on time, every time.
             </p>
             <div className="grid place-content-center">
-              <button className="mt-24 rounded-md bg-theme-teal text-base md:text-xl  text-white px-10 py-2 ">
+              <button className="mt-24 rounded-md bg-theme-orange text-base md:text-xl  text-white px-10 py-2 ">
                 Get a Quote
               </button>
             </div>
@@ -59,7 +59,7 @@ export default function page() {
 const Question = (props: any) => {
   const [open, setOpen] = useState(false);
   return (
-    <div className="max-w-4xl mx-auto border-b  border-neutral-400">
+    <div className="max-w-4xl mx-auto border-b hover:bg-gray-200 px-2 cursor-pointer  border-neutral-400">
       <section
         onClick={() => setOpen(!open)}
         className="flex justify-between py-6 w-full  items-center"
@@ -130,9 +130,9 @@ const TitleDescriptionGrid = (props: any) => {
       {props.data.map((item: any, index: any) => (
         <div
           key={index}
-          className="border border-gray-300 p-4 rounded-lg text-xs md:text-base"
+          className="border border-gray-300 p-4 px-6 rounded-lg text-xs md:text-base"
         >
-          <h3 className="font-semibold">{item.title}</h3>
+          <h3 className=" text-orange-500 text-xl">{item.title}</h3>
           <p className="text-gray-600 mt-2">{item.description}</p>
         </div>
       ))}
@@ -149,7 +149,7 @@ const DriverSafetyInfo = () => {
       </h2>
       <p className="pb-24 text-center max-w-4xl mx-auto ">
         At Busy Minis,{" "}
-        <span className="text-theme-teal font-semibold">
+        <span className="text-theme-orange font-semibold">
           safety is our top priority
         </span>{" "}
         . We have implemented rigorous safety protocols to ensure the well-being
@@ -890,14 +890,14 @@ const About1 = () => {
 
             <div className="w-full px-4 lg:w-1/2 xl:w-5/12">
               <div className="mt-10 lg:mt-0">
-                <span className="block mb-4 text-2xl font-light text-theme-teal">
+                <span className="block mb-4 text-2xl font-light text-theme-orange">
                   About Us
                 </span>
-                <h2 className="mb-5 text-3xl  text-dark sm:text-[40px]/[48px]">
+                <h2 className="mb-5 text-3xl tracking-tighter  text-dark sm:text-[40px]/[48px]">
                   Ensure your little ones travel joyfully by providing reliable
                   and safe transportation services.
                 </h2>
-                <p className="mb-5 text-base text-body-color ">
+                <p className="mb-5 text-base text-gray-700 leading-relaxed  ">
                   Busy Minis was founded by Lia, a working mother of two, who
                   struggled to balance her work commitments with her childrens
                   busy schedules. When she realized there were no reliable
@@ -907,13 +907,6 @@ const About1 = () => {
                   better work-life balance without compromising their childrens
                   activities.
                 </p>
-
-                <a
-                  href="javascript:void(0)"
-                  className="inline-flex mt-4 items-center justify-center py-2 text-base font-medium text-center text-white border border-transparent rounded-md px-4 bg-theme-teal hover:bg-opacity-90"
-                >
-                  Sign Up
-                </a>
               </div>
             </div>
           </div>

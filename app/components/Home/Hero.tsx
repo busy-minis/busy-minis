@@ -39,7 +39,7 @@ export default function Hero() {
         quality={100}
       />
       <Image
-        src={"/assets/01.jpg"}
+        src={"/assets/09.png"}
         alt=""
         width={150}
         height={150}

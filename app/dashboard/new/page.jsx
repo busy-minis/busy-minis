@@ -109,5 +109,3 @@ const MapboxAddressAutofill = ({ onAddressSelect }) => {
     </div>
   );
 };
-
-export default MapboxAddressAutofill;
