@@ -179,7 +179,7 @@ export default function ScheduleRide() {
           ) : null}
         </div>
 
-        <div>
+        {/* <div>
           <MapboxAddressAutofill onAddressSelect={handleAddressSelect} />
           {formik.touched.pickupAddress && formik.errors.pickupAddress ? (
             <div className="text-red-600">{formik.errors.pickupAddress}</div>
@@ -187,7 +187,7 @@ export default function ScheduleRide() {
           {formik.touched.dropoffAddress && formik.errors.dropoffAddress ? (
             <div className="text-red-600">{formik.errors.dropoffAddress}</div>
           ) : null}
-        </div>
+        </div> */}
 
         <div>
           <label
