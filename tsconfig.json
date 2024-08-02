@@ -18,6 +18,7 @@
       }
     ],
     "paths": {
+      "react": ["./node_modules/@types/react"],
       "@/*": ["./*"]
     }
   },
@@ -26,7 +27,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "app/dashboard/MyAdressForm.jsx",
+    "app/dashboard/MyAdressForm.tsx",
     "app/dashboard/new/page.tsx"
   ],
   "exclude": ["node_modules"]

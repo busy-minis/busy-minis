@@ -12,18 +12,18 @@ import {
 const MAPBOX_ACCESS_TOKEN =
   "pk.eyJ1IjoiYnVzeW1pbmlzMyIsImEiOiJjbHo0NWtvMGMwOGV0Mm5vbXBrdWpzeTFsIn0.M7KP1szOMBQaDaS6RwXhWA";
 
-const MapboxAddressAutofill = ({ onAddressSelect }) => {
+const MapboxAddressAutofill = ({ onAddressSelect }: any) => {
   const [minimapFeature, setMinimapFeature] = useState();
   const { formRef, showConfirm } = useConfirmAddress({
     accessToken: MAPBOX_ACCESS_TOKEN,
   });
 
-  const handleAutofillRetrieve = (response) => {
+  const handleAutofillRetrieve = (response: any) => {
     setMinimapFeature(response.features[0]);
   };
 
   const handleFormSubmit = useCallback(
-    async (e) => {
+    async (e: any) => {
       e.preventDefault();
       const result = await showConfirm();
 
