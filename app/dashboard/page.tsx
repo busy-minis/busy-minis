@@ -1,21 +1,11 @@
 import React from "react";
-import {
-  Car,
-  HouseLine,
-  Note,
-  UserCircle,
-} from "@phosphor-icons/react/dist/ssr";
-
-import { Bell, CarProfile, Dot, Recycle } from "@phosphor-icons/react";
+import { Car, Recycle, Dot } from "@phosphor-icons/react/dist/ssr";
 
 export default function page() {
   return (
     <div className="space-y-4 w-full">
       <h1 className="text-xl pb-4 text-white">Your Trips </h1>
-      <Ride />
-      <Ride />
-      <Ride />
-      <Ride />
+      <NoRidesFound />
     </div>
   );
 }
