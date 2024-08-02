@@ -33,17 +33,17 @@ export default function Hero() {
       <Image
         src={"/assets/01.jpg"}
         alt=""
-        width={150}
-        height={150}
-        className="-z-10 top-8 sm:hidden  absolute left-12 rounded-full "
+        width={125}
+        height={125}
+        className="-z-10 top-8 sm:hidden  absolute left-4 rounded-full "
         quality={100}
       />
       <Image
         src={"/assets/09.png"}
         alt=""
-        width={150}
-        height={150}
-        className="-z-10 top-16 sm:hidden  absolute right-6 rounded-full "
+        width={125}
+        height={125}
+        className="-z-10 top-12 sm:hidden  absolute right-4 rounded-full "
         quality={100}
       />
       <Image
