@@ -14,7 +14,7 @@ const AdminNavBar = () => {
       <nav className="bg-stone-800 p-4 lg:px-24 shadow-md">
         <div className=" flex justify-between items-center">
           <div className="text-white text-lg font-semibold">
-            BusyMinis Admin
+            <Link href={"/admin"}>BusyMinis Admin</Link>
           </div>
           <div className="block lg:hidden">
             <button
@@ -52,17 +52,18 @@ const AdminNavBar = () => {
               >
                 Drivers
               </Link>
+
               <Link
-                href="/"
+                href="/admin/orientation"
                 className="block px-4 py-2 text-white hover:bg-stone-600 rounded-lg"
               >
-                Sign Out
+                Orientation
               </Link>
               <Link
                 href="/"
                 className="block px-4 py-2 text-white hover:bg-stone-600 rounded-lg"
               >
-                Orientation
+                Sign Out
               </Link>
             </div>
           </div>
@@ -81,6 +82,12 @@ const AdminNavBar = () => {
             className="block px-4 py-2 text-white hover:bg-zinc-300 hover:text-black  "
           >
             Driver Form
+          </Link>
+          <Link
+            href="/admin/orientation"
+            className="block px-4 py-2 text-white hover:bg-zinc-300 hover:text-black  "
+          >
+            Orientation
           </Link>
           <Link
             href="/"
