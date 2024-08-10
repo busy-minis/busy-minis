@@ -1,7 +1,7 @@
 import React from "react";
 
 export default function page() {
-  return <div>pagee</div>;
+  return <div>pageee</div>;
 }
 
 // "use client";
