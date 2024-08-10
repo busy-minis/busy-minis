@@ -6,27 +6,30 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import MapboxAddressAutofill from "../MapboxAddressAutofill";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function ScheduleRide() {
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
   const formik = useFormik({
     initialValues: {
-      name: "",
-      email: "",
-      phone: "",
-      date: "",
-      time: "",
+      rider: "",
+      pickupDate: "",
+      pickupTime: "",
       pickupAddress: "",
       dropoffAddress: "",
       specialInstructions: "",
     },
     validationSchema: Yup.object({
-      name: Yup.string().required("Required"),
-      email: Yup.string().email("Invalid email address").required("Required"),
-      phone: Yup.string().required("Required"),
-      date: Yup.date().required("Required"),
-      time: Yup.string().required("Required"),
+      rider: Yup.string().required("Required"),
+      pickupDate: Yup.date().required("Required"),
+      pickupTime: Yup.string().required("Required"),
       pickupAddress: Yup.string().required("Required"),
       dropoffAddress: Yup.string().required("Required"),
       specialInstructions: Yup.string(),
@@ -76,106 +79,72 @@ export default function ScheduleRide() {
       <form onSubmit={formik.handleSubmit} className="space-y-6">
         <div>
           <label
-            htmlFor="name"
+            htmlFor="rider"
             className="block text-sm font-medium text-gray-700"
           >
-            Name
+            Rider
           </label>
-          <Input
-            id="name"
-            name="name"
-            type="text"
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            value={formik.values.name}
-            className="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md bg-white"
-          />
-          {formik.touched.name && formik.errors.name ? (
-            <div className="text-red-600">{formik.errors.name}</div>
+          <Select>
+            <SelectTrigger
+              id="rider"
+              name="rider"
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              value={formik.values.rider}
+              className="bg-white"
+            >
+              <SelectValue placeholder="Theme" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Jane Doe">Jane Doe</SelectItem>
+              <SelectItem value="Jack Doek">Jane Doe</SelectItem>
+              <SelectItem value="Jill Doe">Jill Doe</SelectItem>
+            </SelectContent>
+          </Select>
+          {formik.touched.rider && formik.errors.rider ? (
+            <div className="text-red-600">{formik.errors.rider}</div>
           ) : null}
         </div>
 
         <div>
           <label
-            htmlFor="email"
+            htmlFor="pickupDate"
             className="block text-sm font-medium text-gray-700"
           >
-            Email
+            Pickup Date
           </label>
           <Input
-            id="email"
-            name="email"
-            type="email"
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            value={formik.values.email}
-            className="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md bg-white"
-          />
-          {formik.touched.email && formik.errors.email ? (
-            <div className="text-red-600">{formik.errors.email}</div>
-          ) : null}
-        </div>
-
-        <div>
-          <label
-            htmlFor="phone"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Phone
-          </label>
-          <Input
-            id="phone"
-            name="phone"
-            type="text"
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            value={formik.values.phone}
-            className="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md bg-white"
-          />
-          {formik.touched.phone && formik.errors.phone ? (
-            <div className="text-red-600">{formik.errors.phone}</div>
-          ) : null}
-        </div>
-
-        <div>
-          <label
-            htmlFor="date"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Date
-          </label>
-          <Input
-            id="date"
-            name="date"
+            id="pickupDate"
+            name="pickupDate"
             type="date"
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            value={formik.values.date}
+            value={formik.values.pickupDate}
             className="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md bg-white"
           />
-          {formik.touched.date && formik.errors.date ? (
-            <div className="text-red-600">{formik.errors.date}</div>
+          {formik.touched.pickupDate && formik.errors.pickupDate ? (
+            <div className="text-red-600">{formik.errors.pickupDate}</div>
           ) : null}
         </div>
 
         <div>
           <label
-            htmlFor="time"
+            htmlFor="pickupTime"
             className="block text-sm font-medium text-gray-700"
           >
-            Time
+            Pickup Time
           </label>
           <Input
-            id="time"
-            name="time"
+            id="pickupTime"
+            name="pickupTime"
             type="time"
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            value={formik.values.time}
+            value={formik.values.pickupTime}
             className="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md bg-white"
           />
-          {formik.touched.time && formik.errors.time ? (
-            <div className="text-red-600">{formik.errors.time}</div>
+          {formik.touched.pickupTime && formik.errors.pickupTime ? (
+            <div className="text-red-600">{formik.errors.pickupTime}</div>
           ) : null}
         </div>
 

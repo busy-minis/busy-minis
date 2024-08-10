@@ -57,6 +57,9 @@ export default function PricingPage() {
                 <h4 className="text-3xl font-semibold tracking-tighter text-theme-orange">
                   Ride Pricing Calculator
                 </h4>
+                <p className="text-xs md:text-sm mt-2 font-medium">
+                  *All prices are estimates*
+                </p>
 
                 <div className="flex flex-col text-gray-700 text-lg font-semibold space-y-2 mt-8">
                   <label className="flex items-center cursor-pointer">
@@ -68,7 +71,7 @@ export default function PricingPage() {
                       onChange={() => setSelectedRideType("single")}
                       className="form-radio h-4 w-4 text-theme-orange focus:ring-0"
                     />
-                    <span className="ml-2">Single Ride - $16.00/trip</span>
+                    <span className="ml-2">One time ride - $16.00/trip</span>
                   </label>
 
                   <label className="flex items-center cursor-pointer">

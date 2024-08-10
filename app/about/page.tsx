@@ -16,7 +16,7 @@ export default function page() {
       <About1 />
       <div className="  ">
         <main className="max-w-7xl mx-auto  ">
-          <div className="border-2 rounded-xl px-4 md:px-0  shadow-lg py-12 mt-24">
+          <div className="border-2 border-zinc-400 rounded-xl px-4 md:px-0  shadow-lg py-12 mt-24">
             <h2 className="text-2xl sm:text-4xl md:text-5xl  text-center text-theme-orange font-light">
               Our Mission
             </h2>
@@ -894,8 +894,8 @@ const About1 = () => {
                   About Us
                 </span>
                 <h2 className="mb-5 text-3xl tracking-tighter  text-dark sm:text-[40px]/[48px]">
-                  Ensure your little ones travel joyfully by providing reliable
-                  and safe transportation services.
+                  Ensure your Minis travel joyfully by providing reliable and
+                  safe transportation services.
                 </h2>
                 <p className="mb-5 text-base text-gray-700 leading-relaxed  ">
                   Busy Minis was founded by Lia, a working mother of two, who

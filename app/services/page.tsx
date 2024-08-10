@@ -35,11 +35,7 @@ export default function page() {
       description:
         "Facilitating your family's faith journey with dependable transportation to and from religious events.",
     },
-    {
-      name: "Job Interview Transport",
-      description:
-        "Empowering young job seekers with punctual and safe transportation to important job interviews.",
-    },
+
     {
       name: "Six Flags Season Pass Transport",
       description:

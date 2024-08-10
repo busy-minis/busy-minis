@@ -76,7 +76,7 @@ export default function WhyChooseUs() {
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        <g clip-path="url(#clip0_29_2)">
+        <g clipPath="url(#clip0_29_2)">
           <path d="M0 32L1440 224V0H0V32Z" fill="#3EB7AE" />
         </g>
         <defs>

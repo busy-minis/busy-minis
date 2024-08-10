@@ -1,5 +1,6 @@
 import React from "react";
 import { Car, Recycle, Dot } from "@phosphor-icons/react/dist/ssr";
+import Link from "next/link";
 
 export default function page() {
   return (
@@ -7,7 +8,8 @@ export default function page() {
       <h1 className="text-3xl pb-4 tracking-tighter font-semibold text-gray-700">
         Your Trips{" "}
       </h1>
-      <NoRidesFound />
+      {/* <NoRidesFound /> */}
+      <Ride />
     </div>
   );
 }
@@ -17,9 +19,12 @@ const NoRidesFound = () => {
     <div className="grid text-center h-full bg-white   place-content-center  py-24 rounded-md shadow-sm border">
       {/* <Ride /> */}
       <p>You have no scheduled rides at this time.</p>
-      <button className="px-6 py-2 mt-4 w-fit mx-auto text-neutral-100 bg-theme-orange rounded-md">
+      <Link
+        href={"/book"}
+        className="px-6 py-2 mt-4 w-fit mx-auto text-neutral-100 bg-theme-orange rounded-md"
+      >
         Schedule A Ride
-      </button>
+      </Link>
     </div>
   );
 };
