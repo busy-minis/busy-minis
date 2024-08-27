@@ -1,54 +1,62 @@
 import React from "react";
 import { ArrowRight, Star } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
+
 export default function WhatWeOffer() {
   return (
-    <div className="max-w-7xl mt-48 rounded-3xl mx-auto  bg-gradient-to-b from-emerald-200 to-orange-200 text-teal-950 py-24 p-8">
-      <div className="text-center">
-        <h2 className="mt-4 text-2xl sm:text-4xl md:text-5xl tracking-tighter  ">
-          What do we Offer ?
+    <section className="py-20 px-6 bg-white">
+      <div className="max-w-7xl mx-auto text-center">
+        <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 tracking-tight leading-tight">
+          What Do We Offer?
         </h2>
-        <p className="mt-12  text-sm md:text-lg max-w-3xl text-center mx-auto  leading-relaxed">
-          Busy Minis Transportation offers a wide range of services tailored to
-          fit your family&apos;s needs. From daily school commutes to
-          last-minute pickups and special events, our flexible scheduling and
-          customized routes provide a hassle-free transportation solution for
-          busy families.
+        <p className="mt-6 text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">
+          Busy Minis Transportation offers services tailored to your familys
+          needs. From safe school transportation to extracurricular activities,
+          we ensure a reliable experience.
         </p>
       </div>
 
-      <ul className="mt-36 grid grid-cols-2 gap-y-8 text-xl gap-x-4 md:gap-x-24 w-fit  mx-auto">
-        <Offer title={"Tutoring/After School Tutorials Transportation"} />
-        <Offer title={"Summer Camp Transportation"} />
-        <Offer title={"Last Minute or Sick Child Pick Up"} />
-        <Offer title={"Transportation for Children with Special Needs"} />
-        <Offer title={"Transportation for Sports/Extracurricular Activities"} />
-        <Offer title={"Transportation for Religious Activities"} />
+      {/* Offers Grid */}
+      <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+        {offers.map((offer, index) => (
+          <OfferItem key={index} title={offer.title} />
+        ))}
+      </div>
 
-        <p></p>
-        <p></p>
-        <p></p>
-        <p></p>
-        <p></p>
-      </ul>
-
-      <Link
-        href={"/services"}
-        className="cursor-pointer  font-semibold  flex mx-auto bg-orange-300  px-8 py-2 gap-4 rounded-3xl w-fit items-center"
-      >
-        <p className=" ">Find Out More</p>
-      </Link>
-    </div>
+      {/* Call to Action */}
+      <div className="flex justify-center mt-16">
+        <Link
+          href="/services"
+          className="flex items-center bg-orange-600 hover:bg-orange-700 text-white transition-all px-8 py-4 gap-3 rounded-full shadow-lg text-lg font-semibold hover:shadow-xl transform hover:scale-105"
+        >
+          <span>Explore Our Services</span>
+          <ArrowRight className="text-2xl" weight="bold" />
+        </Link>
+      </div>
+    </section>
   );
 }
 
-const Offer = (props: any) => {
+// Offer Item Component
+const OfferItem = ({ title }: any) => {
   return (
-    <div className="flex  gap-4 text-sm md:text-lg">
-      <div className="  pt-1">
-        <Star className="text-theme-teal" weight="fill" />
-      </div>
-      <h3 className="">{props.title}</h3>
+    <div className="flex flex-col items-center p-6 bg-gray-100 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 hover:bg-white">
+      <Star className="text-orange-600 text-4xl mb-4" weight="fill" />
+      <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
+      <p className="text-sm text-gray-600 text-center">
+        We provide customized transportation solutions that prioritize safety,
+        reliability, and comfort for all.
+      </p>
     </div>
   );
 };
+
+// Offer Data
+const offers = [
+  { title: "Tutoring & After School Transportation" },
+  { title: "Summer Camp Transportation" },
+  { title: "Emergency Pickups & Sick Child Transport" },
+  { title: "Transportation for Children with Special Needs" },
+  { title: "Sports & Extracurricular Activities" },
+  { title: "Religious Event Transportation" },
+];

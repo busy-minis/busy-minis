@@ -1,91 +1,54 @@
 "use client";
-import React from "react";
-import { Shield } from "@phosphor-icons/react/dist/ssr";
-import Image from "next/image";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { Car, Check, ShieldPlus } from "@phosphor-icons/react";
+import React, { useEffect } from "react";
+import { Check } from "@phosphor-icons/react";
+import { motion, useAnimation } from "framer-motion";
+import { useInView } from "react-intersection-observer";
 
 export default function WhyChooseUs() {
-  const sections = [
-    {
-      title: "Safety First",
-      description:
-        "Our drivers are certified, trained, and equipped with CPR and First Aid certification. Each ride is accompanied by a trained Shuttle Aid for additional support.",
-      bgColor: "bg-white",
-    },
-    {
-      title: "Reliable Service",
-      description:
-        "We prioritize punctuality and reliability, ensuring your children get to their destinations on time, every time.",
-      bgColor: "bg-indigo-50",
-    },
-    {
-      title: "Convenient Options",
-      description:
-        "With services tailored to your family's needs, we provide a hassle-free transportation solution.",
-      bgColor: "bg-trf",
-    },
-  ];
-
-  const { scrollYProgress } = useScroll();
-  const y = useTransform(scrollYProgress, [0, 1], [0, 300]);
-  const x = useTransform(scrollYProgress, [0, 0.1], [-1000, 0]);
-
   return (
-    <div className="">
-      <svg
-        width="100%"
-        height="100%"
-        viewBox="0 0 1440 160"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <g clip-path="url(#clip0_29_4)">
-          <path d="M0 0L720 96H1440V160H720H0V0Z" fill="#3EB7AE" />
-        </g>
-        <defs>
-          <clipPath id="clip0_29_4">
-            <rect width="100%" height="100%" fill="white" />
-          </clipPath>
-        </defs>
-      </svg>
-
-      <div className="  bg-theme-teal text-teal-950  pb-36 py-12  ">
-        <div className="max-w-7xl mx-auto relative">
-          <div className="mx-auto rounded-3xl text-sm px-4 py-1 w-fit  bg-gradient-to-r from-emerald-200 to-teal-300 ">
+    <section className="relative bg-gradient-to-b from-theme-teal/90 to-teal-700 text-white py-24">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Title Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="text-center"
+        >
+          <div className="mx-auto text-xs sm:text-sm px-4 py-1 w-fit bg-gradient-to-r from-emerald-300 to-teal-400 text-teal-900 font-semibold rounded-full">
             Busy Minis
           </div>
-          <h2 className="text-center text-teal-950 mt-4 font-bold  px-4 py-2 text-3xl  sm:text-4xl md:text-6xl   pb-24">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mt-4">
             Why Choose Us?
           </h2>
-          {/* <Image
-          src={"/assets/mac.jpg"}
-          alt=""
-          height={400}
-          width={400}
-          className="rounded-full mx-auto my-24 absolute top-48 left-24 -z-10"
-        /> */}
+          <p className="max-w-2xl mx-auto mt-4 text-sm md:text-lg leading-relaxed text-teal-200">
+            At Busy Minis Transportation, safety, reliability, and convenience
+            are at the core of what we do. Discover why families trust us with
+            their children’s transportation needs.
+          </p>
+        </motion.div>
 
-          <DriverSafetyComponent />
-        </div>
+        {/* Safety Features Section */}
+        <DriverSafetyComponent />
       </div>
-      <svg
-        width="100%"
-        height="100%"
-        viewBox="0 0 1440 224"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <g clipPath="url(#clip0_29_2)">
-          <path d="M0 32L1440 224V0H0V32Z" fill="#3EB7AE" />
-        </g>
-        <defs>
-          <clipPath id="clip0_29_2">
-            <rect width="100%" height="100%" fill="white" />
-          </clipPath>
-        </defs>
-      </svg>
-    </div>
+
+      {/* Decorative SVG at Bottom */}
+      <div className="absolute bottom-0 w-full overflow-hidden leading-none">
+        <svg
+          width="100%"
+          height="100%"
+          viewBox="0 0 1440 100"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            fillOpacity="1"
+            d="M0,64L48,80C96,96,192,128,288,133.3C384,139,480,117,576,106.7C672,96,768,96,864,101.3C960,107,1056,117,1152,117.3C1248,117,1344,107,1392,101.3L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+            fill="#3EB7AE"
+          />
+        </svg>
+      </div>
+    </section>
   );
 }
 
@@ -93,56 +56,85 @@ const DriverSafetyComponent = () => {
   const safetyFeatures = [
     {
       title: "Experienced & Compassionate Drivers",
-      description: "Clean driving records and genuine care for children.",
+      description:
+        "Our drivers have clean driving records and show genuine care for children.",
     },
     {
       title: "Rigorous Background Checks",
-      description: "Ensuring trustworthy and reliable staff.",
+      description:
+        "We ensure that all staff members are thoroughly vetted and trustworthy.",
     },
     {
       title: "First Aid Kits & Safety Equipment",
-      description: "Always on board.",
+      description: "Always on board to ensure the safety of our passengers.",
     },
     {
       title: "Regular Evaluations",
       description:
-        "Continuous performance assessments to maintain high standards.",
+        "Our drivers undergo continuous evaluations to maintain high standards.",
     },
     {
-      title: "Pick-Up/Drop-Off Notices",
-      description: "Timely updates for parents.",
+      title: "Pick-Up/Drop-Off Notifications",
+      description:
+        "We keep parents informed with timely updates on pick-up and drop-off times.",
     },
     {
       title: "Dual Dash Cams",
-      description: "Monitoring road and cabin views for safety.",
+      description:
+        "For safety monitoring, both road and cabin views are recorded.",
     },
     {
       title: "Marked Vehicles",
-      description: "Easily identifiable for safety.",
+      description:
+        "Our vehicles are easily identifiable to ensure safety and visibility.",
     },
     {
       title: "Uniformed Drivers",
-      description: "Professional and easily recognizable.",
+      description: "Our professional drivers are easily recognizable.",
     },
   ];
 
-  return (
-    <div className="px-4  md:px-0 grid grid-cols-1  md:grid-cols-2 gap-4 md:gap-12 ">
-      {safetyFeatures.map((feature, index) => (
-        <div
-          key={index}
-          className="flex    bg-gradient-to-r from-emerald-200 to-teal-300 px-8 py-6 rounded-lg"
-        >
-          <div className=" mt-2 bg-theme-orange h-6 mr-4 w-6 grid place-content-center rounded-full">
-            <Check className="text-white" weight="bold" />
-          </div>
-          <section className="">
-            <h3 className="text-sm md:text-2xl   ">{feature.title}</h3>
+  const controls = useAnimation();
+  const [ref, inView] = useInView({ triggerOnce: true });
 
-            <p className="text-xs md:text-base mt-1">{feature.description}</p>
-          </section>
-        </div>
+  useEffect(() => {
+    if (inView) {
+      controls.start("visible");
+    }
+  }, [controls, inView]);
+
+  const fadeIn = {
+    hidden: { opacity: 0, y: 50 },
+    visible: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6, ease: "easeOut", delay: i * 0.2 },
+    }),
+  };
+
+  return (
+    <motion.div
+      ref={ref}
+      initial="hidden"
+      animate={controls}
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-12"
+    >
+      {safetyFeatures.map((feature, index) => (
+        <motion.div
+          key={index}
+          custom={index}
+          variants={fadeIn}
+          className="flex flex-col items-start bg-white bg-opacity-95 shadow-lg p-6 rounded-lg transform hover:scale-105 transition-transform duration-300"
+        >
+          <div className="flex items-center justify-center w-12 h-12 bg-orange-500 rounded-full mb-4">
+            <Check className="text-white" size={24} weight="bold" />
+          </div>
+          <h3 className="text-lg font-semibold mb-2 text-teal-900">
+            {feature.title}
+          </h3>
+          <p className="text-sm text-gray-600">{feature.description}</p>
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 };

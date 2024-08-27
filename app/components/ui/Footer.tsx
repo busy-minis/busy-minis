@@ -1,49 +1,103 @@
+"use client";
 import Image from "next/image";
+import {
+  FacebookLogo,
+  TwitterLogo,
+  InstagramLogo,
+} from "@phosphor-icons/react";
+
 const Footer = () => {
   return (
-    <footer className="  bg-neutral-100 ">
-      {/* <Wrap /> */}
-      <footer className="rounded-lg  text-orange-900  m-4  mt-24">
-        <div className="w-full max-w-screen-2xl mx-auto p-4 md:py-8">
-          <div className="flex flex-col items-center  sm:flex-row  sm:items-center sm:justify-between">
-            <div className="flex pb-4 sm:pb-0 items-center  text-2xl font-semibold whitespace-nowrap ">
-              <p className="text-sm">@BusyMinis</p>
+    <footer className="bg-neutral-900 text-gray-200 py-12">
+      <div className="max-w-screen-2xl mx-auto px-6 md:px-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 items-center">
+          {/* Logo and Social Links */}
+          <div className="flex flex-col items-center lg:items-start">
+            <Image
+              src="/logo.png"
+              alt="Busy Minis Logo"
+              width={120}
+              height={120}
+              className="mb-6"
+            />
+            <div className="flex space-x-6">
+              <a
+                href="https://facebook.com"
+                aria-label="Facebook"
+                className="text-gray-400 hover:text-white transition-colors duration-300"
+              >
+                <FacebookLogo size={28} weight="fill" />
+              </a>
+              <a
+                href="https://twitter.com"
+                aria-label="Twitter"
+                className="text-gray-400 hover:text-white transition-colors duration-300"
+              >
+                <TwitterLogo size={28} weight="fill" />
+              </a>
+              <a
+                href="https://instagram.com"
+                aria-label="Instagram"
+                className="text-gray-400 hover:text-white transition-colors duration-300"
+              >
+                <InstagramLogo size={28} weight="fill" />
+              </a>
             </div>
+          </div>
 
-            <ul className="flex flex-wrap items-center mb-6 text-sm font-medium  sm:mb-0 ">
-              <li>
-                <a href="#" className="hover:underline me-4 md:me-6">
-                  Home
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:underline me-4 md:me-6">
-                  Pricing
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:underline me-4 md:me-6">
-                  About
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:underline  me-4 md:me-6">
-                  Services
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:underline ">
-                  Contact
-                </a>
-              </li>
+          {/* Navigation Links */}
+          <div className="flex justify-center lg:justify-start">
+            <ul className="space-y-4 text-center lg:text-left">
+              {["Home", "Pricing", "About", "Services", "Contact"].map(
+                (item) => (
+                  <li key={item}>
+                    <a
+                      href="#"
+                      className="text-gray-400 hover:text-white transition-colors duration-300"
+                    >
+                      {item}
+                    </a>
+                  </li>
+                )
+              )}
             </ul>
           </div>
-          <hr className="my-6 border-gray-400 sm:mx-auto  lg:my-8" />
-          <div className="block whitespace-nowrap overflow-x-hidden text-center text-xs sm:text-sm  sm:text-center ">
-            &copy; 2024 Busy Minis Transportation Company. All rights reserved.
+
+          {/* Contact Info */}
+          <div className="text-center lg:text-right">
+            <p className="text-sm text-gray-400">
+              Have questions? Reach us at:
+            </p>
+            <p className="text-lg font-semibold text-white mt-2">
+              contact@busminis.com
+            </p>
+            <p className="text-sm text-gray-400 mt-1">+1 (555) 123-4567</p>
           </div>
         </div>
-      </footer>
+
+        <hr className="my-10 border-gray-700" />
+
+        {/* Bottom Text */}
+        <div className="flex flex-col lg:flex-row justify-between items-center text-center text-xs text-gray-400">
+          <span>
+            &copy; 2024 Busy Minis Transportation Company. All rights reserved.
+          </span>
+          <div className="space-x-4 mt-4 lg:mt-0">
+            <a
+              href="#"
+              className="hover:text-white transition-colors duration-300"
+            >
+              Privacy Policy
+            </a>
+            <a
+              href="#"
+              className="hover:text-white transition-colors duration-300"
+            >
+              Terms of Service
+            </a>
+          </div>
+        </div>
+      </div>
     </footer>
   );
 };

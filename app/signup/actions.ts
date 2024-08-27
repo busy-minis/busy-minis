@@ -4,70 +4,60 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 
-// Login function
-export async function login(formData: FormData) {
-  const supabase = createClient();
-
-  // Type-casting here for convenience
-  // In practice, you should validate your inputs
-  const data = {
-    email: formData.get("email") as string,
-    password: formData.get("password") as string,
-  };
-
-  const { error } = await supabase.auth.signInWithPassword(data);
-
-  if (error) {
-    // Handle error (log it, display a message, etc.)
-    console.error("Login error:", error.message);
-    redirect("/error");
-    return;
-  }
-
-  // Revalidate cache and redirect to home
-  revalidatePath("/");
-  redirect("/");
-}
-
 // Signup function
 export async function signup(formData: FormData) {
   const supabase = createClient();
 
   // Type-casting here for convenience
-  // In practice, you should validate your inputs
   const data = {
     email: formData.get("email") as string,
     password: formData.get("password") as string,
+    firstName: formData.get("firstName") as string,
+    lastName: formData.get("lastName") as string,
   };
 
-  const { error } = await supabase.auth.signUp(data);
+  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+    email: data.email,
+    password: data.password,
+    options: {
+      data: {
+        first_name: data.firstName,
+        last_name: data.lastName,
+      },
+    },
+  });
 
-  if (error) {
+  if (signUpError) {
     // Handle error (log it, display a message, etc.)
-    console.error("Signup error:", error.message);
+    console.error("Signup error:", signUpError.message);
     redirect("/error");
     return;
   }
 
-  // Revalidate cache and redirect to home
-  revalidatePath("/");
-  redirect("/");
-}
+  // Insert the user into your custom `users` table
+  const { error: insertError } = await supabase.from("users").insert([
+    {
+      id: signUpData?.user?.id, // Use the user ID from the sign-up process
+      first_name: data.firstName,
+      last_name: data.lastName,
+      email: data.email,
+      verified: false, // default to false until verified
+      role: "driver", // default role, adjust as needed
+      orientation_date: null, // default to null, adjust as needed
+    },
+  ]);
 
-// Logout function
-export async function logout() {
-  const supabase = createClient();
-
-  const { error } = await supabase.auth.signOut();
-
-  if (error) {
+  if (insertError) {
     // Handle error (log it, display a message, etc.)
-    console.error("Logout error:", error.message);
+    console.error(
+      "Error inserting user into custom users table:",
+      insertError.message
+    );
     redirect("/error");
     return;
   }
 
-  // Revalidate cache and redirect to home
-  revalidatePath("/");
-  redirect("/");
+  // Redirect to the signup success page
+  revalidatePath("/signup-success");
+  redirect("/signup-success");
 }

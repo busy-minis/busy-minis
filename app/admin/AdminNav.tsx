@@ -57,7 +57,13 @@ const AdminNavBar = () => {
                 href="/admin/orientation"
                 className="block px-4 py-2 text-white hover:bg-stone-600 rounded-lg"
               >
-                Orientation
+                VerifyUsers
+              </Link>
+              <Link
+                href="/admin/schedule"
+                className="block px-4 py-2 text-white hover:bg-stone-600 rounded-lg"
+              >
+                Schedule
               </Link>
               <Link
                 href="/"
@@ -87,7 +93,13 @@ const AdminNavBar = () => {
             href="/admin/orientation"
             className="block px-4 py-2 text-white hover:bg-zinc-300 hover:text-black  "
           >
-            Orientation
+            VerifyUsers
+          </Link>
+          <Link
+            href="/"
+            className="block px-4 py-2 text-white hover:bg-zinc-300 hover:text-black  "
+          >
+            Schedule
           </Link>
           <Link
             href="/"

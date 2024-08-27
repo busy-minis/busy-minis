@@ -19,9 +19,29 @@ const config = {
     },
     extend: {
       colors: {
-        "theme-orange": "#ec742e",
-        "theme-teal": "#3eb7ae",
-        "theme-yellow": "#fbba30",
+        "theme-orange": "#ec742e", // Primary orange for branding
+        "theme-teal": "#3eb7ae", // Teal for accenting and branding
+        "theme-yellow": "#fbba30", // Yellow for highlights
+        // Complementary and tonal shades for design flexibility
+        "theme-orange-light": "#fbd6bf",
+        "theme-teal-dark": "#2e7f76",
+        "theme-yellow-light": "#ffdd78",
+        // Tailwind's default color shades as fallbacks for variations
+        orange: {
+          light: "#ffd8cc",
+          DEFAULT: "#f97316",
+          dark: "#ea580c",
+        },
+        teal: {
+          light: "#7edce0",
+          DEFAULT: "#14b8a6",
+          dark: "#0d9488",
+        },
+        yellow: {
+          light: "#fde68a",
+          DEFAULT: "#fbbf24",
+          dark: "#f59e0b",
+        },
       },
       keyframes: {
         "accordion-down": {

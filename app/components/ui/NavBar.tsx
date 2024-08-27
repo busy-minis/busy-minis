@@ -1,119 +1,129 @@
-// import { redirect } from "next/navigation";
-// import { createClient } from "@/app/supabase/server";
 import Link from "next/link";
-import {
-  Cross,
-  Hamburger,
-  List,
-  Person,
-  UserCircle,
-  UserRectangle,
-  X,
-} from "@phosphor-icons/react";
 import Image from "next/image";
 import MobileMenu from "./MobileMenu";
+import NavItems from "./NavItems";
+import { createClient } from "@/utils/supabase/server";
+import Logout from "./Logout";
 
-export const NavBar = async (props: { page: string }) => {
-  // const supabase = createClient();
+export const NavBar = async () => {
+  const supabase = createClient();
 
-  // const { data, error } = await supabase.auth.getUser();
-  // if (error || !data?.user) {
-  //   redirect("/login");
+  // Fetch user data from the authentication table
+  const { data: authData, error: authError } = await supabase.auth.getUser();
+  const user = authData?.user;
+
+  // If user is not authenticated or user.email is missing, show login and schedule ride
+  if (!user || !user.email || authError) {
+    return (
+      <nav className="flex z-40 sticky top-0 lg:bg-white/50 bg-white/90 lg:backdrop-blur-lg justify-between items-center px-12 py-3 shadow-md md:shadow-none">
+        <Logo />
+        <NavItems />
+        <div className="hidden lg:flex items-center space-x-6">
+          <LinkButton href="/schedule-ride" label="Schedule a Ride" />
+          <LinkButton href="/login" label="Login" />
+        </div>
+        <MobileMenu isLoggedIn={false} />
+      </nav>
+    );
+  }
+
+  // // Log email for debugging purposes
+  // console.log("Authenticated user email:", user.email);
+
+  // // Step 1: Check if the user is a driver
+  // const { data: driverData, error: driverError } = await supabase
+  //   .from("drivers")
+  //   .select("id")
+  //   .ilike("email", user.email.trim()) // Case-insensitive comparison with trim
+  //   .single();
+
+  // if (driverError) {
+  //   console.error("Error fetching driver data:", driverError.message);
+  // } else if (driverData) {
+  //   console.log("Driver found:", driverData);
+  // } else {
+  //   console.log("No driver found for this user.");
   // }
 
-  const { page } = props;
+  // let isDriver = false;
+  // let dashboardHref = "/dashboard";
+  // let dashboardLabel = "User Dashboard";
+
+  // // If driver data exists, set as driver
+  // if (driverData) {
+  //   isDriver = true;
+  //   dashboardHref = "/driverdashboard/available-rides";
+  //   dashboardLabel = "Driver Dashboard";
+  // }
+
+  // // Step 2: Check if the user is a regular user if not a driver
+  // if (!isDriver) {
+  //   const { data: userData, error: userError } = await supabase
+  //     .from("users")
+  //     .select("id")
+  //     .eq("email", user.email)
+  //     .single();
+
+  //   if (userError) {
+  //     console.error("Error fetching user data:", userError.message);
+  //   } else if (userData) {
+  //     console.log("User found:", userData);
+  //     dashboardHref = "/dashboard";
+  //     dashboardLabel = "User Dashboard";
+  //   } else {
+  //     console.error("No user found in either drivers or users table.");
+  //   }
+  // }
 
   return (
-    <nav className="flex z-10 sticky top-0 bg-neutral-100 justify-between px-4 md:justify-around items-center">
+    <nav className="flex z-40 sticky top-0 lg:bg-white/50 bg-white/90 lg:backdrop-blur-lg justify-between items-center px-12 py-3 shadow-md md:shadow-none">
       <Logo />
-      <ul className="space-x-8 hidden lg:flex">
-        <Link
-          href="/"
-          className={`${
-            page === "home"
-              ? "text-theme-orange font-semibold"
-              : "text-gray-700"
-          } m-4 group relative w-max`}
-        >
-          <span>Home</span>
-          <span className="absolute -bottom-1 left-0 w-0 transition-all h-0.5 bg-theme-orange group-hover:w-full"></span>
-        </Link>
-        <Link
-          href="/pricing"
-          className={`${
-            page === "pricing"
-              ? "text-theme-orange font-semibold"
-              : "text-gray-700"
-          } m-4 group relative w-max`}
-        >
-          <span>Pricing</span>
-          <span className="absolute -bottom-1 left-0 w-0 transition-all h-0.5 bg-theme-orange group-hover:w-full"></span>
-        </Link>
-        <Link
-          href="/about"
-          className={`${
-            page === "about"
-              ? "text-theme-orange font-semibold"
-              : "text-gray-700"
-          } m-4 group relative w-max`}
-        >
-          <span>About</span>
-          <span className="absolute -bottom-1 left-0 w-0 transition-all h-0.5 bg-theme-orange group-hover:w-full"></span>
-        </Link>
-        <Link
-          href="/services"
-          className={`${
-            page === "services"
-              ? "text-theme-orange font-semibold"
-              : "text-gray-700"
-          } m-4 group relative w-max`}
-        >
-          <span>Services</span>
-          <span className="absolute -bottom-1 left-0 w-0 transition-all h-0.5 bg-theme-orange group-hover:w-full"></span>
-        </Link>
-        <Link
-          href="/contact"
-          className={`${
-            page === "contact"
-              ? "text-theme-orange font-semibold"
-              : "text-gray-700"
-          } m-4 group relative w-max`}
-        >
-          <span>Contact</span>
-          <span className="absolute -bottom-1 left-0 w-0 transition-all h-0.5 bg-theme-orange group-hover:w-full"></span>
-        </Link>
-      </ul>
-      <section className="lg:flex gap-4 hidden">
-        <Link
-          href="/login"
-          className="bg-theme-orange rounded-md text-white px-4 py-1"
-        >
-          Schedule a Ride
-        </Link>
-        <Link
-          href="/login"
-          className="bg-neutral-900 rounded-md text-white px-4 py-1"
-        >
-          Login
-        </Link>
-      </section>
-      <MobileMenu />
+      <NavItems />
+      <div className="hidden lg:flex items-center space-x-6">
+        <LinkButton href="/schedule-ride" label="Schedule a Ride" />
+        {/* <LinkButton href={dashboardHref} label={dashboardLabel} primary /> */}
+        <Logout />
+      </div>
+      {/* <MobileMenu isLoggedIn={true} dashboardHref={dashboardHref} /> */}
     </nav>
   );
 };
 
-const Logo = () => {
+// Reusable LinkButton Component
+interface LinkButtonProps {
+  href: string;
+  label: string;
+  primary?: boolean;
+}
+
+const LinkButton = ({ href, label, primary = false }: LinkButtonProps) => {
   return (
-    <div className="">
-      <Link href={"/"}>
-        <Image
-          src={"/logo-small.png"}
-          alt=""
-          width={80}
-          height={200}
-          quality={100}
-        />
-      </Link>
-    </div>
+    <Link
+      href={href}
+      className={`px-5 py-2 rounded-md font-medium text-sm transition duration-300 ${
+        primary
+          ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md hover:shadow-lg"
+          : "bg-neutral-900 text-white hover:bg-neutral-800"
+      }`}
+    >
+      {label}
+    </Link>
   );
 };
+
+const Logo = () => (
+  <div className="flex items-center">
+    <Link href="/">
+      <Image
+        src="/logo-small.png"
+        alt="Busy Minis Logo"
+        width={80}
+        height={80}
+        quality={100}
+        className="cursor-pointer"
+      />
+    </Link>
+  </div>
+);
+
+export default NavBar;

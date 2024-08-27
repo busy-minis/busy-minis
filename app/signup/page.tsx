@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent } from "react";
-import { signup } from "./actions";
+import { signup } from "./actions"; // Import your signup function
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -14,122 +14,163 @@ export default function SignupPage() {
   };
 
   return (
-    <section className="">
-      <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
-        <a
-          href="#"
-          className="flex items-center mb-6 text-2xl font-semibold text-gray-900 "
-        >
-          <Logo />
-        </a>
-        <div className="w-full rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 bg-zinc-700 text-white">
-          <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
-            <h1 className="text-xl font-bold leading-tight tracking-tight text-white md:text-2xl">
-              Create an account
-            </h1>
-            <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block mb-2 text-sm font-medium text-white"
-                >
-                  Your email
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  id="email"
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:border-gray-600 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                  placeholder="name@email.com"
-                  required
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="password"
-                  className="block mb-2 text-sm font-medium text-white"
-                >
-                  Password
-                </label>
-                <input
-                  type="password"
-                  name="password"
-                  id="password"
-                  placeholder="••••••••"
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:border-gray-600 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                  required
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="confirm-password"
-                  className="block mb-2 text-sm font-medium text-white"
-                >
-                  Confirm password
-                </label>
-                <input
-                  type="password"
-                  name="confirm-password"
-                  id="confirm-password"
-                  placeholder="••••••••"
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:border-gray-600 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                  required
-                />
-              </div>
-              <div className="flex items-start">
-                <div className="flex items-center h-5">
-                  <input
-                    id="terms"
-                    aria-describedby="terms"
-                    type="checkbox"
-                    className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-primary-600 dark:ring-offset-gray-800"
-                  />
-                </div>
-                <div className="ml-3 text-sm">
-                  <label htmlFor="terms" className="font-light text-white">
-                    I accept the{" "}
-                    <a
-                      className="font-medium text-primary-600 hover:underline dark:text-primary-500"
-                      href="#"
-                    >
-                      Terms and Conditions
-                    </a>
-                  </label>
-                </div>
-              </div>
-              <button
-                type="submit"
-                className="w-full text-white bg-neutral-800 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+    <section className="min-h-screen flex items-center justify-center bg-gray-800">
+      <div className="flex flex-col items-center w-full p-8 space-y-8 bg-gray-100 rounded-xl shadow-lg max-w-4xl">
+        {/* Logo */}
+        <Logo />
+
+        {/* Sign Up Form */}
+        <div className="w-full">
+          <h1 className="text-4xl font-bold text-center text-gray-900">
+            Create Your Account
+          </h1>
+          <p className="text-center text-lg text-gray-600">
+            Join us and enjoy our reliable transportation services!
+          </p>
+
+          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+            {/* First Name */}
+            <div>
+              <label
+                htmlFor="firstName"
+                className="block text-sm font-medium text-gray-700"
               >
-                Create an account
-              </button>
-              <p className="text-sm font-light">
-                Already have an account?{" "}
-                <Link
-                  href="/login"
-                  className="font-medium text-primary-600 underline"
-                >
-                  Login here
+                First Name
+              </label>
+              <input
+                type="text"
+                id="firstName"
+                name="firstName"
+                className="block w-full px-4 py-3 mt-1 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                placeholder="John"
+                required
+              />
+            </div>
+
+            {/* Last Name */}
+            <div>
+              <label
+                htmlFor="lastName"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Last Name
+              </label>
+              <input
+                type="text"
+                id="lastName"
+                name="lastName"
+                className="block w-full px-4 py-3 mt-1 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                placeholder="Doe"
+                required
+              />
+            </div>
+
+            {/* Email */}
+            <div>
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Email
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                className="block w-full px-4 py-3 mt-1 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                placeholder="you@example.com"
+                required
+              />
+            </div>
+
+            {/* Password */}
+            <div>
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Password
+              </label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                className="block w-full px-4 py-3 mt-1 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                placeholder="••••••••"
+                required
+              />
+            </div>
+
+            {/* Confirm Password */}
+            <div>
+              <label
+                htmlFor="confirm-password"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Confirm Password
+              </label>
+              <input
+                type="password"
+                id="confirm-password"
+                name="confirm-password"
+                className="block w-full px-4 py-3 mt-1 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                placeholder="••••••••"
+                required
+              />
+            </div>
+
+            {/* Terms & Conditions */}
+            <div className="flex items-center">
+              <input
+                id="terms"
+                name="terms"
+                type="checkbox"
+                className="h-4 w-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
+                required
+              />
+              <label htmlFor="terms" className="ml-2 text-sm text-gray-600">
+                I agree to the{" "}
+                <Link href="#" className="text-orange-600 hover:underline">
+                  Terms and Conditions
                 </Link>
-              </p>
-            </form>
-          </div>
+              </label>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              className="w-full py-3 text-white bg-orange-600 rounded-lg shadow-lg hover:bg-orange-700 transition-colors duration-300"
+            >
+              Sign Up
+            </button>
+          </form>
+
+          {/* Already have an account? */}
+          <p className="mt-6 text-center text-sm text-gray-600">
+            Already have an account?{" "}
+            <Link
+              href="/login"
+              className="text-orange-600 font-medium hover:underline"
+            >
+              Login here
+            </Link>
+          </p>
         </div>
       </div>
     </section>
   );
 }
 
-const Logo = () => {
-  return (
-    <div className="">
-      <Image
-        src="/logo-small.png"
-        alt="Logo"
-        width={100}
-        height={200}
-        quality={100}
-      />
-    </div>
-  );
-};
+// Logo Component
+const Logo = () => (
+  <div className="flex items-center justify-center">
+    <Image
+      src="/logo-small.png"
+      alt="Logo"
+      width={100}
+      height={100}
+      priority
+      className="object-contain"
+    />
+  </div>
+);

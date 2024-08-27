@@ -1,6 +1,4 @@
-import DashboardNav from "./DashboardNav";
 import Side from "./Side";
-import SideBar from "./SideBar";
 
 export default function DashboardLayout({
   children,
@@ -8,25 +6,16 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <section>
-      <div className="h-screen ">
-        {/* <div className="bg-neutral-900 text-white px-20 py-1 ">
-          <p className="text-right">Welcome TomJones@gmail.com</p>
-        </div> */}
-        {/* <div className="bg-red-700 cursor-pointer text-white px-20 py-1 ">
-          <p className="text-center underline">
-            Click here or contact us to schedule an orientation{" "}
-          </p>
-        </div> */}
-        <main className="flex  h-screen relative">
-          <Side />
-          {/* <div className="bg-neutral-700 absolute top-0 w-full py-36 -z-10"></div> */}
-          <aside className="w-[85%] h-full ">
-            <div className="absolute top-0"></div>
-            <div className="p-8  h-full   ">{children}</div>
-          </aside>
-        </main>
-      </div>{" "}
+    <section className="min-h-screen  relative">
+      <div className="flex h-full">
+        {/* Sidebar */}
+        <Side />
+
+        {/* Main Content Area */}
+        <aside className="flex-1 h-full ">
+          <div className=" h-full overflow-auto  p-4">{children}</div>
+        </aside>
+      </div>
     </section>
   );
 }
