@@ -222,7 +222,7 @@ export default function SingleRideBooking() {
                 <Warning text="Off-peak hours (before 6 AM or after 6 PM) will incur an additional fee of $15.00." />
               )}
               {isWithinOneHour && (
-                <Warning text="You cannot book a ride within the next hour." />
+                <Warning text="Rides within one hour will incur an additional fee" />
               )}
 
               {formData.riders.map((rider, index) => (
