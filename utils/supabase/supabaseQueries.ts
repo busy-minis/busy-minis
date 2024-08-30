@@ -21,6 +21,7 @@ export const getTimeBlocks = async () => {
   }
 };
 export const createRide = async (rideData: {
+  user_id: string;
   pickupDate: string;
   pickupTime: string;
   pickupAddress: string;
@@ -61,21 +62,200 @@ export const makeTimeBlock = async () => {
     throw error;
   }
 };
-
-export const getRides = async () => {
+export const cancelRideById = async (rideId: string) => {
   try {
     const { data, error } = await supabase
-      .from("rides") // querying from rides table
-      .select("*")
-      .eq("status", "pending");
+      .from("rides") // accessing the rides table
+      .update({ status: "canceled" }) // updating the status to canceled
+      .eq("id", rideId); // filtering by ride ID
 
     if (error) {
       throw error;
     }
 
-    return data; // Return the pending rides
+    return data; // Return the canceled ride data
   } catch (error) {
-    console.error("Error fetching pending rides:", error);
+    console.error("Error canceling ride:", error);
+    throw error;
+  }
+};
+export const getRidesByStatus = async (status: string) => {
+  try {
+    const { data, error } = await supabase
+      .from("rides") // querying from rides table
+      .select("*")
+      .eq("status", status); // filter by 'pending', 'accepted', or 'ongoing' statuses
+
+    if (error) {
+      throw error;
+    }
+
+    return data; // Return the rides with the specified statuses
+  } catch (error) {
+    console.error("Error fetching rides:", error);
+    throw error;
+  }
+};
+
+export const getRidesForUser = async (userId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from("rides") // querying from rides table
+      .select("*")
+      .in("status", ["pending", "accepted", "ongoing"]) // filter by 'pending', 'accepted', or 'ongoing' statuses
+      .eq("user_id", userId); // filter by user ID
+
+    if (error) {
+      throw error;
+    }
+
+    return data; // Return the rides with the specified statuses
+  } catch (error) {
+    console.error("Error fetching rides:", error);
+    throw error;
+  }
+};
+
+export const getCompletedOrCanceledRides = async (userId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from("rides") // querying from rides table
+      .select("*")
+      .in("status", ["completed", "canceled"]) // filter by status 'completed' or 'canceled'
+      .eq("user_id", userId); // filter by user ID
+
+    if (error) {
+      throw error;
+    }
+
+    return data; // Return the completed or canceled rides
+  } catch (error) {
+    console.error("Error fetching completed or canceled rides:", error);
+    throw error;
+  }
+};
+export const acceptRide = async (rideId: string, userId: string) => {
+  try {
+    // Update the ride with the current user's ID and change status to accepted
+    const { data, error } = await supabase
+      .from("rides")
+      .update({
+        driver_id: userId,
+        status: "accepted",
+      })
+      .eq("id", rideId);
+
+    if (error) {
+      throw error;
+    }
+
+    return data; // Return the updated ride data
+  } catch (error) {
+    console.error("Error accepting the ride:", error);
+    throw error;
+  }
+};
+export const startRide = async (rideId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from("rides")
+      .update({ status: "ongoing" }) // Update the status to "ongoing"
+      .eq("id", rideId);
+
+    if (error) {
+      throw error;
+    }
+
+    return data; // Return the updated ride data
+  } catch (error) {
+    console.error("Error starting the ride:", error);
+    throw error;
+  }
+};
+
+export const updateDriverLocation = async (
+  rideId: string,
+  location: { lat: number; lng: number }
+) => {
+  try {
+    const { data, error } = await supabase
+      .from("ride_location")
+      .upsert(
+        {
+          ride_id: rideId,
+          driver_lat: location.lat,
+          driver_lng: location.lng,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "ride_id" }
+      ) // onConflict should be a string, specifying the column name
+      .eq("ride_id", rideId);
+
+    if (error) {
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error updating driver location:", error);
+    throw error;
+  }
+};
+export const endRide = async (rideId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from("rides")
+      .update({ status: "completed" }) // Update the status to "completed"
+      .eq("id", rideId);
+
+    if (error) {
+      throw error;
+    }
+
+    return data; // Return the updated ride data
+  } catch (error) {
+    console.error("Error ending the ride:", error);
+    throw error;
+  }
+};
+export const getRideById = async (rideId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from("rides")
+      .select("*")
+      .eq("id", rideId)
+      .single(); // Ensure we only get one ride
+
+    if (error) {
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error fetching ride by ID:", error);
+    throw error;
+  }
+};
+
+export const getAcceptedRidesByDriver = async (driverId: string) => {
+  try {
+    // Query to get all rides with the specified driver_id and status either 'accepted' or 'ongoing'
+    const { data, error } = await supabase
+      .from("rides")
+      .select("*")
+      .eq("driver_id", driverId)
+      .in("status", ["accepted", "ongoing"]); // Use 'in' to filter by multiple statuses
+
+    if (error) {
+      throw error;
+    }
+
+    return data; // Return the filtered rides
+  } catch (error) {
+    console.error(
+      "Error fetching accepted or ongoing rides for driver:",
+      error
+    );
     throw error;
   }
 };

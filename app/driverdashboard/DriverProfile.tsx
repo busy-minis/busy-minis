@@ -51,7 +51,7 @@ export const DriverProfile = () => {
 
       {/* Profile Section */}
       <h2 className="text-4xl text-center text-gray-200">Driver Profile</h2>
-      <div className="bg-white p-10 rounded-xl shadow-lg flex flex-col items-center space-y-8">
+      <div className="bg-gray-100 p-10 rounded-xl shadow-lg flex flex-col items-center space-y-8">
         {/* Clickable Profile Picture */}
         <div onClick={openModal} className="relative cursor-pointer group">
           <div className="p-2 rounded-full bg-gray-300 text-white group-hover:bg-gray-400 transition-all duration-200">
@@ -62,7 +62,12 @@ export const DriverProfile = () => {
                 className="w-32 h-32 rounded-full object-cover border-4 border-teal-500"
               />
             ) : (
-              <User className="w-32 h-32 text-teal-500" />
+              <img
+                src={"/assets/john.jpg"}
+                alt="Profile"
+                className="w-32 h-32 rounded-full object-cover border-4 border-teal-500"
+              />
+              // <User className="w-32 h-32 text-teal-500" />
             )}
           </div>
 
@@ -74,7 +79,7 @@ export const DriverProfile = () => {
 
         {/* Driver Name */}
         <div>
-          <p className="text-3xl font-semibold text-gray-900">John Doe</p>
+          <p className="text-3xl font-semibold text-gray-900">Jerone George</p>
         </div>
       </div>
 

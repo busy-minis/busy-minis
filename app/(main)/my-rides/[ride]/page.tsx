@@ -39,7 +39,7 @@ export default function RideTrackingPage() {
   }, [progress]);
 
   return (
-    <section className="bg-zinc-800 min-h-screen">
+    <section className="bg-zinc-200 min-h-screen">
       <div className="max-w-4xl mx-auto py-12 px-6 lg:px-8">
         <h1 className="text-4xl font-bold text-teal-900 text-center mb-8">
           Ride Tracking

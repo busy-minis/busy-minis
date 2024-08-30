@@ -55,6 +55,11 @@ export default function WhyChooseUs() {
 const DriverSafetyComponent = () => {
   const safetyFeatures = [
     {
+      title: "Regular Safety Inspections",
+      description:
+        "Routine checks and services performed on each vehicle to ensure they meet safety standards",
+    },
+    {
       title: "Experienced & Compassionate Drivers",
       description:
         "Our drivers have clean driving records and show genuine care for children.",

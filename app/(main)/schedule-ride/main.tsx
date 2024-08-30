@@ -47,7 +47,7 @@ export default function RideOptions() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-12 text-center">
+          <div className="flex gap-16 text-center">
             {rideOptions.map((option, index) => (
               <Link key={index} href={option.link}>
                 <div className="group cursor-pointer p-8 sm:p-10 rounded-3xl bg-white shadow-xl hover:shadow-2xl hover:bg-teal-100 transform hover:-translate-y-3 transition-all duration-500 ease-in-out">

@@ -71,7 +71,7 @@ const Footer = () => {
             <p className="text-lg font-semibold text-white mt-2">
               contact@busminis.com
             </p>
-            <p className="text-sm text-gray-400 mt-1">+1 (555) 123-4567</p>
+            <p className="text-sm text-gray-400 mt-1">+1 404-981-8020</p>
           </div>
         </div>
 

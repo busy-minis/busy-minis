@@ -1,39 +1,25 @@
-"use client";
 import React from "react";
 import Footer from "@/app/components/ui/Footer";
-import { CheckCircle, Clock, XCircle } from "@phosphor-icons/react";
+import { CheckCircle, Clock, XCircle } from "@phosphor-icons/react/dist/ssr";
+import { createClient } from "@/utils/supabase/server";
+import { getCompletedOrCanceledRides } from "@/utils/supabase/supabaseQueries";
 
-export default function RideHistory() {
-  const rideHistory = [
-    {
-      date: "August 20, 2024",
-      rideType: "Single Ride",
-      pickup: "123 Main St, Springfield",
-      dropOff: "456 Elm St, Springfield",
-      status: "Completed",
-    },
-    {
-      date: "August 18, 2024",
-      rideType: "Weekly Ride",
-      pickup: "789 Maple St, Springfield",
-      dropOff: "101 Oak St, Springfield",
-      status: "Completed",
-    },
-    {
-      date: "August 16, 2024",
-      rideType: "Single Ride",
-      pickup: "321 Birch St, Springfield",
-      dropOff: "654 Pine St, Springfield",
-      status: "Canceled",
-    },
-    {
-      date: "August 14, 2024",
-      rideType: "Weekly Ride",
-      pickup: "111 Cedar St, Springfield",
-      dropOff: "222 Walnut St, Springfield",
-      status: "Pending",
-    },
-  ];
+export default async function RideHistory() {
+  const supabase = createClient();
+
+  // Get the currently logged-in user
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
+  if (error || !user) {
+    return <p>Error: Unable to fetch user.</p>;
+  }
+
+  // Fetch pending rides for the logged-in user
+  const rides = await getCompletedOrCanceledRides(user.id);
+  console.log(rides);
 
   return (
     <div className="relative ">
@@ -82,15 +68,15 @@ export default function RideHistory() {
                 </tr>
               </thead>
               <tbody>
-                {rideHistory.map((ride, index) => (
+                {rides.map((ride, index) => (
                   <tr key={index} className="border-b">
-                    <td className="px-5 py-5 text-sm">{ride.date}</td>
-                    <td className="px-5 py-5 text-sm">{ride.rideType}</td>
-                    <td className="px-5 py-5 text-sm">{ride.pickup}</td>
-                    <td className="px-5 py-5 text-sm">{ride.dropOff}</td>
+                    <td className="px-5 py-5 text-sm">{ride.pickupDate}</td>
+                    <td className="px-5 py-5 text-sm">Single Ride</td>
+                    <td className="px-5 py-5 text-sm">{ride.pickupAddress}</td>
+                    <td className="px-5 py-5 text-sm">{ride.dropoffAddress}</td>
                     <td className="px-5 py-5 text-sm">
                       <div className="flex items-center">
-                        {ride.status === "Completed" && (
+                        {ride.status === "completed" && (
                           <>
                             <CheckCircle
                               size={24}
@@ -99,13 +85,13 @@ export default function RideHistory() {
                             <span className="text-green-500">Completed</span>
                           </>
                         )}
-                        {ride.status === "Pending" && (
+                        {ride.status === "pending" && (
                           <>
                             <Clock size={24} className="text-yellow-500 mr-2" />
                             <span className="text-yellow-500">Pending</span>
                           </>
                         )}
-                        {ride.status === "Canceled" && (
+                        {ride.status === "canceled" && (
                           <>
                             <XCircle size={24} className="text-red-500 mr-2" />
                             <span className="text-red-500">Canceled</span>
@@ -121,38 +107,37 @@ export default function RideHistory() {
 
           {/* Mobile Cards */}
           <div className="lg:hidden space-y-6">
-            {rideHistory.map((ride, index) => (
+            {rides.map((ride, index) => (
               <div
                 key={index}
                 className="bg-white shadow-lg rounded-lg p-6 space-y-4"
               >
-                <div className="text-lg font-semibold">{ride.date}</div>
+                <div className="text-lg font-semibold">{ride.pickupDate}</div>
                 <div className="text-sm">
-                  <span className="font-semibold">Ride Type:</span>{" "}
-                  {ride.rideType}
+                  <span className="font-semibold">Ride Type:</span> Single Ride
                 </div>
                 <div className="text-sm">
                   <span className="font-semibold">Pickup Location:</span>{" "}
-                  {ride.pickup}
+                  {ride.pickupAddress}
                 </div>
                 <div className="text-sm">
                   <span className="font-semibold">Drop-Off Location:</span>{" "}
-                  {ride.dropOff}
+                  {ride.dropoffAddress}
                 </div>
                 <div className="flex items-center text-sm">
-                  {ride.status === "Completed" && (
+                  {ride.status === "completed" && (
                     <>
                       <CheckCircle size={24} className="text-green-500 mr-2" />
                       <span className="text-green-500">Completed</span>
                     </>
                   )}
-                  {ride.status === "Pending" && (
+                  {ride.status === "pending" && (
                     <>
                       <Clock size={24} className="text-yellow-500 mr-2" />
                       <span className="text-yellow-500">Pending</span>
                     </>
                   )}
-                  {ride.status === "Canceled" && (
+                  {ride.status === "canceled" && (
                     <>
                       <XCircle size={24} className="text-red-500 mr-2" />
                       <span className="text-red-500">Canceled</span>

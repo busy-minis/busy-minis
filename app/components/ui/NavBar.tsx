@@ -84,7 +84,7 @@ export const NavBar = async () => {
         {/* <LinkButton href={dashboardHref} label={dashboardLabel} primary /> */}
         <Logout />
       </div>
-      {/* <MobileMenu isLoggedIn={true} dashboardHref={dashboardHref} /> */}
+      <MobileMenu isLoggedIn={true} dashboardHref={"Dashboard"} />
     </nav>
   );
 };
