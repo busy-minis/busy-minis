@@ -54,7 +54,7 @@ const AdminNavBar = () => {
               </Link>
 
               <Link
-                href="/admin/orientation"
+                href="/admin/verify-users"
                 className="block px-4 py-2 text-white hover:bg-stone-600 rounded-lg"
               >
                 VerifyUsers

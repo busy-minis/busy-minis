@@ -280,7 +280,7 @@ export const getUnverifiedUsers = async () => {
     const { data: users, error } = await supabase
       .from("users") // Replace with your actual table name
       .select("*")
-      .eq("verified", false);
+      .eq("orientation_status", "scheduled");
 
     if (error) {
       throw error;
@@ -289,6 +289,251 @@ export const getUnverifiedUsers = async () => {
     return users; // Return the unverified users
   } catch (error) {
     console.error("Error Getting Unverified Users:", error);
+    throw error;
+  }
+};
+export const saveTimeSlotsToSupabase = async (
+  date: string,
+  timeSlots: string[]
+) => {
+  try {
+    const { data, error } = await supabase.from("time_blocks").insert(
+      timeSlots.map((slot) => ({
+        date: date,
+        time_slot: slot,
+      }))
+    );
+
+    if (error) {
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error saving time slots:", error);
+    throw error;
+  }
+};
+
+export const bookOrientation = async (
+  user_id: string,
+  date: string,
+  time: string
+) => {
+  try {
+    // Start a transaction by first booking the time slot
+    const { error: bookingError } = await supabase
+      .from("time_blocks")
+      .update({ booked: true, user_id })
+      .match({ date, time_slot: time });
+
+    if (bookingError) {
+      throw bookingError;
+    }
+
+    // Update the orientation status, date, and time in the users table
+    const { error: statusError } = await supabase
+      .from("users")
+      .update({
+        orientation_status: "scheduled",
+        orientation_date: date,
+        orientation_time: time,
+      })
+      .eq("id", user_id);
+
+    if (statusError) {
+      throw statusError;
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error booking orientation and updating status:", error);
+    return false;
+  }
+};
+export const cancelOrientation = async (
+  user_id: string,
+  date: string,
+  time: string
+) => {
+  try {
+    // Start by un-booking the time slot in time_blocks
+    const { error: unbookError } = await supabase
+      .from("time_blocks")
+      .update({ booked: false, user_id: null })
+      .match({ date, time_slot: time });
+
+    if (unbookError) {
+      throw unbookError;
+    }
+
+    // Reset the orientation status, date, and time in the users table
+    const { error: statusError } = await supabase
+      .from("users")
+      .update({
+        orientation_status: "not_scheduled",
+        orientation_date: null,
+        orientation_time: null,
+      })
+      .eq("id", user_id);
+
+    if (statusError) {
+      throw statusError;
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error canceling orientation:", error);
+    return false;
+  }
+};
+
+export const getUserOrientationStatus = async (user_id: string) => {
+  try {
+    const { data, error } = await supabase
+      .from("users")
+      .select("orientation_status, orientation_date, orientation_time")
+      .eq("id", user_id)
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    return {
+      status: data.orientation_status,
+      date: data.orientation_date,
+      time: data.orientation_time,
+    };
+  } catch (error) {
+    console.error("Error fetching user orientation status:", error);
+    return { status: null, date: null, time: null };
+  }
+};
+type TimeSlot = {
+  id: number;
+  slot: string;
+  booked: boolean;
+};
+
+type TimeSlotsByDate = {
+  [key: string]: TimeSlot[];
+};
+
+export const getAllTimeSlots = async () => {
+  try {
+    const { data, error } = await supabase
+      .from("time_blocks")
+      .select("id, date, time_slot, booked");
+
+    if (error) {
+      throw error;
+    }
+
+    const slotsByDate = data.reduce((acc: TimeSlotsByDate, item) => {
+      const dateKey = item.date;
+      if (!acc[dateKey]) {
+        acc[dateKey] = [];
+      }
+      acc[dateKey].push({
+        id: item.id,
+        slot: item.time_slot,
+        booked: item.booked,
+      });
+      return acc;
+    }, {} as TimeSlotsByDate);
+
+    return slotsByDate;
+  } catch (error) {
+    console.error("Error fetching time slots:", error);
+    throw error;
+  }
+};
+export const getAvailableTimeSlots = async () => {
+  try {
+    const { data, error } = await supabase
+      .from("time_blocks")
+      .select("date, time_slot")
+      .eq("booked", false) // Only unbooked slots
+      .order("date", { ascending: true }); // Order by date
+
+    if (error) {
+      throw error;
+    }
+
+    // Transform the data into a structure suitable for your component
+    const slotsByDate: { [key: string]: string[] } = {};
+    data.forEach((entry) => {
+      const date = entry.date;
+      const timeSlot = entry.time_slot;
+
+      if (!slotsByDate[date]) {
+        slotsByDate[date] = [];
+      }
+
+      slotsByDate[date].push(timeSlot);
+    });
+
+    // Sort the time slots correctly (AM before PM)
+    Object.keys(slotsByDate).forEach((date) => {
+      slotsByDate[date].sort((a, b) => {
+        const timeA = convertTo24HourTimestamp(a);
+        const timeB = convertTo24HourTimestamp(b);
+        return timeA - timeB;
+      });
+    });
+
+    return slotsByDate;
+  } catch (error) {
+    console.error("Error fetching time slots:", error);
+    return {};
+  }
+};
+
+// Helper function to convert 12-hour time format to a timestamp for comparison
+function convertTo24HourTimestamp(time12h: any) {
+  const [time, modifier] = time12h.split(" ");
+  let [hours, minutes] = time.split(":");
+  if (hours === "12") {
+    hours = "00";
+  }
+  if (modifier === "PM") {
+    hours = parseInt(hours, 10) + 12;
+  }
+  // Return a timestamp representing the time portion
+  return new Date(`1970-01-01T${hours}:${minutes}:00Z`).getTime();
+}
+export const removeTimeSlotFromSupabase = async (id: number) => {
+  try {
+    const { data, error } = await supabase
+      .from("time_blocks")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error deleting time slot:", error);
+    throw error;
+  }
+};
+export const verifyUserOrientation = async (userId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from("users") // Replace with your actual table name
+      .update({ orientation_status: "verified" })
+      .eq("id", userId);
+
+    if (error) {
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error Verifying User Orientation:", error);
     throw error;
   }
 };

@@ -41,8 +41,7 @@ export async function signup(formData: FormData) {
       first_name: data.firstName,
       last_name: data.lastName,
       email: data.email,
-      verified: false, // default to false until verified
-      role: "driver", // default role, adjust as needed
+      orientation_status: "unverified", // default to false until verified
       orientation_date: null, // default to null, adjust as needed
     },
   ]);

@@ -18,7 +18,7 @@ export default function LoginPage() {
       setError(result.error); // Set error state if there's an error
     } else {
       setError(null); // Clear error state on success
-      window.location.href = "/dashboard"; // Redirect manually
+      window.location.href = "/my-rides"; // Redirect manually
     }
   };
 
