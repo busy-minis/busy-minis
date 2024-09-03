@@ -1,17 +1,17 @@
-// import React from "react";
-// import { createClient } from "@/utils/supabase/server";
-// import { redirect } from "next/navigation";
-// import DriversPage from "./DriverCard";
-// import { getDrivers } from "@/utils/supabase/supabaseQueries";
-// export default async function page() {
-//   const drivers = await getDrivers();
-//   console.log(drivers);
-
-//   return <div>{drivers && <DriversPage drivers={drivers} />}</div>;
-// }
-
 import React from "react";
+import DriversPage from "./DriverCard";
+import { getDrivers } from "@/utils/supabase/supabaseQueries";
+import { revalidatePath } from "next/cache";
 
-export default function page() {
-  return <div>page</div>;
+export default async function page() {
+  revalidatePath("/admin/verify-users");
+
+  const drivers = await getDrivers();
+  console.log(drivers);
+
+  if (!drivers) {
+    return <div>No Drivers Found</div>;
+  }
+
+  return <div>{drivers && <DriversPage drivers={drivers} />}</div>;
 }

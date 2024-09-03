@@ -93,7 +93,7 @@ export default function SingleRides({
               )}
             </div>
             <div className="flex flex-col gap-2">
-              <Link href={`/my-rides/${ride.id}`}>
+              <Link href={`/my-rides/ride?id=${ride.id}`}>
                 <button className="flex items-center bg-theme-orange text-white px-4 py-2 rounded-full hover:bg-red-600 transition duration-300">
                   <Eye size={20} className="mr-2" />
                   View Ride
@@ -110,7 +110,12 @@ export default function SingleRides({
           </div>
         ))
       ) : (
-        <p>No single rides booked.</p>
+        <>
+          <p>No single rides booked.</p>
+          <button className="bg-theme-orange mt-2 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-all duration-200 shadow-md">
+            <Link href={"/schedule-ride/single-ride"}>Book a Single Ride</Link>
+          </button>
+        </>
       )}
 
       {/* Modal for confirming cancellation */}

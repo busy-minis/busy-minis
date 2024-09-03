@@ -14,6 +14,7 @@ export async function signup(formData: FormData) {
     password: formData.get("password") as string,
     firstName: formData.get("firstName") as string,
     lastName: formData.get("lastName") as string,
+    phoneNumber: formData.get("phone_number") as string, // Added phone number
   };
 
   const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
@@ -23,6 +24,7 @@ export async function signup(formData: FormData) {
       data: {
         first_name: data.firstName,
         last_name: data.lastName,
+        phone_number: data.phoneNumber, // Added phone number to user metadata
       },
     },
   });
@@ -41,6 +43,7 @@ export async function signup(formData: FormData) {
       first_name: data.firstName,
       last_name: data.lastName,
       email: data.email,
+      phone_number: data.phoneNumber, // Store phone number in custom table
       orientation_status: "unverified", // default to false until verified
       orientation_date: null, // default to null, adjust as needed
     },

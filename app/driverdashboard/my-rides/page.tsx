@@ -68,11 +68,6 @@ export default async function MyRides() {
                 <h4 className="text-lg text-white">Dropoff</h4>
                 <p className="text-gray-300">{ride.dropoffAddress}</p>
               </div>
-
-              <div className="bg-gray-600 p-4 rounded-md">
-                <h4 className="text-lg text-white">Estimated Time</h4>
-                <p className="text-gray-300">Null</p>
-              </div>
             </div>
 
             <div className="mt-6 text-center">

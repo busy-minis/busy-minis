@@ -2,6 +2,8 @@ import React from "react";
 import RideOptions from "./main";
 import OrientationPage from "./orientation";
 import { createClient } from "@/utils/supabase/server";
+import { getUserOrientationStatus } from "@/utils/supabase/supabaseQueries";
+import { revalidatePath } from "next/cache";
 export default async function page() {
   const supabase = createClient();
   const {
@@ -12,11 +14,16 @@ export default async function page() {
   if (error || !user) {
     return <p>Error: Unable to fetch user.</p>;
   }
-  console.log(user.id);
+  const currentUser = await getUserOrientationStatus(user.id);
+  revalidatePath("/driverdashboard/available-rides");
+
+  if (currentUser.status === "verified") {
+    return <RideOptions />;
+  }
+
   return (
     <div>
       <OrientationPage user_id={user.id} />
-      {/* <RideOptions /> */}
     </div>
   );
 }

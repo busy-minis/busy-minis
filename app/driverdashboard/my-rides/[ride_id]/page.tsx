@@ -29,6 +29,19 @@ interface Ride {
   riders: Passenger[];
 }
 
+// Utility function to format date and time
+const formatDateTime = (date: string, time: string) => {
+  const dateTime = new Date(`${date}T${time}`);
+  return dateTime.toLocaleString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+};
+
 export default function RidePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -164,7 +177,9 @@ export default function RidePage() {
         {/* Ride Time */}
         <div className="bg-gray-50 p-4 rounded-lg">
           <h3 className="text-lg font-semibold text-gray-800">Ride Time</h3>
-          <p className="text-gray-700 mt-2">{rideData.pickupTime}</p>
+          <p className="text-gray-700 mt-2">
+            {formatDateTime(rideData.pickupDate, rideData.pickupTime)}
+          </p>
         </div>
 
         {/* Passenger Information */}

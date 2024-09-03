@@ -1,15 +1,38 @@
 "use client";
 
-import { FormEvent } from "react";
+import { FormEvent, useState } from "react";
 import { signup } from "./actions"; // Import your signup function
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
 export default function SignupPage() {
+  const [formError, setFormError] = useState<string | null>(null);
+
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     const formData = new FormData(event.target as HTMLFormElement);
+
+    // Clear any previous error messages
+    setFormError(null);
+
+    // Validate password match
+    const password = formData.get("password") as string;
+    const confirmPassword = formData.get("confirm-password") as string;
+
+    if (password !== confirmPassword) {
+      setFormError("Passwords do not match.");
+      return;
+    }
+
+    // Basic phone number validation
+    const phoneNumber = formData.get("phone_number") as string;
+    const phonePattern = /^\+?[1-9]\d{1,14}$/; // E.164 international phone number format
+    if (!phonePattern.test(phoneNumber)) {
+      setFormError("Please enter a valid phone number.");
+      return;
+    }
+
     await signup(formData);
   };
 
@@ -83,6 +106,24 @@ export default function SignupPage() {
               />
             </div>
 
+            {/* Phone Number */}
+            <div>
+              <label
+                htmlFor="phoneNumber"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Phone Number
+              </label>
+              <input
+                type="tel"
+                id="phoneNumber"
+                name="phone_number"
+                className="block w-full px-4 py-3 mt-1 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                placeholder="+1 555 555 5555"
+                required
+              />
+            </div>
+
             {/* Password */}
             <div>
               <label
@@ -135,6 +176,11 @@ export default function SignupPage() {
                 </Link>
               </label>
             </div>
+
+            {/* Error Message */}
+            {formError && (
+              <p className="text-red-500 text-center">{formError}</p>
+            )}
 
             {/* Submit Button */}
             <button

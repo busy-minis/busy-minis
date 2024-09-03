@@ -278,7 +278,7 @@ export const getDrivers = async () => {
 export const getUnverifiedUsers = async () => {
   try {
     const { data: users, error } = await supabase
-      .from("users") // Replace with your actual table name
+      .from("users")
       .select("*")
       .eq("orientation_status", "scheduled");
 

@@ -6,6 +6,7 @@ import AddressAutocomplete from "./AddressAutocompleteProps";
 import LoadGoogleMapsScript from "./LoadGoogleMapsScript";
 import { format, isBefore, parseISO, addHours } from "date-fns";
 import { loadStripe } from "@stripe/stripe-js";
+import { Warning } from "../components/Warning";
 import {
   Calendar,
   Clock,
@@ -60,6 +61,7 @@ export default function SingleRideBooking(props: { userId: string }) {
 
   const [isSameDay, setIsSameDay] = useState(false);
   const [isOffPeak, setIsOffPeak] = useState(false);
+  const [isMoreRiders, setIsMoreRiders] = useState(false);
   const [isWithinOneHour, setIsWithinOneHour] = useState(false);
   const [totalPrice, setTotalPrice] = useState(19); // Base price
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
@@ -117,17 +119,21 @@ export default function SingleRideBooking(props: { userId: string }) {
     setIsWithinOneHour(Boolean(withinOneHour));
   };
 
-  const handleAddRider = () =>
+  const handleAddRider = () => {
     setFormData({
       ...formData,
       riders: [...formData.riders, { name: "", age: "" }],
     });
+    setIsMoreRiders(true);
+  };
 
-  const handleRemoveRider = (index: number) =>
+  const handleRemoveRider = (index: number) => {
     setFormData({
       ...formData,
       riders: formData.riders.filter((_, i) => i !== index),
     });
+    setIsMoreRiders(false);
+  };
 
   const handlePickupAddressSelect = (
     address: string,
@@ -182,7 +188,7 @@ export default function SingleRideBooking(props: { userId: string }) {
     e.preventDefault();
     const data = await createRide(formData);
     console.log(data);
-    //Proceed to Stripe Payment Page
+
     const stripe = await stripePromise;
 
     if (stripe) {
@@ -203,11 +209,7 @@ export default function SingleRideBooking(props: { userId: string }) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-between relative   ">
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-teal-50 to-teal-100 opacity-70"></div>
-        <div className="absolute bottom-0 right-0 w-full h-1/2 bg-gradient-to-t from-orange-50 to-yellow-100 opacity-70"></div>
-      </div>
+    <div className="min-h-screen flex flex-col justify-between relative  bg-teal-50  ">
       <LoadGoogleMapsScript /> {/* Load Google Maps API */}
       <div className="container mx-auto px-4 sm:px-6 pt-10">
         <h1 className="text-4xl sm:text-5xl font-bold text-center text-gray-900 mb-10">
@@ -219,13 +221,15 @@ export default function SingleRideBooking(props: { userId: string }) {
           onSubmit={handleSubmit}
         >
           <div className="mb-8">
-            <div className="text-center mb-8 flex justify-center items-center space-x-4">
-              <StepIndicator step={step} currentStep={1} label="Details" />
-              <span className="font-semibold text-gray-700">|</span>
-              <StepIndicator step={step} currentStep={2} label="Location" />
-            </div>
             {step === 1 ? (
               <>
+                <section className="flex gap-2 mb-8 items-center">
+                  <div className="bg-orange-500 grid place-content-center text-sm size-6 rounded-full text-white">
+                    1
+                  </div>
+                  <p className=" font-semibold"> Details</p>
+                </section>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <Input
                     label="Pickup Date"
@@ -252,6 +256,9 @@ export default function SingleRideBooking(props: { userId: string }) {
                 )}
                 {isWithinOneHour && (
                   <Warning text="Rides within one hour will incur an additional fee." />
+                )}
+                {isMoreRiders && (
+                  <Warning text="More Riders will incur an additional fee." />
                 )}
 
                 {formData.riders.map((rider, index) => (
@@ -313,7 +320,46 @@ export default function SingleRideBooking(props: { userId: string }) {
                 </button>
               </>
             ) : (
-              <>
+              <div>
+                <section className="flex gap-2 mb-8 items-center">
+                  <div className="bg-orange-500 grid place-content-center text-sm size-6 rounded-full text-white">
+                    2
+                  </div>
+                  <p className=" font-semibold"> Location </p>
+                </section>
+                <section className="mb-6 p-4 bg-white shadow rounded-lg">
+                  <div className="mb-4">
+                    <h4 className="font-semibold text-lg text-teal-700 mb-2">
+                      Riders:
+                    </h4>
+                    <ul className="list-disc list-inside">
+                      {formData.riders.map((rider, index) => (
+                        <li key={index} className="text-gray-800">
+                          <span className="font-medium">{rider.name}</span>,{" "}
+                          {rider.age} years old
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="flex flex-col md:flex-row gap-4">
+                    <div className="flex-1">
+                      <p className="text-gray-600">
+                        <span className="font-medium text-teal-700">
+                          Pickup Date:
+                        </span>{" "}
+                        {formData.pickupDate}
+                      </p>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-gray-600">
+                        <span className="font-medium text-teal-700">
+                          Pickup Time:
+                        </span>{" "}
+                        {formData.pickupTime}
+                      </p>
+                    </div>
+                  </div>
+                </section>
                 <AddressAutocomplete
                   label="Pickup Address"
                   onAddressSelect={handlePickupAddressSelect}
@@ -323,10 +369,9 @@ export default function SingleRideBooking(props: { userId: string }) {
                   onAddressSelect={handleDropoffAddressSelect}
                 />
 
-                <div className="mt-6 flex justify-center items-center space-x-2">
-                  <CurrencyDollar size={24} />
-                  <h2 className="text-lg font-bold">
-                    Total Price: ${totalPrice.toFixed(2)}
+                <div className="mt-6 space-x-2">
+                  <h2 className="text-xl font-semibold tracking-tight text-red-600">
+                    Total Price Before Mileage : ${totalPrice.toFixed(2)}
                   </h2>
                 </div>
 
@@ -347,7 +392,7 @@ export default function SingleRideBooking(props: { userId: string }) {
                     <ArrowRight size={24} />
                   </button>
                 </div>
-              </>
+              </div>
             )}
           </div>
         </form>
@@ -391,17 +436,6 @@ const Input: React.FC<InputProps> = ({
   </div>
 );
 
-interface WarningProps {
-  text: string;
-}
-
-const Warning: React.FC<WarningProps> = ({ text }) => (
-  <p className=" text-red-600 font-semibold mb-4 flex  space-x-2">
-    <WarningIcon />
-    <span>{text}</span>
-  </p>
-);
-
 const StepIndicator: React.FC<{
   step: number;
   currentStep: number;
@@ -419,21 +453,4 @@ const StepIndicator: React.FC<{
     </span>
     <span className="ml-2 font-semibold text-gray-900">{label}</span>
   </div>
-);
-
-const WarningIcon = () => (
-  <svg
-    className="w-6 h-6 text-red-600"
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="2"
-      d="M13 16h-1v-4h1m0 4h1v-4h-1m-1-4V7h2v5h-2zm1 7h.01M21 11.25A8.25 8.25 0 117.75 3 8.25 8.25 0 0121 11.25z"
-    ></path>
-  </svg>
 );
