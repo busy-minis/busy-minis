@@ -1,4 +1,3 @@
-// app/api/create-checkout-session/route.ts
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
@@ -7,9 +6,13 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 });
 
 export async function POST(request: Request) {
-  const { price, rideData } = await request.json();
-
   try {
+    const { price, rideData } = await request.json();
+
+    if (!price || !rideData) {
+      return new NextResponse("Invalid request data", { status: 400 });
+    }
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: [
@@ -20,7 +23,7 @@ export async function POST(request: Request) {
               name: "Ride Booking",
               description: `Pickup: ${rideData.pickupAddress}, Dropoff: ${rideData.dropoffAddress}`,
             },
-            unit_amount: price * 100, // Stripe expects amount in cents
+            unit_amount: price * 100, // Convert to cents
           },
           quantity: 1,
         },

@@ -12,8 +12,7 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-const endpointSecret =
-  "pk_test_51Pq0V6AU6tLKej0RgL8EyqnGLr2FSrqtraFvpHgSi6R5jGL2J2BhRJJmumdajy3WgzuNlnZK6drMlrLAtw5cixYP00kozGoK19";
+const endpointSecret = "whsec_hayoDar28G1OmT42CsGLGOWCx9QttDMP";
 
 export async function POST(request: Request) {
   const payload = await request.text();
@@ -47,7 +46,7 @@ export async function POST(request: Request) {
     try {
       // Insert ride data into Supabase
       const { data, error } = await supabase
-        .from("rides")
+        .from("stripe-test")
         .insert([JSON.parse(rideData)]);
 
       if (error) {
