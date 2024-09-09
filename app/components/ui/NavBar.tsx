@@ -17,7 +17,7 @@ export const NavBar = async () => {
 
   if (!user || !user.email || authError) {
     return (
-      <nav className="flex z-40 sticky top-0 lg:bg-white/50 bg-white/90 lg:backdrop-blur-lg justify-between items-center px-12 py-3 shadow-md md:shadow-none">
+      <nav className="flex z-40 sticky top-0 lg:bg-white/50 bg-white/90 lg:backdrop-blur-lg justify-between items-center px-4 sm:px-12 py-3 shadow-md md:shadow-none">
         <Logo />
         <NavItems isLoggedIn={false} />
         <div className="hidden lg:flex items-center space-x-6">

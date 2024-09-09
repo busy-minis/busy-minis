@@ -40,7 +40,7 @@ export default function WhatWeOffer() {
 // Offer Item Component
 const OfferItem = ({ title }: any) => {
   return (
-    <div className="flex flex-col items-center p-6 bg-gray-100 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 hover:bg-white">
+    <div className="flex flex-col text-center items-center p-6 bg-gray-100 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 hover:bg-white">
       <Star className="text-orange-600 text-4xl mb-4" weight="fill" />
       <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
       <p className="text-sm text-gray-600 text-center">

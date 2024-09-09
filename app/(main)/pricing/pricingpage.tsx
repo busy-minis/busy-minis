@@ -37,10 +37,10 @@ export default function PricingPage() {
   }, [selectedRideType, passengers, stops, miles]);
 
   return (
-    <section className="bg-gradient-to-br from-teal-50 to-teal-100 min-h-screen">
+    <section className="bg-gradient-to-br px-2 from-teal-50 to-teal-100 min-h-screen">
       <div className="pb-24">
         <div className="max-w-7xl mx-auto pt-12 px-6 lg:px-8">
-          <h3 className="text-5xl text-center font-bold text-teal-900">
+          <h3 className="text-3xl sm:text-5xl text-center font-bold text-teal-900">
             Pricing Calculator
           </h3>
           <p className="text-center text-gray-700 mt-4 text-lg">
@@ -241,8 +241,8 @@ const RideInfo = ({ selectedRideType }: { selectedRideType: RideType }) => (
   <div className="text-center">
     {selectedRideType === "single" ? (
       <>
-        <h4 className="text-3xl font-bold">One-Time Ride</h4>
-        <p className="mt-4 text-lg text-white">
+        <h4 className="text-2xl sm:text-3xl font-bold">One-Time Ride</h4>
+        <p className="mt-4 text-base sm:text-lg text-white">
           One-Time rides start at $16/trip with a $3 booking fee. The base rate
           covers up to 5 miles and 1 passenger. Additional charges apply for
           extra miles, passengers, and stops.
@@ -250,8 +250,8 @@ const RideInfo = ({ selectedRideType }: { selectedRideType: RideType }) => (
       </>
     ) : (
       <>
-        <h4 className="text-3xl font-bold">Regular Rides</h4>
-        <p className="mt-4 text-lg text-white">
+        <h4 className="text-2xl sm:text-3xl font-bold">Regular Rides</h4>
+        <p className="mt-4 text-base sm:text-lg text-white">
           Regular rides start at $13/trip with a $3 booking fee. Ideal for
           frequent travelers, this rate covers up to 5 miles and 1 passenger.
           Additional charges apply for extra miles, passengers, and stops.
@@ -262,7 +262,7 @@ const RideInfo = ({ selectedRideType }: { selectedRideType: RideType }) => (
 );
 
 const PricingChart = () => (
-  <div className="bg-white rounded-lg shadow-md p-4 sm:p-8 mt-8 sm:mt-16">
+  <div className="bg-white text-xs sm:text-base rounded-lg shadow-md p-4 sm:p-8 mt-8 sm:mt-16">
     <h2 className="text-xl sm:text-2xl font-bold text-teal-900 mb-4 text-center sm:text-left">
       Pricing Details
     </h2>
