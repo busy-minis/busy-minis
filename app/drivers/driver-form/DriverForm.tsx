@@ -1,12 +1,27 @@
 "use client";
-import { FormEvent } from "react";
+import { FormEvent, useState } from "react";
 import { createDriver } from "./actions";
 import React from "react";
 
 export default function AddDriverPage() {
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     const formData = new FormData(event.target as HTMLFormElement);
+
+    const password = formData.get("password") as string;
+    const confirmPassword = formData.get("confirmPassword") as string;
+
+    // Check if passwords match
+    if (password !== confirmPassword) {
+      setPasswordError("Passwords do not match");
+      return;
+    }
+
+    // Reset error state if passwords match
+    setPasswordError(null);
+
     await createDriver(formData);
   };
 
@@ -90,6 +105,31 @@ export default function AddDriverPage() {
               />
             </div>
 
+            {/* Confirm Password Field */}
+            <div className="sm:col-span-2">
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Confirm Password
+              </label>
+              <input
+                type="password"
+                name="confirmPassword"
+                id="confirmPassword"
+                className="block w-full px-4 py-2 mt-1 border rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 border-gray-300"
+                placeholder="••••••••"
+                required
+              />
+            </div>
+
+            {/* Display password mismatch error */}
+            {passwordError && (
+              <div className="sm:col-span-2">
+                <p className="text-sm text-red-500">{passwordError}</p>
+              </div>
+            )}
+
             <div>
               <label
                 htmlFor="licensePlate"
@@ -154,6 +194,24 @@ export default function AddDriverPage() {
                 id="vehicleColor"
                 className="block w-full px-4 py-2 mt-1 border rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 border-gray-300"
                 placeholder="Blue"
+                required
+              />
+            </div>
+
+            {/* New Phone Number Field */}
+            <div className="sm:col-span-2">
+              <label
+                htmlFor="phoneNumber"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Phone Number
+              </label>
+              <input
+                type="tel"
+                name="phoneNumber"
+                id="phoneNumber"
+                className="block w-full px-4 py-2 mt-1 border rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 border-gray-300"
+                placeholder="(123) 456-7890"
                 required
               />
             </div>

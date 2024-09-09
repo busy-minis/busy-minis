@@ -4,6 +4,7 @@ import MobileMenu from "./MobileMenu";
 import NavItems from "./NavItems";
 import { createClient } from "@/utils/supabase/server";
 import Logout from "./Logout";
+import { redirect } from "next/navigation";
 
 export const NavBar = async () => {
   const supabase = createClient();
@@ -13,11 +14,12 @@ export const NavBar = async () => {
   const user = authData?.user;
 
   // If user is not authenticated or user.email is missing, show login and schedule ride
+
   if (!user || !user.email || authError) {
     return (
       <nav className="flex z-40 sticky top-0 lg:bg-white/50 bg-white/90 lg:backdrop-blur-lg justify-between items-center px-12 py-3 shadow-md md:shadow-none">
         <Logo />
-        <NavItems />
+        <NavItems isLoggedIn={false} />
         <div className="hidden lg:flex items-center space-x-6">
           <LinkButton href="/schedule-ride" label="Schedule a Ride" />
           <LinkButton href="/login" label="Login" />
@@ -25,6 +27,16 @@ export const NavBar = async () => {
         <MobileMenu isLoggedIn={false} />
       </nav>
     );
+  }
+  const { data: driverData, error: driverError } = await supabase
+    .from("drivers")
+    .select("driver")
+    .eq("email", user.email)
+    .single();
+
+  // If the user is a driver, log to the console
+  if (driverData?.driver) {
+    redirect("/available-rides");
   }
 
   // // Log email for debugging purposes
@@ -78,7 +90,7 @@ export const NavBar = async () => {
   return (
     <nav className="flex z-40 sticky top-0 lg:bg-white/50 bg-white/90 lg:backdrop-blur-lg justify-between items-center px-12 py-3 shadow-md md:shadow-none">
       <Logo />
-      <NavItems />
+      <NavItems isLoggedIn={true} />
       <div className="hidden lg:flex items-center space-x-6">
         <LinkButton href="/schedule-ride" label="Schedule a Ride" />
         {/* <LinkButton href={dashboardHref} label={dashboardLabel} primary /> */}

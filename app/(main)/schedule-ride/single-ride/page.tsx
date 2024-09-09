@@ -1,6 +1,7 @@
 import React from "react";
 import SingleRideBooking from "./SingleRideForm";
 import { createClient } from "@/utils/supabase/server";
+import { redirect } from "next/navigation";
 export default async function page() {
   const supabase = createClient();
 
@@ -11,7 +12,7 @@ export default async function page() {
   } = await supabase.auth.getUser();
 
   if (error || !user) {
-    return <p>Error: Unable to fetch user.</p>;
+    redirect("/login");
   }
 
   return (

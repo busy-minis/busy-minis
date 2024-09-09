@@ -112,9 +112,11 @@ export default function SingleRides({
       ) : (
         <>
           <p>No single rides booked.</p>
-          <button className="bg-theme-orange mt-2 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-all duration-200 shadow-md">
-            <Link href={"/schedule-ride/single-ride"}>Book a Single Ride</Link>
-          </button>
+          <Link href={"/schedule-ride/single-ride"} className="">
+            <div className="bg-theme-orange mt-2 text-white px-6 py-3 w-fit rounded-lg hover:bg-indigo-700 transition-all duration-200 shadow-md">
+              Book a Single Ride
+            </div>
+          </Link>
         </>
       )}
 

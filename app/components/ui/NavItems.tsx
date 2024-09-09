@@ -3,7 +3,7 @@ import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-export default function NavItems() {
+export default function NavItems(props: { isLoggedIn: boolean }) {
   const pathname = usePathname();
 
   const isActive = (path: string) => pathname === path;
@@ -20,16 +20,20 @@ export default function NavItems() {
         active={isActive("/services")}
       />
       <NavItem href="/contact" label="Contact" active={isActive("/contact")} />
-      <NavItem
-        href="/my-rides"
-        label="My Rides"
-        active={isActive("/my-rides")}
-      />
-      <NavItem
-        href="/ride-history"
-        label="Ride Histoy"
-        active={isActive("/ride-history")}
-      />
+      {props.isLoggedIn && (
+        <>
+          <NavItem
+            href="/my-rides"
+            label="My Rides"
+            active={isActive("/my-rides")}
+          />
+          <NavItem
+            href="/ride-history"
+            label="Ride Histoy"
+            active={isActive("/ride-history")}
+          />
+        </>
+      )}
     </ul>
   );
 }

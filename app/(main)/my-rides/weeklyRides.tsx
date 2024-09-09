@@ -25,7 +25,7 @@ export default function WeeklyRides() {
       <h3 className="font-semibold text-2xl text-teal-700 mb-6">
         Weekly Rides
       </h3>
-      {/* {weeklyRides.length > 0 ? (
+      {weeklyRides.length > 0 ? (
         weeklyRides.map((weeklyRide) => (
           <div
             key={weeklyRide.id}
@@ -53,13 +53,13 @@ export default function WeeklyRides() {
         ))
       ) : (
         <></>
-      )} */}
-      <>
+      )}
+      {/* <>
         <p>No Weekly rides booked.</p>
         <button className="bg-theme-orange mt-2 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-all duration-200 shadow-md">
-          <Link href={"/schedule-ride/single-ride"}>Book a Weekly Ride</Link>
+          <Link href={"/schedule-ride/weekly-ride"}>Book a Weekly Ride</Link>
         </button>
-      </>
+      </> */}
     </div>
   );
 }

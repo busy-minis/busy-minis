@@ -13,6 +13,7 @@ export async function createDriver(formData: FormData) {
   const lastName = formData.get("lastName") as string;
   const licensePlate = formData.get("licensePlate") as string;
   const vehicleBrand = formData.get("vehicleBrand") as string;
+  const phoneNumber = formData.get("phoneNumber") as string; // New phone number field
 
   // Step 1: Sign up the driver in Supabase Auth
   const { data: signUpData, error: authError } = await supabase.auth.signUp({
@@ -22,6 +23,7 @@ export async function createDriver(formData: FormData) {
       data: {
         first_name: firstName,
         last_name: lastName,
+        phone_number: phoneNumber, // Optional to store phone in the profile
       },
     },
   });
@@ -32,22 +34,40 @@ export async function createDriver(formData: FormData) {
     return;
   }
 
+  const userId = signUpData?.user?.id;
+
+  // Check if userId is defined
+  if (!userId) {
+    console.error("User ID is undefined after signup");
+    redirect("/error");
+    return;
+  }
+
   // Step 2: Insert the driver’s details into the drivers table
   const { error: insertError } = await supabase.from("drivers").insert([
     {
-      id: signUpData?.user?.id,
+      id: userId,
       first_name: firstName,
       last_name: lastName,
       email: email,
+      phone_number: phoneNumber, // New phone number field
       license_plate: licensePlate,
       vehicle_brand: vehicleBrand,
       is_active: false, // Assuming the driver is inactive until verified
-      current_location: null, // Assuming no location is provided at the time of sign-up
     },
   ]);
 
+  // If there's an error inserting into the drivers table, delete the user from auth
   if (insertError) {
     console.error("Error creating driver:", insertError.message);
+
+    // Step 3: Delete the user from Supabase Auth since the insert failed
+    const { error: deleteError } = await supabase.auth.admin.deleteUser(userId);
+
+    if (deleteError) {
+      console.error("Error deleting user from auth:", deleteError.message);
+    }
+
     redirect("/error");
     return;
   }

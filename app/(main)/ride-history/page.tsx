@@ -3,6 +3,7 @@ import Footer from "@/app/components/ui/Footer";
 import { CheckCircle, Clock, XCircle } from "@phosphor-icons/react/dist/ssr";
 import { createClient } from "@/utils/supabase/server";
 import { getCompletedOrCanceledRides } from "@/utils/supabase/supabaseQueries";
+import { redirect } from "next/navigation";
 
 export default async function RideHistory() {
   const supabase = createClient();
@@ -14,7 +15,7 @@ export default async function RideHistory() {
   } = await supabase.auth.getUser();
 
   if (error || !user) {
-    return <p>Error: Unable to fetch user.</p>;
+    redirect("/login");
   }
 
   // Fetch pending rides for the logged-in user

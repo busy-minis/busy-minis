@@ -1,114 +1,82 @@
-"use client";
 import Link from "next/link";
-import React, { useState } from "react";
+import MobileNav from "./MobileNav";
+import { createClient } from "@/utils/supabase/server";
+import { redirect } from "next/navigation";
+import { getUserRole } from "@/utils/supabase/supabaseQueries";
 
-const AdminNavBar = () => {
-  const [isOpen, setIsOpen] = useState(false);
+const AdminNavBar = async () => {
+  const supabase = createClient();
 
-  const toggleMenu = () => {
-    setIsOpen(!isOpen);
-  };
+  // Get the currently logged-in user
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
+  if (error || !user) {
+    redirect("/403");
+  }
+
+  // Get the user's role
+  const userRole = await getUserRole(user.id);
+  if (!userRole) {
+    redirect("/403");
+  }
+
+  // If the user is not an admin, redirect to forbidden page
+  if (userRole !== "admin") {
+    redirect("/403");
+  }
 
   return (
     <div>
       <nav className="bg-stone-800 p-4 lg:px-24 shadow-md">
-        <div className=" flex justify-between items-center">
+        <div className="flex justify-between items-center">
+          {/* Brand Name */}
           <div className="text-white text-lg font-semibold">
-            <Link href={"/admin"}>BusyMinis Admin</Link>
+            <Link href="/admin">BusyMinis Admin</Link>
           </div>
-          <div className="block lg:hidden">
-            <button
-              onClick={toggleMenu}
-              className="text-white focus:outline-none"
-            >
-              <svg className="h-6 w-6 fill-current" viewBox="0 0 24 24">
-                {isOpen ? (
-                  <path
-                    fillRule="evenodd"
-                    clipRule="evenodd"
-                    d="M18.36 6.64L12 13.01 5.64 6.64 4.22 8.05l7.78 7.78 7.78-7.78-1.41-1.41z"
-                  />
-                ) : (
-                  <path
-                    fillRule="evenodd"
-                    clipRule="evenodd"
-                    d="M4 5h16v2H4V5zm0 6h16v2H4v-2zm0 6h16v2H4v-2z"
-                  />
-                )}
-              </svg>
-            </button>
-          </div>
-          <div className={`lg:flex hidden w-full lg:w-auto`}>
-            <div className="flex flex-col lg:flex-row lg:items-center lg:space-x-6">
+
+          {/* Desktop Menu */}
+          <div className="hidden lg:flex w-full lg:w-auto">
+            <div className="flex space-x-6">
               <Link
                 href="/admin/driver-form"
-                className="block px-4 py-2 text-white hover:bg-stone-600 rounded-lg"
+                className="text-white hover:bg-stone-600 rounded-lg px-4 py-2 transition-colors"
               >
                 Driver Form
               </Link>
               <Link
                 href="/admin/drivers"
-                className="block px-4 py-2 text-white hover:bg-stone-600 rounded-lg"
+                className="text-white hover:bg-stone-600 rounded-lg px-4 py-2 transition-colors"
               >
                 Drivers
               </Link>
-
               <Link
                 href="/admin/verify-users"
-                className="block px-4 py-2 text-white hover:bg-stone-600 rounded-lg"
+                className="text-white hover:bg-stone-600 rounded-lg px-4 py-2 transition-colors"
               >
-                VerifyUsers
+                Verify Users
               </Link>
               <Link
                 href="/admin/schedule"
-                className="block px-4 py-2 text-white hover:bg-stone-600 rounded-lg"
+                className="text-white hover:bg-stone-600 rounded-lg px-4 py-2 transition-colors"
               >
                 Schedule
               </Link>
               <Link
                 href="/"
-                className="block px-4 py-2 text-white hover:bg-stone-600 rounded-lg"
+                className="text-white hover:bg-stone-600 rounded-lg px-4 py-2 transition-colors"
               >
                 Sign Out
               </Link>
             </div>
           </div>
+
+          {/* Mobile Menu */}
+          <MobileNav />
         </div>
       </nav>
-      {isOpen && (
-        <section className="bg-zinc-700 lg:hidden">
-          <Link
-            href="/admin/drivers"
-            className="block px-4 py-2 text-white hover:bg-zinc-300 hover:text-black "
-          >
-            Drivers
-          </Link>
-          <Link
-            href="/admin/driver-form"
-            className="block px-4 py-2 text-white hover:bg-zinc-300 hover:text-black  "
-          >
-            Driver Form
-          </Link>
-          <Link
-            href="/admin/orientation"
-            className="block px-4 py-2 text-white hover:bg-zinc-300 hover:text-black  "
-          >
-            VerifyUsers
-          </Link>
-          <Link
-            href="/"
-            className="block px-4 py-2 text-white hover:bg-zinc-300 hover:text-black  "
-          >
-            Schedule
-          </Link>
-          <Link
-            href="/"
-            className="block px-4 py-2 text-white hover:bg-zinc-300 hover:text-black  "
-          >
-            Sign Out
-          </Link>
-        </section>
-      )}
     </div>
   );
 };

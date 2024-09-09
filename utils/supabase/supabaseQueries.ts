@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { redirect } from "next/navigation";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl as string, supabaseKey as string);
@@ -272,6 +273,27 @@ export const getDrivers = async () => {
   } catch (error) {
     // Handle error
     console.error("Error Getting Drivers :", error);
+    throw error;
+  }
+};
+export const getUserRole = async (userId: string) => {
+  try {
+    const { data: user, error } = await supabase
+      .from("users")
+      .select("role") // Select only the role field
+      .eq("id", userId); // Use the userId to find the specific user
+
+    if (error) {
+      throw error;
+    }
+
+    if (user && user.length > 0) {
+      return user[0].role; // Return the user's role
+    } else {
+      redirect("/403");
+    }
+  } catch (error) {
+    console.error("Error Getting User Role:", error);
     throw error;
   }
 };

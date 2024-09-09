@@ -4,6 +4,7 @@ import SingleRides from "./singleRides";
 import WeeklyRides from "./weeklyRides";
 import { createClient } from "@/utils/supabase/server";
 import { getRidesForUser } from "@/utils/supabase/supabaseQueries";
+import { redirect } from "next/navigation";
 
 export default async function MyRides() {
   const supabase = createClient();
@@ -15,7 +16,7 @@ export default async function MyRides() {
   } = await supabase.auth.getUser();
 
   if (error || !user) {
-    return <p>Error: Unable to fetch user.</p>;
+    redirect("/login");
   }
 
   // Fetch pending rides for the logged-in user

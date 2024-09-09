@@ -2,6 +2,7 @@
 import Image from "next/image";
 import { MapPin } from "@phosphor-icons/react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 export default function Hero() {
   return (
@@ -87,8 +88,8 @@ export default function Hero() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 1.2, duration: 0.5 }}
         >
-          <button className="bg-theme-orange text-white rounded-full px-10 py-4 text-lg md:text-xl font-semibold shadow-lg hover:shadow-xl hover:bg-orange-500 transition-transform transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-600">
-            SIGN UP
+          <button className="bg-neutral-800 text-white rounded-xl px-10 py-2 text-lg md:text-xl font-semibold shadow-lg hover:shadow-xl hover:bg-orange-500 transition-transform transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-600">
+            <Link href={"/schedule-ride"}>Schedule A Ride</Link>
           </button>
         </motion.div>
       </motion.div>
