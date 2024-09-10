@@ -283,7 +283,7 @@ export default function WeeklyRideBookingPage(props: { userId: string }) {
                   </div>
                   <p className="mt-4 text-sm text-yellow-600">
                     <Info size={16} className="inline" /> If you select a day
-                    that matches today's date, your ride will be scheduled for
+                    that matches todays date, your ride will be scheduled for
                     the same day in the following week, as same-day bookings are
                     not allowed.
                   </p>
