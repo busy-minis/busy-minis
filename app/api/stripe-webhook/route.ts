@@ -12,7 +12,7 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+const endpointSecret = "whsec_hayoDar28G1OmT42CsGLGOWCx9QttDMP";
 
 export async function POST(request: Request) {
   const payload = await request.text();
