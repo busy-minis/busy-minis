@@ -46,7 +46,7 @@ export async function POST(request: Request) {
     try {
       // Insert ride data into Supabase
       const { data, error } = await supabase
-        .from("stripe-test")
+        .from("rides")
         .insert([JSON.parse(rideData)]);
 
       if (error) {
