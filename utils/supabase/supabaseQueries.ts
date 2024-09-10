@@ -46,6 +46,146 @@ export const createRide = async (rideData: {
     throw error;
   }
 };
+
+// Helper functions (ensure these are part of your actual codebase)
+const dayToOffset: { [key: string]: number } = {
+  Sunday: 0,
+  Monday: 1,
+  Tuesday: 2,
+  Wednesday: 3,
+  Thursday: 4,
+  Friday: 5,
+  Saturday: 6,
+};
+
+function addDaysAsText(startDate: Date, offset: number): string {
+  const resultDate = new Date(startDate);
+  resultDate.setDate(resultDate.getDate() + offset);
+  return resultDate.toISOString().split("T")[0]; // Returns date in YYYY-MM-DD format
+}
+interface Rider {
+  name: string;
+  age: string;
+}
+// Define the shape of formData
+interface FormData {
+  user_id: string;
+  status: string;
+  pickupDate: string;
+  end_date: string;
+  selectedTime: string;
+  selectedDays: string[];
+  pickupAddress: string;
+  pickupLat?: number;
+  pickupLng?: number;
+  dropoffAddress: string;
+  dropoffLat?: number;
+  dropoffLng?: number;
+  riders: Rider[];
+}
+
+// Define the type for a ride session
+interface RideSession {
+  weekly_ride_id: string;
+  user_id: string;
+  pickupDate: string;
+  pickupTime: string;
+  pickupAddress: string;
+  pickupLat?: number;
+  pickupLng?: number;
+  dropoffAddress: string;
+  dropoffLat?: number;
+  dropoffLng?: number;
+  riders: Rider[];
+  status: string;
+}
+
+export async function createWeeklyRide({ formData }: { formData: FormData }) {
+  const {
+    user_id,
+    pickupAddress,
+    dropoffAddress,
+    riders,
+    selectedTime,
+    selectedDays,
+    pickupLat,
+    pickupLng,
+    dropoffLat,
+    end_date,
+    dropoffLng,
+    pickupDate,
+  } = formData;
+
+  // Step 1: Insert into weekly_rides table
+  const { data: weeklyRide, error: weeklyRideError } = await supabase
+    .from("weekly_rides")
+    .insert({
+      user_id,
+      status: "active",
+      pickupAddress,
+      dropoffAddress,
+      selectedDays,
+      riders,
+      start_date: pickupDate,
+      end_date,
+      pickupTime: selectedTime,
+      total_price: "0", // Initially 0, will be updated later
+    })
+    .select()
+    .single();
+
+  if (weeklyRideError) {
+    console.error("Error creating weekly ride:", weeklyRideError);
+    return { success: false, error: weeklyRideError };
+  }
+
+  // Create ride sessions
+  const rideSessions: RideSession[] = []; // Explicitly typed as an array of RideSession
+  const startDate = new Date(pickupDate);
+
+  selectedDays.forEach((day: string) => {
+    const currentDay = startDate.getDay(); // Day of the week for the pickupDate
+    const selectedDayOffset = dayToOffset[day];
+
+    // Calculate the offset; if the selected day is the same as today, add 7 to skip to the next week
+    let offset = (selectedDayOffset - currentDay + 7) % 7;
+
+    // If offset is 0 (meaning same day), we force it to be 7 to get the next occurrence
+    if (offset === 0) {
+      offset = 7;
+    }
+
+    const sessionDate = addDaysAsText(startDate, offset); // Calculate the date
+
+    rideSessions.push({
+      weekly_ride_id: weeklyRide.id,
+      user_id,
+      pickupDate: sessionDate, // Store the next occurrence of the day
+      pickupTime: selectedTime,
+      pickupAddress,
+      pickupLat,
+      pickupLng,
+      dropoffAddress,
+      dropoffLat,
+      dropoffLng,
+      riders,
+      status: "available", // Session starts as 'available'
+    });
+  });
+
+  // Step 3: Insert all ride sessions into the ride_sessions table
+  const { error: rideSessionsError } = await supabase
+    .from("ride_sessions")
+    .insert(rideSessions);
+
+  if (rideSessionsError) {
+    console.error("Error creating ride sessions:", rideSessionsError);
+    return { success: false, error: rideSessionsError };
+  }
+
+  return { success: true };
+}
+
 export const makeTimeBlock = async () => {
   try {
     let { data: drivers, error } = await supabase
@@ -113,6 +253,24 @@ export const getRidesForUser = async (userId: string) => {
     return data; // Return the rides with the specified statuses
   } catch (error) {
     console.error("Error fetching rides:", error);
+    throw error;
+  }
+};
+export const getWeeklyRidesForUser = async (userId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from("weekly_rides") // querying from the weekly_rides table
+      .select("*") // selecting all fields
+      .in("status", ["active"]) // filter by 'pending', 'accepted', or 'ongoing' statuses
+      .eq("user_id", userId); // filter by user ID
+
+    if (error) {
+      throw error;
+    }
+
+    return data; // Return the weekly rides data
+  } catch (error) {
+    console.error("Error fetching weekly rides:", error);
     throw error;
   }
 };

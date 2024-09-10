@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Footer from "@/app/components/ui/Footer";
 import LoadGoogleMapsScript from "./LoadGoogleMapsScript";
 import { loadStripe } from "@stripe/stripe-js";
@@ -57,7 +57,20 @@ export default function SingleRideBooking(props: { userId: string }) {
   const [distance, setDistance] = useState<number | null>(null);
 
   // Calculate base price
-  const calculateTotalPrice = () => {
+  const calculateTotalPrice = useCallback(() => {
+    const calculateCost = () => {
+      const miles = distance;
+      const baseRate = 0; // Base rate covers up to 5 miles
+      let totalCost = baseRate;
+
+      if (miles !== null && miles > 5) {
+        const additionalMiles = miles - 5;
+        totalCost += additionalMiles * 2; // $2 per mile after 5 miles
+      }
+
+      // Round the total cost to two decimal places as a number
+      return Math.round(totalCost * 100) / 100;
+    };
     let price = 19; // Base price
     if (isSameDay) price += 25;
     if (isOffPeak) price += 15;
@@ -68,12 +81,11 @@ export default function SingleRideBooking(props: { userId: string }) {
       price += calculateCost();
     }
     setTotalPrice(price);
-  };
+  }, [isSameDay, isOffPeak, formData.riders, distance]); // Add calculateCost as a dependency
 
   useEffect(() => {
-    calculateTotalPrice();
-  }, [isSameDay, isOffPeak, formData.riders, distance]);
-
+    calculateTotalPrice(); // Call the memoized version of the function
+  }, [calculateTotalPrice]);
   // Validation function for Step 1
   const validateStep1 = () => {
     const errors: string[] = [];
@@ -94,20 +106,6 @@ export default function SingleRideBooking(props: { userId: string }) {
     } else if (step === 2) {
       setStep(3);
     }
-  };
-
-  const calculateCost = () => {
-    const miles = distance;
-    const baseRate = 0; // Base rate covers up to 5 miles
-    let totalCost = baseRate;
-
-    if (miles !== null && miles > 5) {
-      const additionalMiles = miles - 5;
-      totalCost += additionalMiles * 2; // $2 per mile after 5 miles
-    }
-
-    // Round the total cost to two decimal places as a number
-    return Math.round(totalCost * 100) / 100;
   };
 
   // Handle form submission on the last step

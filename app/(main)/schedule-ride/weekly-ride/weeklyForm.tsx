@@ -1,126 +1,193 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Footer from "@/app/components/ui/Footer";
-import {
-  CalendarCheck,
-  UserPlus,
-  UserMinus,
-  MapPin,
-  Clock,
-  Car,
-  Info,
-} from "@phosphor-icons/react";
+import { CalendarCheck, Clock, Info } from "@phosphor-icons/react";
+import { createWeeklyRide } from "@/utils/supabase/supabaseQueries";
 
-export default function WeeklyRideBookingPage() {
-  const [passengers, setPassengers] = useState([{ name: "", age: "" }]);
-  const [selectedDate, setSelectedDate] = useState("");
-  const [selectedTime, setSelectedTime] = useState("");
-  const [pickupAddress, setPickupAddress] = useState("");
-  const [dropoffAddress, setDropoffAddress] = useState("");
-  const [selectedDays, setSelectedDays] = useState<string[]>([]);
+import AddressAutocomplete from "./components/AddressAutocompleteProps";
+import LoadGoogleMapsScript from "./components/LoadGoogleMapsScript";
+import Riders from "./components/Riders";
+import Review from "./components/Review";
+import Time from "./components/Time";
+
+const daysOfWeekMap: { [key: string]: number } = {
+  Sunday: 0,
+  Monday: 1,
+  Tuesday: 2,
+  Wednesday: 3,
+  Thursday: 4,
+  Friday: 5,
+  Saturday: 6,
+};
+
+interface Rider {
+  name: string;
+  age: string;
+}
+
+interface FormData {
+  user_id: string;
+  status: string;
+  pickupDate: string;
+  selectedTime: string;
+  selectedDays: string[];
+  pickupAddress: string;
+  end_date: string;
+  pickupLat?: number;
+  pickupLng?: number;
+  dropoffAddress: string;
+  dropoffLat?: number;
+  dropoffLng?: number;
+  riders: Rider[];
+}
+
+export default function WeeklyRideBookingPage(props: { userId: string }) {
+  const [formData, setFormData] = useState<FormData>({
+    user_id: props.userId,
+    status: "pending",
+    end_date: "",
+    pickupDate: "", // Will be auto-calculated based on selected days
+    pickupAddress: "",
+    pickupLat: undefined,
+    pickupLng: undefined,
+    dropoffAddress: "",
+    dropoffLat: undefined,
+    dropoffLng: undefined,
+    riders: [{ name: "", age: "" }],
+    selectedTime: "",
+    selectedDays: [] as string[],
+  });
   const [dateError, setDateError] = useState("");
   const [timeWarning, setTimeWarning] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPrice, setTotalPrice] = useState(13);
+  const [distance, setDistance] = useState<number | null>(null);
 
-  const today = new Date().toISOString().split("T")[0];
-  const daysOfWeek = [
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-    "Sunday",
-  ];
-  const currentDay = new Date().toLocaleDateString("en-US", {
-    weekday: "long",
-  });
+  const daysOfWeek = Object.keys(daysOfWeekMap);
 
-  const addPassenger = () => {
-    setPassengers([...passengers, { name: "", age: "" }]);
+  const calculateDistance = () => {
+    if (
+      window.google &&
+      formData.pickupLat &&
+      formData.pickupLng &&
+      formData.dropoffLat &&
+      formData.dropoffLng
+    ) {
+      const service = new google.maps.DistanceMatrixService();
+
+      service.getDistanceMatrix(
+        {
+          origins: [{ lat: formData.pickupLat, lng: formData.pickupLng }],
+          destinations: [
+            { lat: formData.dropoffLat, lng: formData.dropoffLng },
+          ],
+          travelMode: google.maps.TravelMode.DRIVING,
+        },
+        (response, status) => {
+          if (status === "OK" && response) {
+            const distanceInMeters =
+              response.rows[0].elements[0].distance.value; // distance in meters
+            const distanceInKilometers = distanceInMeters / 1000; // convert to kilometers
+            const distanceInMiles = distanceInKilometers * 0.621371; // convert kilometers to miles
+
+            setDistance(distanceInMiles);
+          } else {
+            console.error("Error calculating distance:", status);
+          }
+        }
+      );
+    } else {
+      console.error("Google Maps is not available or coordinates are missing.");
+    }
   };
+  // Calculate total price based on riders and time
+  const calculateTotalPrice = useCallback(() => {
+    const basePricePerDay = 13; // Base price per day
+    const selectedDaysCount = formData.selectedDays.length; // Number of selected days
+    const calculateCost = () => {
+      const miles = distance;
+      let totalCost = 0; // Initialize the total cost
 
-  const removePassenger = (index: number) => {
-    setPassengers(passengers.filter((_, i) => i !== index));
+      if (miles !== null && miles > 5) {
+        const additionalMiles = miles - 5;
+        totalCost += additionalMiles * 2; // $2 per mile after 5 miles
+      }
+
+      // Round the total cost to two decimal places as a number
+      return Math.round(totalCost * 100) / 100;
+    };
+
+    // Calculate base price for all selected days
+    let price = selectedDaysCount * basePricePerDay; // Price based on the number of selected days
+
+    if (timeWarning) price += 10; // Add off-peak surcharge
+    if (formData.riders.length > 1) {
+      price += (formData.riders.length - 1) * 5; // Add rider surcharge
+    }
+    if (distance) {
+      price += calculateCost(); // Add distance surcharge
+    }
+
+    setTotalPrice(price); // Set the calculated price
+  }, [timeWarning, formData.riders, formData.selectedDays, distance]);
+  useEffect(() => {
+    calculateTotalPrice();
+  }, [calculateTotalPrice]);
+
+  // Calculate the first pickup date after today based on selected days
+  const calculateNextPickupDate = (selectedDays: string[]): string | null => {
+    if (selectedDays.length === 0) return null;
+
+    const today = new Date();
+    const todayDay = today.getDay(); // 0 for Sunday, 1 for Monday, etc.
+
+    // Find the next available day after today
+    let minOffset = 7;
+    selectedDays.forEach((day) => {
+      const selectedDayOffset = daysOfWeekMap[day];
+      let offset = (selectedDayOffset - todayDay + 7) % 7;
+      if (offset === 0) offset = 7; // Skip today if the same day is selected
+      if (offset < minOffset) minOffset = offset;
+    });
+
+    const nextPickupDate = new Date();
+    nextPickupDate.setDate(today.getDate() + minOffset);
+    return nextPickupDate.toISOString().split("T")[0]; // Return in YYYY-MM-DD format
   };
 
   const handleDaySelection = (day: string) => {
-    setSelectedDays((prev) =>
-      prev.includes(day)
-        ? prev.filter((selectedDay) => selectedDay !== day)
-        : [...prev, day]
-    );
+    setFormData((prevData) => {
+      const updatedDays = prevData.selectedDays.includes(day)
+        ? prevData.selectedDays.filter((selectedDay) => selectedDay !== day)
+        : [...prevData.selectedDays, day];
+
+      const pickupDate = calculateNextPickupDate(updatedDays);
+
+      return {
+        ...prevData,
+        selectedDays: updatedDays,
+        pickupDate: pickupDate || "", // Automatically update the pickup date
+      };
+    });
+  };
+  const handleNext = () => {
+    calculateDistance();
+    setPage(2);
   };
 
-  const handleTimeChange = (time: string) => {
-    setSelectedTime(time);
-
-    const [hours] = time.split(":").map(Number);
-    if (hours < 8 || hours > 18) {
-      setTimeWarning(
-        "Selecting an off-peak time (before 8 AM or after 6 PM) will incur an additional fee."
-      );
-    } else {
-      setTimeWarning("");
-    }
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const selected = new Date(selectedDate);
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    if (selected < tomorrow) {
-      setDateError("The start date must be at least one day after today.");
+    if (!formData.pickupDate) {
+      setDateError("Please select at least one day.");
       return;
     }
 
-    if (
-      !selectedDate ||
-      !selectedTime ||
-      !pickupAddress ||
-      !dropoffAddress ||
-      passengers.some((p) => p.name === "" || p.age === "") ||
-      selectedDays.length === 0
-    ) {
-      alert("Please fill out all fields and select at least one day.");
-    } else {
-      alert(
-        `Weekly Ride Booked!\n\nDate: ${selectedDate}\nTime: ${selectedTime}\nPickup: ${pickupAddress}\nDropoff: ${dropoffAddress}\nPassengers: ${passengers
-          .map((p) => `${p.name} (Age: ${p.age})`)
-          .join(", ")}\nDays: ${selectedDays.join(", ")}`
-      );
-    }
+    await createWeeklyRide({ formData });
   };
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-teal-50 to-teal-100">
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-teal-400 to-teal-100 opacity-70"></div>
-        <div className="absolute bottom-0 right-0 w-full h-1/2 bg-gradient-to-t from-orange-200 to-yellow-100 opacity-70"></div>
-      </div>
-
-      {/* Hero Section */}
-      <section className="relative pt-24 pb-12">
-        <div className="container mx-auto px-6 text-center">
-          <CalendarCheck size={64} className="text-teal-600 mx-auto mb-4" />
-          <h1 className="text-5xl font-extrabold text-gray-900 mb-4">
-            Schedule Your Weekly Ride
-          </h1>
-          <p className="text-lg text-gray-600 mb-6">
-            Simplify your commute by booking a weekly ride. Select passengers,
-            pick-up and drop-off points, and your preferred days.
-          </p>
-          <p className="text-md text-gray-500">
-            <Info size={20} className="inline text-teal-600" /> Weekly rides
-            will not be booked on the same day and will start on the next
-            calendar day.
-          </p>
-          <Car size={48} className="text-teal-600 mx-auto mb-4 mt-6" />
-        </div>
-      </section>
-
+    <div className="">
+      <LoadGoogleMapsScript /> {/* Load Google Maps API */}
       {/* Booking Form */}
       <section className="relative pb-20 lg:pb-36">
         <div className="container mx-auto px-6">
@@ -128,150 +195,99 @@ export default function WeeklyRideBookingPage() {
             onSubmit={handleSubmit}
             className="max-w-3xl mx-auto bg-white p-10 rounded-xl shadow-xl space-y-10"
           >
-            {/* Passengers Card */}
-            <div className="bg-gray-50 p-6 rounded-xl shadow-md">
-              <h4 className="text-2xl font-semibold text-teal-900 mb-6 flex items-center">
-                <UserPlus size={28} className="mr-2 text-teal-600" /> Add
-                Passengers
-              </h4>
-              {passengers.map((passenger, index) => (
-                <div key={index} className="grid grid-cols-5 gap-4 mb-4">
-                  <input
-                    type="text"
-                    placeholder={`Passenger ${index + 1} Name`}
-                    value={passenger.name}
-                    onChange={(e) => {
-                      const newPassengers = [...passengers];
-                      newPassengers[index].name = e.target.value;
-                      setPassengers(newPassengers);
-                    }}
-                    className="col-span-3 p-3 border border-gray-300 rounded-lg focus:ring-teal-600 focus:border-teal-600"
+            {page === 1 ? (
+              <>
+                {/* Riders Card */}
+                <Riders formData={formData} setFormData={setFormData} />
+
+                {/* Pickup and Dropoff Card */}
+                <div className="bg-gray-50 p-6 rounded-xl shadow-md">
+                  <AddressAutocomplete
+                    label="Pickup Address"
+                    onAddressSelect={(address, lat, lng) =>
+                      setFormData({
+                        ...formData,
+                        pickupAddress: address,
+                        pickupLat: lat,
+                        pickupLng: lng,
+                      })
+                    }
                   />
-                  <input
-                    type="number"
-                    placeholder="Age"
-                    value={passenger.age}
-                    onChange={(e) => {
-                      const newPassengers = [...passengers];
-                      newPassengers[index].age = e.target.value;
-                      setPassengers(newPassengers);
-                    }}
-                    className="col-span-1 p-3 border border-gray-300 rounded-lg focus:ring-teal-600 focus:border-teal-600"
+                  <AddressAutocomplete
+                    label="Dropoff Address"
+                    onAddressSelect={(address, lat, lng) =>
+                      setFormData({
+                        ...formData,
+                        dropoffAddress: address,
+                        dropoffLat: lat,
+                        dropoffLng: lng,
+                      })
+                    }
                   />
-                  {passengers.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removePassenger(index)}
-                      className="col-span-1 bg-red-500 text-white p-2 rounded-lg shadow hover:bg-red-600 transition"
-                    >
-                      <UserMinus size={24} />
-                    </button>
-                  )}
                 </div>
-              ))}
-              <button
-                type="button"
-                onClick={addPassenger}
-                className="mt-4 bg-teal-600 text-white px-4 py-2 rounded-lg shadow hover:bg-teal-700 transition inline-flex items-center"
-              >
-                <UserPlus size={20} className="mr-2" /> Add Passenger
-              </button>
-              {passengers.length > 1 && (
-                <p className="mt-4 text-sm text-yellow-600">
-                  <Info size={16} className="inline" /> Adding more than one
-                  passenger will incur an additional fee.
-                </p>
-              )}
-            </div>
 
-            {/* Pickup and Dropoff Card */}
-            <div className="bg-gray-50 p-6 rounded-xl shadow-md">
-              <h4 className="text-2xl font-semibold text-teal-900 mb-6 flex items-center">
-                <MapPin size={28} className="mr-2 text-teal-600" /> Pickup &
-                Dropoff
-              </h4>
-              <input
-                type="text"
-                placeholder="Pickup Address"
-                value={pickupAddress}
-                onChange={(e) => setPickupAddress(e.target.value)}
-                className="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:ring-teal-600 focus:border-teal-600"
-                required
+                {/* Date & Time Card */}
+                <Time
+                  timeWarning={timeWarning}
+                  setFormData={setFormData}
+                  formData={formData}
+                  setTimeWarning={setTimeWarning}
+                  dateError={dateError}
+                />
+
+                {/* Days of the Week Card */}
+                <div className="bg-gray-50 p-6 rounded-xl shadow-md">
+                  <h4 className="text-2xl font-semibold text-teal-900 mb-6 flex items-center">
+                    <CalendarCheck size={28} className="mr-2 text-teal-600" />{" "}
+                    Select Days of the Week
+                  </h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    {daysOfWeek.map((day) => (
+                      <label
+                        key={day}
+                        className="flex items-center cursor-pointer"
+                      >
+                        <input
+                          type="checkbox"
+                          value={day}
+                          checked={formData.selectedDays.includes(day)}
+                          onChange={() => handleDaySelection(day)}
+                          className="form-checkbox h-5 w-5 text-teal-600 focus:ring-0"
+                        />
+                        <span className="ml-2 text-teal-900">{day}</span>
+                      </label>
+                    ))}
+                  </div>
+                  <p className="mt-4 text-sm text-yellow-600">
+                    <Info size={16} className="inline" /> If you select a day
+                    that matches today's date, your ride will be scheduled for
+                    the same day in the following week, as same-day bookings are
+                    not allowed.
+                  </p>
+                </div>
+
+                {/* Next Button */}
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={handleNext}
+                    className="bg-teal-600 text-white px-8 py-3 rounded-xl shadow-lg justify-center hover:bg-teal-700 transition duration-300 inline-flex w-full items-center"
+                  >
+                    <CalendarCheck size={24} className="mr-2" />
+                    Next : Review Details
+                  </button>
+                </div>
+              </>
+            ) : (
+              <Review
+                formData={formData}
+                setPage={setPage}
+                totalPrice={totalPrice}
               />
-              <input
-                type="text"
-                placeholder="Dropoff Address"
-                value={dropoffAddress}
-                onChange={(e) => setDropoffAddress(e.target.value)}
-                className="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:ring-teal-600 focus:border-teal-600"
-                required
-              />
-            </div>
-
-            {/* Date & Time Card */}
-            <div className="bg-gray-50 p-6 rounded-xl shadow-md">
-              <h4 className="text-2xl font-semibold text-teal-900 mb-6 flex items-center">
-                <Clock size={28} className="mr-2 text-teal-600" /> Select Time
-              </h4>
-
-              {dateError && (
-                <p className="text-red-500 text-sm mb-4">{dateError}</p>
-              )}
-              <input
-                type="time"
-                value={selectedTime}
-                onChange={(e) => handleTimeChange(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-teal-600 focus:border-teal-600"
-                required
-              />
-              {timeWarning && (
-                <p className="mt-4 text-sm text-yellow-600">
-                  <Info size={16} className="inline" /> {timeWarning}
-                </p>
-              )}
-            </div>
-
-            {/* Days of the Week Card */}
-            <div className="bg-gray-50 p-6 rounded-xl shadow-md">
-              <h4 className="text-2xl font-semibold text-teal-900 mb-6 flex items-center">
-                <CalendarCheck size={28} className="mr-2 text-teal-600" />{" "}
-                Select Days of the Week
-              </h4>
-              <div className="grid grid-cols-2 gap-4">
-                {daysOfWeek.map((day) => (
-                  <label key={day} className="flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      value={day}
-                      checked={selectedDays.includes(day)}
-                      onChange={() => handleDaySelection(day)}
-                      className="form-checkbox h-5 w-5 text-teal-600 focus:ring-0"
-                    />
-                    <span className="ml-2 text-teal-900">{day}</span>
-                  </label>
-                ))}
-              </div>
-              <p className="mt-4 text-sm text-yellow-600">
-                <Info size={16} className="inline" /> If you select a day that
-                matches todays date, your ride will be scheduled for the same
-                day in the following week, as same-day bookings are not allowed.
-              </p>
-            </div>
-
-            {/* Submit Button */}
-            <div className="text-center">
-              <button
-                type="submit"
-                className="bg-teal-600 text-white px-8 py-4 rounded-full shadow-lg hover:bg-teal-700 transition duration-300 inline-flex items-center"
-              >
-                <CalendarCheck size={24} className="mr-2" />
-                Confirm Weekly Ride
-              </button>
-            </div>
+            )}
           </form>
         </div>
       </section>
-
       <Footer />
     </div>
   );

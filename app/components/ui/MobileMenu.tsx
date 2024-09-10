@@ -1,6 +1,6 @@
 "use client";
 
-import { List, X } from "@phosphor-icons/react";
+import { List, X, Car, ClockCounterClockwise } from "@phosphor-icons/react"; // Add appropriate icons
 import React, { useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -116,11 +116,31 @@ const MobileMenu = ({ isLoggedIn, dashboardHref }: MobileMenuProps) => {
                       }}
                     >
                       <Link
-                        href={dashboardHref || "/dashboard"}
+                        href={"/my-rides"}
                         onClick={() => setOpen(false)}
-                        className="block py-3 px-6 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+                        className="text-2xl text-white hover:text-orange-400 flex items-center transition-colors"
                       >
-                        Dashboard
+                        <Car size={28} className="mr-2 text-orange-500" />
+                        My Rides
+                      </Link>
+                    </motion.li>
+
+                    <motion.li
+                      variants={{
+                        visible: { opacity: 1, y: 0 },
+                        hidden: { opacity: 0, y: 20 },
+                      }}
+                    >
+                      <Link
+                        href="/ride-history"
+                        onClick={() => setOpen(false)}
+                        className="text-2xl text-white hover:text-orange-400 flex items-center transition-colors"
+                      >
+                        <ClockCounterClockwise
+                          size={28}
+                          className="mr-2 text-orange-500"
+                        />
+                        Ride History
                       </Link>
                     </motion.li>
 

@@ -39,54 +39,6 @@ export const NavBar = async () => {
     redirect("/available-rides");
   }
 
-  // // Log email for debugging purposes
-  // console.log("Authenticated user email:", user.email);
-
-  // // Step 1: Check if the user is a driver
-  // const { data: driverData, error: driverError } = await supabase
-  //   .from("drivers")
-  //   .select("id")
-  //   .ilike("email", user.email.trim()) // Case-insensitive comparison with trim
-  //   .single();
-
-  // if (driverError) {
-  //   console.error("Error fetching driver data:", driverError.message);
-  // } else if (driverData) {
-  //   console.log("Driver found:", driverData);
-  // } else {
-  //   console.log("No driver found for this user.");
-  // }
-
-  // let isDriver = false;
-  // let dashboardHref = "/dashboard";
-  // let dashboardLabel = "User Dashboard";
-
-  // // If driver data exists, set as driver
-  // if (driverData) {
-  //   isDriver = true;
-  //   dashboardHref = "/driverdashboard/available-rides";
-  //   dashboardLabel = "Driver Dashboard";
-  // }
-
-  // // Step 2: Check if the user is a regular user if not a driver
-  // if (!isDriver) {
-  //   const { data: userData, error: userError } = await supabase
-  //     .from("users")
-  //     .select("id")
-  //     .eq("email", user.email)
-  //     .single();
-
-  //   if (userError) {
-  //     console.error("Error fetching user data:", userError.message);
-  //   } else if (userData) {
-  //     console.log("User found:", userData);
-  //     dashboardHref = "/dashboard";
-  //     dashboardLabel = "User Dashboard";
-  //   } else {
-  //     console.error("No user found in either drivers or users table.");
-  //   }
-  // }
-
   return (
     <nav className="flex z-40 sticky top-0 lg:bg-white/50 bg-white/90 lg:backdrop-blur-lg justify-between items-center px-12 py-3 shadow-md md:shadow-none">
       <Logo />

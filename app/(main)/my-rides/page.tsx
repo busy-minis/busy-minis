@@ -3,7 +3,10 @@ import Footer from "@/app/components/ui/Footer";
 import SingleRides from "./singleRides";
 import WeeklyRides from "./weeklyRides";
 import { createClient } from "@/utils/supabase/server";
-import { getRidesForUser } from "@/utils/supabase/supabaseQueries";
+import {
+  getRidesForUser,
+  getWeeklyRidesForUser,
+} from "@/utils/supabase/supabaseQueries";
 import { redirect } from "next/navigation";
 
 export default async function MyRides() {
@@ -21,6 +24,7 @@ export default async function MyRides() {
 
   // Fetch pending rides for the logged-in user
   const rides = await getRidesForUser(user.id);
+  const weeklyRides = await getWeeklyRidesForUser(user.id);
   console.log(rides);
 
   return (
@@ -50,7 +54,7 @@ export default async function MyRides() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
             {/* Pass the rides data to your components as needed */}
             <SingleRides initialRides={rides} user_id={user.id} />
-            <WeeklyRides />
+            <WeeklyRides weekly_rides={weeklyRides} user_id={user.id} />
           </div>
         </div>
       </section>
