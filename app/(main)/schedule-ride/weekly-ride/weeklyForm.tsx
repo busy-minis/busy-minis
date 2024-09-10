@@ -3,12 +3,17 @@ import React, { useState, useEffect, useCallback } from "react";
 import Footer from "@/app/components/ui/Footer";
 import { CalendarCheck, Clock, Info } from "@phosphor-icons/react";
 import { createWeeklyRide } from "@/utils/supabase/supabaseQueries";
+import { loadStripe } from "@stripe/stripe-js";
 
 import AddressAutocomplete from "./components/AddressAutocompleteProps";
 import LoadGoogleMapsScript from "./components/LoadGoogleMapsScript";
 import Riders from "./components/Riders";
 import Review from "./components/Review";
 import Time from "./components/Time";
+
+const stripePromise = loadStripe(
+  "pk_test_51Pq0V6AU6tLKej0RgL8EyqnGLr2FSrqtraFvpHgSi6R5jGL2J2BhRJJmumdajy3WgzuNlnZK6drMlrLAtw5cixYP00kozGoK19"
+);
 
 const daysOfWeekMap: { [key: string]: number } = {
   Sunday: 0,
@@ -183,6 +188,24 @@ export default function WeeklyRideBookingPage(props: { userId: string }) {
     }
 
     await createWeeklyRide({ formData });
+
+    const stripe = await stripePromise;
+
+    if (stripe) {
+      const response = await fetch("/api/create-checkout-session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          price: totalPrice,
+          rideData: formData,
+        }),
+      });
+
+      const session = await response.json();
+      await stripe.redirectToCheckout({ sessionId: session.id });
+    }
   };
 
   return (

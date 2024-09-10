@@ -127,7 +127,7 @@ export default function WeeklyRides({
                 onClick={() => handleManage(weeklyRide.id)}
               >
                 <PencilSimple size={20} className="mr-2" />
-                Manage Weekly Ride
+                Cancel WeeklyRide
               </button>
 
               {/* Cancel Ride Modal */}

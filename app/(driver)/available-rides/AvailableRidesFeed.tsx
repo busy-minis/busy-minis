@@ -15,7 +15,7 @@ export default function AvailableRidesFeed({ rides, user_id }: any) {
   const handleAcceptRide = async (rideId: string) => {
     try {
       await acceptRide(rideId, user_id);
-      router.push("/driverdashboard/my-rides"); // Redirect to 'My Rides' after accepting
+      router.push("/accepted-rides"); // Redirect to 'My Rides' after accepting
     } catch (error) {
       console.error("Failed to accept ride:", error);
     }

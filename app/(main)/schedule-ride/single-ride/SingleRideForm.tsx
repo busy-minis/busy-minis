@@ -8,7 +8,7 @@ import LocationSection from "./components/LocationSection";
 import ReviewSection from "./components/ReviewSection";
 
 const stripePromise = loadStripe(
-  "pk_test_51Pq0V6AU6tLKej0RgL8EyqnGL2FSrqtraFvpHgSi6R5jGL2J2BhRJJmumdajy3WgzuNlnZK6drMlrLAtw5cixYP00kozGoK19"
+  "pk_test_51Pq0V6AU6tLKej0RgL8EyqnGLr2FSrqtraFvpHgSi6R5jGL2J2BhRJJmumdajy3WgzuNlnZK6drMlrLAtw5cixYP00kozGoK19"
 );
 
 interface Rider {
@@ -52,7 +52,7 @@ export default function SingleRideBooking(props: { userId: string }) {
   const [isMoreRiders, setIsMoreRiders] = useState(false);
   const [isWithinOneHour, setIsWithinOneHour] = useState(false);
 
-  const [totalPrice, setTotalPrice] = useState(19); // Base price
+  const [totalPrice, setTotalPrice] = useState(16); // Base price
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [distance, setDistance] = useState<number | null>(null);
 
@@ -71,7 +71,7 @@ export default function SingleRideBooking(props: { userId: string }) {
       // Round the total cost to two decimal places as a number
       return Math.round(totalCost * 100) / 100;
     };
-    let price = 19; // Base price
+    let price = 16; // Base price
     if (isSameDay) price += 25;
     if (isOffPeak) price += 15;
     if (formData.riders.length > 1) {
