@@ -11,7 +11,6 @@ import "@fontsource/poppins/700.css";
 import "@fontsource/poppins/800.css";
 import "@fontsource/poppins/900.css";
 import "@fontsource/chicle";
-import { NavBar } from "./components/ui/NavBar";
 
 export const metadata: Metadata = {
   title: "Busy Minis",

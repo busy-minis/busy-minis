@@ -1,5 +1,5 @@
 import React from "react";
-import Footer from "@/app/components/ui/Footer";
+
 import SingleRides from "./singleRides";
 import WeeklyRides from "./weeklyRides";
 import { createClient } from "@/utils/supabase/server";
@@ -58,8 +58,6 @@ export default async function MyRides() {
           </div>
         </div>
       </section>
-
-      <Footer />
     </div>
   );
 }

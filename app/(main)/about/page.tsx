@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import Footer from "@/app/components/ui/Footer";
+
 import { driverSafetyData, faqData } from "./data";
 import Image from "next/image";
 import {
@@ -19,7 +19,6 @@ export default function Page() {
       <MissionSection />
       <DriverSafetySection />
       <FAQSection />
-      <Footer />
     </div>
   );
 }
@@ -75,9 +74,15 @@ function AboutSection() {
 function ImageGallery() {
   return (
     <div className="grid grid-cols-2 gap-2 sm:gap-4">
-      <ImageItem src="/assets/09.png" alt="Children smiling" />
-      <ImageItem src="/assets/laugh.png" alt="Children laughing" />
-      <ImageItem src="/assets/pexel.jpg" alt="Children playing" />
+      <ImageItem
+        src="/assets/mother_and_kid.png"
+        alt="Photo of mother fixing a kids seat belt"
+      />
+      <ImageItem
+        src="/assets/kids_laughing.png"
+        alt="Photo of kids laughing inside a car"
+      />
+      <ImageItem src="/assets/kid_smiling.jpg" alt="Photo of a child smiling" />
     </div>
   );
 }

@@ -34,23 +34,6 @@ export default function AvailableRidesFeed({ rides, user_id }: any) {
   return (
     <div className="p-6 space-y-6 bg-gradient-to-r from-blue-100 to-white min-h-screen">
       {/* Instructional Header with Image */}
-      <div className="flex flex-col items-center text-center mb-8">
-        <Image
-          src="/carguy.png"
-          alt="Driver dashboard image"
-          width={250}
-          height={250}
-          className="mb-4"
-        />
-        <h2 className="text-4xl font-extrabold text-gray-900 mb-4">
-          Available Rides
-        </h2>
-        <p className="text-lg text-gray-700 max-w-2xl">
-          Welcome, driver! Below is a list of rides that have been posted and
-          are available for you to accept. Once accepted, these rides will move
-          to your My Rides page.
-        </p>
-      </div>
 
       {/* Grid Layout with Balanced Ride Cards */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

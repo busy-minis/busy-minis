@@ -14,6 +14,8 @@ export async function createDriver(formData: FormData) {
   const licensePlate = formData.get("licensePlate") as string;
   const vehicleBrand = formData.get("vehicleBrand") as string;
   const phoneNumber = formData.get("phoneNumber") as string; // New phone number field
+  const vehicleColor = formData.get("vehicleColor") as string;
+  const vehicleYear = formData.get("vehicleYear") as string;
 
   // Step 1: Sign up the driver in Supabase Auth
   const { data: signUpData, error: authError } = await supabase.auth.signUp({
@@ -53,7 +55,8 @@ export async function createDriver(formData: FormData) {
       phone_number: phoneNumber, // New phone number field
       license_plate: licensePlate,
       vehicle_brand: vehicleBrand,
-      is_active: false, // Assuming the driver is inactive until verified
+      vechile_color: vehicleColor,
+      vehicle_year: vehicleYear,
     },
   ]);
 

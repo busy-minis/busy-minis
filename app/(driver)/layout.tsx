@@ -1,4 +1,4 @@
-import DriverBarServer from "../components/ui/DriverBarServer";
+import DriverBarServer from "./components/DriverBarServer";
 export default function DashboardLayout({
   children,
 }: Readonly<{
@@ -6,7 +6,6 @@ export default function DashboardLayout({
 }>) {
   return (
     <div className="min-h-screen ">
-      {" "}
       <DriverBarServer /> {children}
     </div>
   );

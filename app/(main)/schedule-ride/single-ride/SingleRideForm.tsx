@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
-import Footer from "@/app/components/ui/Footer";
+
 import LoadGoogleMapsScript from "./LoadGoogleMapsScript";
 import { loadStripe } from "@stripe/stripe-js";
 import DetailSection from "./components/DetailSection";
@@ -145,6 +145,7 @@ export default function SingleRideBooking(props: { userId: string }) {
           <div className="mb-8">
             {step === 1 && (
               <DetailSection
+                setValidationErrors={setValidationErrors}
                 validationErrors={validationErrors}
                 formData={formData}
                 setFormData={setFormData}
@@ -170,6 +171,7 @@ export default function SingleRideBooking(props: { userId: string }) {
             )}
             {step === 3 && (
               <ReviewSection
+                setStep={setStep}
                 distance={distance}
                 formData={formData}
                 totalPrice={totalPrice}
@@ -178,7 +180,6 @@ export default function SingleRideBooking(props: { userId: string }) {
           </div>
         </form>
       </div>
-      <Footer />
     </div>
   );
 }

@@ -107,35 +107,35 @@ export default function DetailSection({
       </section>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <Input
-          label="Pickup Date"
-          type="date"
-          icon={<Calendar size={24} />}
-          value={formData.pickupDate}
-          min={today} // Restrict past dates
-          onChange={(e) => handleInputChange(e, "pickupDate")}
-        />
-        <Input
-          label="Pickup Time"
-          type="time"
-          icon={<Clock size={24} />}
-          value={formData.pickupTime}
-          onChange={(e) => handleInputChange(e, "pickupTime")}
-        />
+        <div>
+          <Input
+            label="Pickup Date"
+            type="date"
+            icon={<Calendar size={24} />}
+            value={formData.pickupDate}
+            min={today} // Restrict past dates
+            onChange={(e) => handleInputChange(e, "pickupDate")}
+          />
+          {isSameDay && (
+            <Warning text="Same-day pickups will incur an additional fee." />
+          )}
+        </div>
+        <div>
+          <Input
+            label="Pickup Time"
+            type="time"
+            icon={<Clock size={24} />}
+            value={formData.pickupTime}
+            onChange={(e) => handleInputChange(e, "pickupTime")}
+          />
+          {isOffPeak && (
+            <Warning text="Off-peak hours (before 6 AM or after 6 PM) will incur an additional fee." />
+          )}
+          {isWithinOneHour && (
+            <Warning text="Rides within one hour will incur an additional fee." />
+          )}
+        </div>
       </div>
-
-      {isSameDay && (
-        <Warning text="Same-day pickups will incur an additional fee." />
-      )}
-      {isOffPeak && (
-        <Warning text="Off-peak hours (before 6 AM or after 6 PM) will incur an additional fee of $15.00." />
-      )}
-      {isWithinOneHour && (
-        <Warning text="Rides within one hour will incur an additional fee." />
-      )}
-      {isMoreRiders && (
-        <Warning text="More Riders will incur an additional fee." />
-      )}
 
       {formData.riders.map((rider: Rider, index: any) => (
         <div
@@ -166,6 +166,9 @@ export default function DetailSection({
           )}
         </div>
       ))}
+      {isMoreRiders && (
+        <Warning text="More Riders will incur an additional fee." />
+      )}
 
       {formData.riders.length < 4 && (
         <button

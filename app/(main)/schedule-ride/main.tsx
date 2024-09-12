@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import Link from "next/link";
-import Footer from "@/app/components/ui/Footer";
+
 import { Car, CalendarCheck } from "@phosphor-icons/react";
 
 export default function RideOptions() {
@@ -66,8 +66,6 @@ export default function RideOptions() {
           </div>
         </div>
       </section>
-
-      <Footer />
     </div>
   );
 }

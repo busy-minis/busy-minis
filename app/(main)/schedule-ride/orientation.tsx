@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import Footer from "@/app/components/ui/Footer";
+
 import { CalendarCheck, CheckCircle } from "@phosphor-icons/react";
 import {
   getAvailableTimeSlots,
@@ -205,8 +205,6 @@ export default function OrientationPage(props: { user_id: string }) {
           )}
         </div>
       </section>
-
-      <Footer />
 
       {isModalOpen && (
         <CancelModal

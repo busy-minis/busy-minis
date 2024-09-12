@@ -1,5 +1,5 @@
 import React from "react";
-import Footer from "@/app/components/ui/Footer";
+
 import { CheckCircle, Clock, XCircle } from "@phosphor-icons/react/dist/ssr";
 import { createClient } from "@/utils/supabase/server";
 import { getCompletedOrCanceledRides } from "@/utils/supabase/supabaseQueries";
@@ -150,8 +150,6 @@ export default async function RideHistory() {
           </div>
         </div>
       </section>
-
-      <Footer />
     </div>
   );
 }

@@ -1,8 +1,7 @@
-import Hero from "../components/Home/Hero";
-import HowItWorks from "../components/Home/HowItWorks";
-import WhatWeOffer from "../components/Home/WhatWeOffer";
-import WhyChooseUs from "../components/Home/WhyChooseUs";
-import Footer from "../components/ui/Footer";
+import Hero from "./components/Home/Hero";
+import HowItWorks from "./components/Home/HowItWorks";
+import WhatWeOffer from "./components/Home/WhatWeOffer";
+import WhyChooseUs from "./components/Home/WhyChooseUs";
 
 export default function Home() {
   return (
@@ -11,8 +10,6 @@ export default function Home() {
       <WhyChooseUs />
       <HowItWorks />
       <WhatWeOffer />
-      {/* <CTA /> */}
-      <Footer />
     </main>
   );
 }

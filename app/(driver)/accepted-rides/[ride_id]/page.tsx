@@ -8,7 +8,7 @@ import {
   endRide,
 } from "@/utils/supabase/supabaseQueries";
 import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
-import ShareLocationMap from "./ShareLocationMap";
+import Modal from "./components/Modal";
 
 interface Passenger {
   name: string;
@@ -49,35 +49,35 @@ export default function RidePage() {
 
   const [rideData, setRideData] = useState<Ride | null>(null);
   const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false); // State to control the modal visibility
-  const [rideStarted, setRideStarted] = useState(false); // State to track if the ride has started
+  const [showModal, setShowModal] = useState(false);
+  const [rideStarted, setRideStarted] = useState(false);
+  const [error, setError] = useState<string | null>(null); // Handle error state
 
   useEffect(() => {
     const fetchRide = async () => {
       if (rideId) {
         try {
-          const ride = await getRideById(rideId); // Fetch ride data based on id
+          const ride = await getRideById(rideId);
+          if (!ride) throw new Error("Ride not found.");
           setRideData(ride);
-          if (ride.status === "ongoing") {
-            setRideStarted(true); // Mark the ride as started if it's already ongoing
-          }
+          setRideStarted(ride.status === "ongoing");
         } catch (error) {
+          setError("Failed to fetch ride details.");
           console.error("Failed to fetch ride:", error);
         } finally {
           setLoading(false);
         }
       }
     };
-
     fetchRide();
   }, [rideId]);
 
   const startRideHandler = async () => {
     try {
-      await startRide(rideId!); // Start the ride by changing its status to "ongoing"
+      await startRide(rideId!);
       console.log("Ride started.");
-      setRideStarted(true); // Update the state to indicate the ride has started
-      setShowModal(false); // Close the modal after starting the ride
+      setRideStarted(true);
+      setShowModal(false);
     } catch (error) {
       console.error("Failed to start the ride:", error);
     }
@@ -85,20 +85,24 @@ export default function RidePage() {
 
   const endRideHandler = async () => {
     try {
-      await endRide(rideId!); // End the ride by changing its status to "completed"
+      await endRide(rideId!);
       console.log("Ride ended.");
-      router.push("/my-rides"); // Redirect to the "My Rides" page
+      router.push("/my-rides");
     } catch (error) {
       console.error("Failed to end the ride:", error);
     }
   };
 
   if (loading) {
-    return <p>Loading ride details...</p>;
+    return <p className="text-center text-gray-500">Loading ride details...</p>;
+  }
+
+  if (error) {
+    return <p className="text-center text-red-500">{error}</p>;
   }
 
   if (!rideData) {
-    return <p>Ride not found.</p>;
+    return <p className="text-center text-gray-500">Ride not found.</p>;
   }
 
   const mapContainerStyle = {
@@ -122,8 +126,8 @@ export default function RidePage() {
             Ride ID: <span className="text-teal-800">{rideData.id}</span>
           </h3>
           <p
-            className={`mt-2 font-semibold text-${
-              rideStarted ? "green-600" : "red-600"
+            className={`mt-2 font-semibold ${
+              rideStarted ? "text-green-600" : "text-red-600"
             }`}
           >
             {rideStarted ? "Ride is Ongoing" : "Ride Not Started"}
@@ -151,14 +155,8 @@ export default function RidePage() {
             </GoogleMap>
           </LoadScript>
         </div>
-        {/* <div className="bg-gray-50 p-4 rounded-lg">
-          <h3 className="text-lg font-semibold text-gray-800">
-            Share Location
-          </h3>
-          <ShareLocationMap rideId={rideId!} />
-        </div> */}
 
-        {/* Pickup and Dropoff Information */}
+        {/* Pickup and Dropoff Locations */}
         <div className="grid grid-cols-2 gap-4">
           <div className="bg-teal-50 p-4 rounded-lg">
             <h3 className="text-lg font-semibold text-gray-800">
@@ -224,31 +222,10 @@ export default function RidePage() {
 
       {/* Confirmation Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm">
-          <div className="bg-white p-8 rounded-lg shadow-xl max-w-lg w-full">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">
-              Confirm Start Ride
-            </h3>
-            <p className="text-gray-700">
-              Please make sure you are at the pickup location before starting
-              the ride.
-            </p>
-            <div className="mt-6 flex justify-end space-x-4">
-              <button
-                onClick={() => setShowModal(false)} // Close the modal
-                className="bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 transition-colors duration-200"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={startRideHandler}
-                className="bg-teal-600 text-white py-2 px-4 rounded-lg hover:bg-teal-700 transition-colors duration-200"
-              >
-                Accept
-              </button>
-            </div>
-          </div>
-        </div>
+        <Modal
+          setShowModal={setShowModal}
+          startRideHandler={startRideHandler}
+        />
       )}
     </div>
   );

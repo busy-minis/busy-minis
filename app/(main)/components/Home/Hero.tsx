@@ -15,7 +15,7 @@ export default function Hero() {
         transition={{ duration: 1.2 }}
       >
         <Image
-          src="/assets/01.jpg"
+          src="/assets/kids_in_bus.jpg"
           alt="Background image"
           width={500} // Adjust the size as needed
           height={500}

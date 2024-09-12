@@ -1,4 +1,5 @@
-import { NavBar } from "../components/ui/NavBar";
+import Footer from "./components/ui/Footer";
+import NavBar from "./components/ui/NavBar";
 
 export default function RootLayout({
   children,
@@ -10,6 +11,7 @@ export default function RootLayout({
       <body className="">
         <NavBar />
         {children}
+        <Footer />
       </body>
     </html>
   );

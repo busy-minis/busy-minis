@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation"; // Client-side hook for active state
 import { Car, List, UserCircle } from "@phosphor-icons/react"; // Phosphor icons for nav items
-import MobileMenu from "./MobileMenu";
+
 import Logout from "./Logout";
 import DriverMobile from "./DriverMobile";
 

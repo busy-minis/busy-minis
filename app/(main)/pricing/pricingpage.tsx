@@ -9,7 +9,6 @@ import {
   MinusSquare,
   PlusSquare,
 } from "@phosphor-icons/react";
-import Footer from "@/app/components/ui/Footer";
 
 type RideType = "single" | "regular";
 
@@ -69,7 +68,6 @@ export default function PricingPage() {
           <PricingChart />
         </div>
       </div>
-      <Footer />
     </section>
   );
 }
