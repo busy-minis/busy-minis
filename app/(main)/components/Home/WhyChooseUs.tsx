@@ -24,7 +24,7 @@ export default function WhyChooseUs() {
           <p className="max-w-2xl mx-auto mt-4 text-sm md:text-lg leading-relaxed text-teal-200">
             At Busy Minis Transportation, safety, reliability, and convenience
             are at the core of what we do. Discover why families trust us with
-            their children’s transportation needs.
+            their child transportation needs.
           </p>
         </motion.div>
 

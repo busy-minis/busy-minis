@@ -9,6 +9,7 @@ import {
   MinusSquare,
   PlusSquare,
 } from "@phosphor-icons/react";
+import Link from "next/link";
 
 type RideType = "single" | "regular";
 
@@ -64,8 +65,6 @@ export default function PricingPage() {
               <RideInfo selectedRideType={selectedRideType} />
             </div>
           </div>
-
-          <PricingChart />
         </div>
       </div>
     </section>
@@ -129,9 +128,11 @@ const RidePricingCalculator = ({
         <p className="text-3xl font-bold text-teal-900">
           Total Price: ${totalPrice.toFixed(2)}
         </p>
-        <button className="bg-teal-600 text-white px-6 py-3 mt-6 rounded-lg shadow-md hover:bg-teal-700 transition">
-          Get in Touch
-        </button>
+        <Link href={"/contact"}>
+          <div className="bg-teal-600 text-white px-6 py-3 mt-6 rounded-lg shadow-md hover:bg-teal-700 transition">
+            Contact Us
+          </div>
+        </Link>
       </div>
     </div>
   );
@@ -241,28 +242,29 @@ const RideInfo = ({ selectedRideType }: { selectedRideType: RideType }) => (
       <>
         <h4 className="text-2xl sm:text-3xl font-bold">One-Time Ride</h4>
         <p className="mt-4 text-base sm:text-lg text-white">
-          One-Time rides start at $16/trip with a $3 booking fee. The base rate
-          covers up to 5 miles and 1 passenger. Additional charges apply for
-          extra miles, passengers, and stops.
+          One-Time rides start at $16/trip. The base rate covers up to 5 miles
+          and 1 passenger. Additional charges apply for extra miles, passengers,
+          and stops.
         </p>
       </>
     ) : (
       <>
         <h4 className="text-2xl sm:text-3xl font-bold">Regular Rides</h4>
         <p className="mt-4 text-base sm:text-lg text-white">
-          Regular rides start at $13/trip with a $3 booking fee. Ideal for
-          frequent travelers, this rate covers up to 5 miles and 1 passenger.
-          Additional charges apply for extra miles, passengers, and stops.
+          Regular rides start at $13/trip. Ideal for frequent travelers, this
+          rate covers up to 5 miles and 1 passenger. Additional charges apply
+          for extra miles, passengers, and stops.
         </p>
       </>
     )}
+    <PricingChart />
   </div>
 );
 
 const PricingChart = () => (
-  <div className="bg-white text-xs sm:text-base rounded-lg shadow-md p-4 sm:p-8 mt-8 sm:mt-16">
+  <div className="bg-white text-teal-900 z-10 text-xs sm:text-base rounded-lg shadow-md p-4 sm:p-8 mt-8 sm:mt-16">
     <h2 className="text-xl sm:text-2xl font-bold text-teal-900 mb-4 text-center sm:text-left">
-      Pricing Details
+      Add-On Services
     </h2>
     <div className="overflow-x-auto">
       <table className="min-w-full text-left">
@@ -290,16 +292,6 @@ const PricingChart = () => (
 );
 
 const pricingDetails = [
-  {
-    category: "One-Time Rides",
-    description: "Covers up to 5 miles and 1 passenger. $3 booking fee.",
-    cost: "$16/trip",
-  },
-  {
-    category: "Regular Rides",
-    description: "Frequent riders (min. 4 days/week). $3 booking fee.",
-    cost: "$13/trip",
-  },
   {
     category: "Additional Miles",
     description: "Charge per mile beyond 5 miles.",

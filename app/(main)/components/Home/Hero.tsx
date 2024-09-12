@@ -66,7 +66,7 @@ export default function Hero() {
           transition={{ duration: 0.8, delay: 0.2 }}
         >
           Meet <span className="font-bold">Busy Minis Transportation</span>,
-          your trusted partner for safe, reliable, and convenient childrens
+          your trusted partner for safe, reliable, and convenient child
           transportation.
         </motion.p>
 
@@ -88,9 +88,9 @@ export default function Hero() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 1.2, duration: 0.5 }}
         >
-          <button className="bg-neutral-800 text-white rounded-xl px-10 py-2 text-lg md:text-xl font-semibold shadow-lg hover:shadow-xl hover:bg-orange-500 transition-transform transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-600">
+          {/* <button className="bg-neutral-800 text-white rounded-xl px-10 py-2 text-lg md:text-xl font-semibold shadow-lg hover:shadow-xl hover:bg-orange-500 transition-transform transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-600">
             <Link href={"/schedule-ride"}>Schedule A Ride</Link>
-          </button>
+          </button> */}
         </motion.div>
       </motion.div>
     </section>

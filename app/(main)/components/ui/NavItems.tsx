@@ -14,11 +14,6 @@ export default function NavItems(props: { isLoggedIn: boolean }) {
       <NavItem href="/pricing" label="Pricing" active={isActive("/pricing")} />
       <NavItem href="/about" label="About" active={isActive("/about")} />
 
-      <NavItem
-        href="/services"
-        label="Services"
-        active={isActive("/services")}
-      />
       <NavItem href="/contact" label="Contact" active={isActive("/contact")} />
       {props.isLoggedIn && (
         <>

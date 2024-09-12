@@ -101,19 +101,19 @@ const steps = [
   },
   {
     title: "Attend Orientation",
-    text: "Meet with our team to go over safety protocols.",
+    text: "Meet with our team to go over program policies & expectations.",
     Icon: UsersThree,
     delay: 0.7,
   },
   {
     title: "Prepare for the Ride",
-    text: "Easily schedule rides and get all the details in advance.",
+    text: "Easily schedule rides online or by phone.",
     Icon: CashRegister,
     delay: 0.9,
   },
   {
     title: "Enjoy the Ride",
-    text: "Track rides in real-time and share feedback to improve service.",
+    text: "Track rides in real-time and receive confirmation texts along the way.",
     Icon: RocketLaunch,
     delay: 1.1,
   },

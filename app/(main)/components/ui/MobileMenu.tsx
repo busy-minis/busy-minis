@@ -86,7 +86,7 @@ const MobileMenu = ({ isLoggedIn, dashboardHref }: MobileMenuProps) => {
                   { href: "/", label: "Home" },
                   { href: "/pricing", label: "Pricing" },
                   { href: "/about", label: "About" },
-                  { href: "/services", label: "Services" },
+
                   { href: "/contact", label: "Contact" },
                 ].map((item) => (
                   <motion.li

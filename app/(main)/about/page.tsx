@@ -1,14 +1,9 @@
 "use client";
 import React, { useState } from "react";
 
-import { driverSafetyData, faqData } from "./data";
+import { faqData } from "./data";
 import Image from "next/image";
-import {
-  ArrowDown,
-  CheckCircle,
-  ShieldCheck,
-  Question,
-} from "@phosphor-icons/react";
+import { ArrowDown, Question } from "@phosphor-icons/react";
 import Link from "next/link";
 
 export default function Page() {
@@ -17,7 +12,7 @@ export default function Page() {
       <HeroSection />
       <AboutSection />
       <MissionSection />
-      <DriverSafetySection />
+
       <FAQSection />
     </div>
   );
@@ -51,9 +46,6 @@ function HeroSection() {
           Get a Quote
         </Link>
       </div>
-      <div className="absolute bottom-6 sm:bottom-8">
-        <ArrowDown size={28} className="text-gray-100 animate-bounce" />
-      </div>
     </section>
   );
 }
@@ -74,15 +66,9 @@ function AboutSection() {
 function ImageGallery() {
   return (
     <div className="grid grid-cols-2 gap-2 sm:gap-4">
-      <ImageItem
-        src="/assets/mother_and_kid.png"
-        alt="Photo of mother fixing a kids seat belt"
-      />
-      <ImageItem
-        src="/assets/kids_laughing.png"
-        alt="Photo of kids laughing inside a car"
-      />
-      <ImageItem src="/assets/kid_smiling.jpg" alt="Photo of a child smiling" />
+      <ImageItem src="/assets/LiaCostaRica.jpg" alt="Photo of Lia" />
+      <ImageItem src="/assets/LiaRace.jpg" alt="Photo of Lia" />
+      <ImageItem src="/assets/LiaSc.jpg" alt="Photo of Lia" />
     </div>
   );
 }
@@ -114,14 +100,18 @@ function AboutContent() {
         Busy Minis was founded by Lia, a working mother who recognized the need
         for joyful, safe, and convenient transportation for children. With the
         desire to help parents balance their busy lives, Busy Minis was born to
-        provide peace of mind with safe and reliable rides for kids.
+        provide peace of mind for parents and guardians seeking safe and
+        reliable rids for kids.
       </p>
-      <Link
-        href="/about"
+
+      <a
+        rel="noopener noreferrer"
+        href="https://linkedin.com/in/transformationconsultant"
         className="inline-block mt-4 sm:mt-6 text-teal-600 font-semibold text-base sm:text-lg hover:underline"
+        target="_blank" // Optional: Opens the link in a new tab
       >
         Learn more
-      </Link>
+      </a>
     </div>
   );
 }
@@ -134,43 +124,10 @@ function MissionSection() {
           Our Mission
         </h2>
         <p className="text-lg sm:text-xl text-gray-200 mt-4 sm:mt-6 leading-relaxed max-w-2xl mx-auto">
-          At Busy Minis, our mission is to offer safe, reliable, and joyful
-          transportation for children. Our focus is on providing peace of mind
-          to parents by ensuring their children’s safety and punctuality, so
-          they can focus on what matters most.
+          At Busy Minis, our mission is to provide safe, dependable, and joyful
+          transportation for children. We give parents and guardians peace of
+          mind by prioritizing the well-being and punctuality of every child.
         </p>
-      </div>
-    </section>
-  );
-}
-
-function DriverSafetySection() {
-  return (
-    <section className="py-12 sm:py-20 bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 className="text-3xl sm:text-4xl font-bold text-teal-700">
-          Drivers & Safety
-        </h2>
-        <p className="text-base sm:text-lg text-gray-600 mt-4">
-          Our drivers undergo rigorous background checks and extensive training
-          to ensure the safety of your children at all times.
-        </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mt-10 sm:mt-12">
-          {driverSafetyData.map((item, index) => (
-            <div
-              key={index}
-              className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow"
-            >
-              <ShieldCheck size={40} className="text-teal-600 mb-4 mx-auto" />
-              <h3 className="text-lg sm:text-xl font-bold text-teal-700 mb-2">
-                {item.title}
-              </h3>
-              <p className="text-sm sm:text-base text-gray-600">
-                {item.description}
-              </p>
-            </div>
-          ))}
-        </div>
       </div>
     </section>
   );

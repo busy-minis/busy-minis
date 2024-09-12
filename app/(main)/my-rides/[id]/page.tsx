@@ -1,15 +1,13 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { MapPin, Car, User, XCircle } from "@phosphor-icons/react";
+import { XCircle } from "@phosphor-icons/react";
 import { cancelRideById } from "@/utils/supabase/supabaseQueries";
 import { getRideById } from "@/utils/supabase/supabaseQueries";
 import Passengers from "./components/Passengers";
 import Driver from "./components/Driver";
 import Map from "./components/Map";
 import RideInfo from "./components/RideInfo";
-
-// Utility function to format date and time
 
 export default function RideTrackingPage() {
   const [rideData, setRideData] = useState<any>(null);

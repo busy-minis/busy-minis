@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
-import Footer from "@/app/components/ui/Footer";
+
 import { CalendarCheck, Clock, Info } from "@phosphor-icons/react";
 import { createWeeklyRide } from "@/utils/supabase/supabaseQueries";
 import { loadStripe } from "@stripe/stripe-js";
@@ -311,7 +311,6 @@ export default function WeeklyRideBookingPage(props: { userId: string }) {
           </form>
         </div>
       </section>
-      <Footer />
     </div>
   );
 }

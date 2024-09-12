@@ -1,10 +1,6 @@
 "use client";
 import Image from "next/image";
-import {
-  FacebookLogo,
-  TwitterLogo,
-  InstagramLogo,
-} from "@phosphor-icons/react";
+import { FacebookLogo } from "@phosphor-icons/react";
 
 const Footer = () => {
   return (
@@ -22,25 +18,11 @@ const Footer = () => {
             />
             <div className="flex space-x-6">
               <a
-                href="https://facebook.com"
+                href="https://www.facebook.com/BusyMinis"
                 aria-label="Facebook"
                 className="text-gray-400 hover:text-white transition-colors duration-300"
               >
                 <FacebookLogo size={28} weight="fill" />
-              </a>
-              <a
-                href="https://twitter.com"
-                aria-label="Twitter"
-                className="text-gray-400 hover:text-white transition-colors duration-300"
-              >
-                <TwitterLogo size={28} weight="fill" />
-              </a>
-              <a
-                href="https://instagram.com"
-                aria-label="Instagram"
-                className="text-gray-400 hover:text-white transition-colors duration-300"
-              >
-                <InstagramLogo size={28} weight="fill" />
               </a>
             </div>
           </div>
@@ -69,7 +51,7 @@ const Footer = () => {
               Have questions? Reach us at:
             </p>
             <p className="text-lg font-semibold text-white mt-2">
-              contact@busminis.com
+              lia@busyminis.com
             </p>
             <p className="text-sm text-gray-400 mt-1">+1 404-981-8020</p>
           </div>
