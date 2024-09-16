@@ -16,3 +16,24 @@ export interface Passenger {
   name: string;
   age: number;
 }
+
+export interface Rider {
+  name: string;
+  age: string;
+}
+
+export interface FormData {
+  user_id: string;
+  status: string;
+  pickupDate: string;
+  selectedTime: string;
+  selectedDays: string[];
+  pickupAddress: string;
+  end_date: string;
+  pickupLat?: number;
+  pickupLng?: number;
+  dropoffAddress: string;
+  dropoffLat?: number;
+  dropoffLng?: number;
+  riders: Rider[];
+}

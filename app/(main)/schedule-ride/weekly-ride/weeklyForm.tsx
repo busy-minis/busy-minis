@@ -1,10 +1,9 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
-
-import { CalendarCheck, Clock, Info } from "@phosphor-icons/react";
+import { CalendarCheck, Info } from "@phosphor-icons/react";
 import { createWeeklyRide } from "@/utils/supabase/supabaseQueries";
 import { loadStripe } from "@stripe/stripe-js";
-
+import { FormData } from "@/app/types/types";
 import AddressAutocomplete from "./components/AddressAutocompleteProps";
 import LoadGoogleMapsScript from "./components/LoadGoogleMapsScript";
 import Riders from "./components/Riders";
@@ -25,33 +24,12 @@ const daysOfWeekMap: { [key: string]: number } = {
   Saturday: 6,
 };
 
-interface Rider {
-  name: string;
-  age: string;
-}
-
-interface FormData {
-  user_id: string;
-  status: string;
-  pickupDate: string;
-  selectedTime: string;
-  selectedDays: string[];
-  pickupAddress: string;
-  end_date: string;
-  pickupLat?: number;
-  pickupLng?: number;
-  dropoffAddress: string;
-  dropoffLat?: number;
-  dropoffLng?: number;
-  riders: Rider[];
-}
-
 export default function WeeklyRideBookingPage(props: { userId: string }) {
   const [formData, setFormData] = useState<FormData>({
     user_id: props.userId,
     status: "pending",
     end_date: "",
-    pickupDate: "", // Will be auto-calculated based on selected days
+    pickupDate: "",
     pickupAddress: "",
     pickupLat: undefined,
     pickupLng: undefined,
@@ -64,13 +42,15 @@ export default function WeeklyRideBookingPage(props: { userId: string }) {
   });
   const [dateError, setDateError] = useState("");
   const [timeWarning, setTimeWarning] = useState("");
+  const [validationError, setValidationError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [totalPrice, setTotalPrice] = useState(13);
   const [distance, setDistance] = useState<number | null>(null);
+  const [loadingDistance, setLoadingDistance] = useState(false);
 
   const daysOfWeek = Object.keys(daysOfWeekMap);
 
-  const calculateDistance = () => {
+  const calculateDistance = useCallback(() => {
     if (
       window.google &&
       formData.pickupLat &&
@@ -78,6 +58,7 @@ export default function WeeklyRideBookingPage(props: { userId: string }) {
       formData.dropoffLat &&
       formData.dropoffLng
     ) {
+      setLoadingDistance(true); // Show loading while distance is being calculated
       const service = new google.maps.DistanceMatrixService();
 
       service.getDistanceMatrix(
@@ -89,11 +70,12 @@ export default function WeeklyRideBookingPage(props: { userId: string }) {
           travelMode: google.maps.TravelMode.DRIVING,
         },
         (response, status) => {
+          setLoadingDistance(false);
           if (status === "OK" && response) {
             const distanceInMeters =
-              response.rows[0].elements[0].distance.value; // distance in meters
-            const distanceInKilometers = distanceInMeters / 1000; // convert to kilometers
-            const distanceInMiles = distanceInKilometers * 0.621371; // convert kilometers to miles
+              response.rows[0].elements[0].distance.value;
+            const distanceInKilometers = distanceInMeters / 1000;
+            const distanceInMiles = distanceInKilometers * 0.621371;
 
             setDistance(distanceInMiles);
           } else {
@@ -104,60 +86,85 @@ export default function WeeklyRideBookingPage(props: { userId: string }) {
     } else {
       console.error("Google Maps is not available or coordinates are missing.");
     }
-  };
-  // Calculate total price based on riders and time
+  }, [
+    formData.pickupLat,
+    formData.pickupLng,
+    formData.dropoffLat,
+    formData.dropoffLng,
+  ]);
+
   const calculateTotalPrice = useCallback(() => {
-    const basePricePerDay = 13; // Base price per day
-    const selectedDaysCount = formData.selectedDays.length; // Number of selected days
+    const basePricePerDay = 13;
+    const selectedDaysCount = formData.selectedDays.length;
+
     const calculateCost = () => {
       const miles = distance;
-      let totalCost = 0; // Initialize the total cost
+      let totalCost = 0;
 
       if (miles !== null && miles > 5) {
         const additionalMiles = miles - 5;
-        totalCost += additionalMiles * 2; // $2 per mile after 5 miles
+        totalCost += additionalMiles * 2;
       }
 
-      // Round the total cost to two decimal places as a number
       return Math.round(totalCost * 100) / 100;
     };
 
-    // Calculate base price for all selected days
-    let price = selectedDaysCount * basePricePerDay; // Price based on the number of selected days
+    let price = selectedDaysCount * basePricePerDay;
 
-    if (timeWarning) price += 10; // Add off-peak surcharge
+    if (timeWarning) price += 10;
     if (formData.riders.length > 1) {
-      price += (formData.riders.length - 1) * 5; // Add rider surcharge
+      price += (formData.riders.length - 1) * 5;
     }
     if (distance) {
-      price += calculateCost(); // Add distance surcharge
+      price += calculateCost();
     }
 
-    setTotalPrice(price); // Set the calculated price
+    setTotalPrice(price);
   }, [timeWarning, formData.riders, formData.selectedDays, distance]);
+
   useEffect(() => {
     calculateTotalPrice();
   }, [calculateTotalPrice]);
 
-  // Calculate the first pickup date after today based on selected days
   const calculateNextPickupDate = (selectedDays: string[]): string | null => {
     if (selectedDays.length === 0) return null;
 
     const today = new Date();
-    const todayDay = today.getDay(); // 0 for Sunday, 1 for Monday, etc.
+    const todayDay = today.getDay();
 
-    // Find the next available day after today
     let minOffset = 7;
     selectedDays.forEach((day) => {
       const selectedDayOffset = daysOfWeekMap[day];
       let offset = (selectedDayOffset - todayDay + 7) % 7;
-      if (offset === 0) offset = 7; // Skip today if the same day is selected
+      if (offset === 0) offset = 7;
       if (offset < minOffset) minOffset = offset;
     });
 
     const nextPickupDate = new Date();
     nextPickupDate.setDate(today.getDate() + minOffset);
-    return nextPickupDate.toISOString().split("T")[0]; // Return in YYYY-MM-DD format
+    return nextPickupDate.toISOString().split("T")[0];
+  };
+
+  // Validate that the user has filled in all necessary fields
+  const validateForm = () => {
+    if (!formData.pickupAddress || !formData.dropoffAddress) {
+      setValidationError("Please fill in both pickup and dropoff addresses.");
+      return false;
+    }
+
+    if (!formData.riders.every((rider) => /^[a-zA-Z\s]+$/.test(rider.name))) {
+      setValidationError("Rider names should only contain letters.");
+      return false;
+    }
+
+    // Ensure at least 4 days are selected
+    if (formData.selectedDays.length < 4) {
+      setValidationError("Please select at least 4 days.");
+      return false;
+    }
+
+    setValidationError(null);
+    return true;
   };
 
   const handleDaySelection = (day: string) => {
@@ -171,11 +178,13 @@ export default function WeeklyRideBookingPage(props: { userId: string }) {
       return {
         ...prevData,
         selectedDays: updatedDays,
-        pickupDate: pickupDate || "", // Automatically update the pickup date
+        pickupDate: pickupDate || "",
       };
     });
   };
+
   const handleNext = () => {
+    if (!validateForm()) return; // Prevent page navigation if validation fails
     calculateDistance();
     setPage(2);
   };
@@ -187,43 +196,56 @@ export default function WeeklyRideBookingPage(props: { userId: string }) {
       return;
     }
 
-    await createWeeklyRide({ formData });
+    try {
+      await createWeeklyRide({ formData });
 
-    const stripe = await stripePromise;
+      const stripe = await stripePromise;
 
-    if (stripe) {
-      const response = await fetch("/api/create-checkout-session", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          price: totalPrice,
-          rideData: formData,
-        }),
-      });
+      if (stripe) {
+        const response = await fetch("/api/create-checkout-session", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            price: totalPrice,
+            rideData: formData,
+          }),
+        });
 
-      const session = await response.json();
-      await stripe.redirectToCheckout({ sessionId: session.id });
+        const session = await response.json();
+        await stripe.redirectToCheckout({ sessionId: session.id });
+      }
+    } catch (error) {
+      console.error("Error during submission:", error);
     }
   };
 
   return (
-    <div className="">
-      <LoadGoogleMapsScript /> {/* Load Google Maps API */}
-      {/* Booking Form */}
+    <div className="bg-gray-100 min-h-screen py-8">
+      <LoadGoogleMapsScript />
       <section className="relative pb-20 lg:pb-36">
         <div className="container mx-auto px-6">
           <form
             onSubmit={handleSubmit}
             className="max-w-3xl mx-auto bg-white p-10 rounded-xl shadow-xl space-y-10"
           >
+            <div className="w-full bg-gray-200 rounded-full h-2.5 mb-6">
+              <div
+                className={`h-2.5 rounded-full ${
+                  page === 1 ? "bg-teal-500 w-1/2" : "bg-teal-500 w-full"
+                }`}
+              ></div>
+            </div>
+
             {page === 1 ? (
               <>
-                {/* Riders Card */}
+                <h1 className="text-3xl font-bold text-center text-teal-700">
+                  Weekly Ride Booking
+                </h1>
+
                 <Riders formData={formData} setFormData={setFormData} />
 
-                {/* Pickup and Dropoff Card */}
                 <div className="bg-gray-50 p-6 rounded-xl shadow-md">
                   <AddressAutocomplete
                     label="Pickup Address"
@@ -247,9 +269,19 @@ export default function WeeklyRideBookingPage(props: { userId: string }) {
                       })
                     }
                   />
+
+                  {distance !== null && !loadingDistance && (
+                    <p className="mt-4 text-sm text-teal-700">
+                      Distance: {distance.toFixed(2)} miles
+                    </p>
+                  )}
+                  {loadingDistance && (
+                    <p className="mt-4 text-sm text-yellow-600">
+                      Calculating distance...
+                    </p>
+                  )}
                 </div>
 
-                {/* Date & Time Card */}
                 <Time
                   timeWarning={timeWarning}
                   setFormData={setFormData}
@@ -258,10 +290,9 @@ export default function WeeklyRideBookingPage(props: { userId: string }) {
                   dateError={dateError}
                 />
 
-                {/* Days of the Week Card */}
                 <div className="bg-gray-50 p-6 rounded-xl shadow-md">
                   <h4 className="text-2xl font-semibold text-teal-900 mb-6 flex items-center">
-                    <CalendarCheck size={28} className="mr-2 text-teal-600" />{" "}
+                    <CalendarCheck size={28} className="mr-2 text-teal-600" />
                     Select Days of the Week
                   </h4>
                   <div className="grid grid-cols-2 gap-4">
@@ -283,13 +314,18 @@ export default function WeeklyRideBookingPage(props: { userId: string }) {
                   </div>
                   <p className="mt-4 text-sm text-yellow-600">
                     <Info size={16} className="inline" /> If you select a day
-                    that matches todays date, your ride will be scheduled for
-                    the same day in the following week, as same-day bookings are
-                    not allowed.
+                    that matches today, your ride will be scheduled for the same
+                    day in the following week, as same-day bookings are not
+                    allowed.
                   </p>
                 </div>
 
-                {/* Next Button */}
+                {validationError && (
+                  <div className="text-red-500 text-sm text-center">
+                    {validationError}
+                  </div>
+                )}
+
                 <div className="text-center">
                   <button
                     type="button"
@@ -303,6 +339,7 @@ export default function WeeklyRideBookingPage(props: { userId: string }) {
               </>
             ) : (
               <Review
+                distance={distance}
                 formData={formData}
                 setPage={setPage}
                 totalPrice={totalPrice}

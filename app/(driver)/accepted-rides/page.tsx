@@ -10,15 +10,19 @@ export default async function MyRides() {
     error,
   } = await supabase.auth.getUser();
   if (error || !user) {
-    return <p>Error: Unable to fetch user.</p>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <p className="text-lg text-gray-600">Error: Unable to fetch user.</p>
+      </div>
+    );
   }
 
   const acceptedRides = await getAcceptedRidesByDriver(user.id);
 
   if (acceptedRides.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 to-blue-500 p-4">
-        <p className="text-lg text-white text-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+        <p className="text-lg text-gray-700 text-center">
           You have no accepted rides at the moment.
         </p>
       </div>
@@ -27,68 +31,69 @@ export default async function MyRides() {
 
   const formatDateTime = (dateString: string, timeString: string) => {
     const date = new Date(`${dateString}T${timeString}`);
-    return `${date.toLocaleDateString()} at ${date.toLocaleTimeString([], {
+    return `${date.toLocaleDateString([], {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    })} at ${date.toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
     })}`;
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-white p-6 md:p-10">
-      {/* Instructional Header with Text */}
-      <div className="text-center mb-10">
-        <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-4">
+    <div className="min-h-screen bg-gray-50 p-6">
+      {/* Header Section */}
+      <div className="text-center mb-8">
+        <h2 className="text-2xl font-bold text-gray-900">
           Your Accepted Rides
         </h2>
-        <p className="text-lg text-gray-700">
-          Below are the rides you have accepted. You can view details, pickup
-          and dropoff locations, and manage each ride. When youre ready, head
-          out and complete your trips!
+        <p className="text-md text-gray-600">
+          Here are the rides youve accepted. Check details, manage your rides,
+          and complete your trips.
         </p>
       </div>
 
-      <div className="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+      {/* Rides Grid */}
+      <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {acceptedRides.map((ride) => (
           <div
             key={ride.id}
-            className="bg-white p-6 rounded-lg shadow-lg transition-transform transform "
+            className="bg-white p-5 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200"
           >
             <div className="flex justify-between items-center">
-              <span className="text-sm md:text-base text-purple-500 font-semibold">
+              <span className="text-sm text-gray-500">
                 {formatDateTime(ride.pickupDate, ride.pickupTime)}
               </span>
-              <p className="text-sm md:text-base text-gray-500">
+              <p className="text-sm text-gray-500">
                 {ride.riders.length}{" "}
                 {ride.riders.length > 1 ? "Passengers" : "Passenger"}
               </p>
             </div>
-            <h3 className="mt-4 text-xl md:text-2xl font-semibold text-gray-800">
+
+            {/* Ride Title */}
+            <h3 className="mt-4 text-xl font-semibold text-gray-800">
               Ride to {ride.dropoffAddress}
             </h3>
 
-            <div className="mt-6 space-y-3">
-              {/* Pickup Information */}
-              <div className="flex items-center bg-gray-100 rounded-md p-3">
-                <span className="w-5 h-5 bg-teal-500 rounded-full mr-3"></span>
-                <p className="text-gray-700 text-base">
-                  Pickup: {ride.pickupAddress}
-                </p>
+            {/* Pickup and Dropoff Info */}
+            <div className="mt-4">
+              <div className="flex items-center text-gray-600 mb-3">
+                <span className="w-4 h-4 bg-teal-500 rounded-full mr-2"></span>
+                <p className="text-base">Pickup: {ride.pickupAddress}</p>
               </div>
 
-              {/* Dropoff Information */}
-              <div className="flex items-center bg-gray-100 rounded-md p-3">
-                <span className="w-5 h-5 bg-amber-500 rounded-full mr-3"></span>
-                <p className="text-gray-700 text-base">
-                  Dropoff: {ride.dropoffAddress}
-                </p>
+              <div className="flex items-center text-gray-600">
+                <span className="w-4 h-4 bg-amber-500 rounded-full mr-2"></span>
+                <p className="text-base">Dropoff: {ride.dropoffAddress}</p>
               </div>
             </div>
 
             {/* View Details Button */}
-            <div className="mt-6">
+            <div className="mt-5">
               <Link href={`/accepted-rides/ride?ride_id=${ride.id}`}>
-                <div className="block text-center text-white bg-gradient-to-r from-pink-500 to-purple-500 py-2 px-4 rounded-lg hover:from-pink-600 hover:to-purple-600 transition-colors duration-300 text-base">
-                  View Details
+                <div className="block text-center text-gray-800 border border-gray-300 py-2 rounded-md hover:bg-gray-100 transition-colors">
+                  Go To Ride Page
                 </div>
               </Link>
             </div>

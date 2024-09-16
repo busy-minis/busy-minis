@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useDebounce } from "use-debounce";
 
 interface AddressAutocompleteProps {
   label: string;
@@ -11,6 +12,10 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
 }) => {
   const autocompleteRef = useRef<HTMLInputElement>(null);
   const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState(false);
+  const [inputValue, setInputValue] = useState("");
+
+  // Debounce the inputValue by 500ms to prevent excessive API requests
+  const [debouncedValue] = useDebounce(inputValue, 500);
 
   useEffect(() => {
     const checkGoogleMaps = () => {
@@ -26,7 +31,7 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
             setIsGoogleMapsLoaded(true);
             clearInterval(interval);
           }
-        }, 100); // Check every 100ms
+        }, 100);
       }
     };
 
@@ -49,12 +54,21 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
         const address = place.formatted_address || "";
         const lat = place.geometry.location.lat();
         const lng = place.geometry.location.lng();
-        onAddressSelect(address, lat, lng); // Provide lat/lng
+
+        // Update the input value with the selected address
+        setInputValue(address);
+        onAddressSelect(address, lat, lng);
       } else {
         const address = place.formatted_address || "";
-        onAddressSelect(address); // Provide only address, lat/lng undefined
+        setInputValue(address); // Update input with address
+        onAddressSelect(address); // Provide only the address, lat/lng undefined
       }
     });
+
+    // Cleanup the listener on unmount
+    return () => {
+      window.google.maps.event.clearInstanceListeners(autocomplete);
+    };
   }, [isGoogleMapsLoaded, onAddressSelect]);
 
   return (
@@ -62,6 +76,8 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
       <label className="block text-gray-700 font-semibold mb-2">{label}</label>
       <input
         ref={autocompleteRef}
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
         className="block w-full px-4 py-2 text-gray-700 bg-gray-200 rounded-lg"
         placeholder={`Enter ${label.toLowerCase()}`}
         required

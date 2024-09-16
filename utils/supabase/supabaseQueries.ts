@@ -203,6 +203,7 @@ export const makeTimeBlock = async () => {
     throw error;
   }
 };
+
 export const cancelRideById = async (rideId: string) => {
   try {
     const { data, error } = await supabase
@@ -332,34 +333,23 @@ export const startRide = async (rideId: string) => {
   }
 };
 
-export const updateDriverLocation = async (
+export async function updateDriverLocation(
   rideId: string,
-  location: { lat: number; lng: number }
-) => {
-  try {
-    const { data, error } = await supabase
-      .from("ride_location")
-      .upsert(
-        {
-          ride_id: rideId,
-          driver_lat: location.lat,
-          driver_lng: location.lng,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "ride_id" }
-      ) // onConflict should be a string, specifying the column name
-      .eq("ride_id", rideId);
+  driverId: string,
+  driverLat: number,
+  driverLng: number
+) {
+  const { error } = await supabase.from("ride_location").insert({
+    ride_id: rideId,
+    driver_id: driverId,
+    driverLat,
+    driverLng,
+  });
 
-    if (error) {
-      throw error;
-    }
-
-    return data;
-  } catch (error) {
-    console.error("Error updating driver location:", error);
-    throw error;
+  if (error) {
+    console.error("Failed to update driver's location:", error);
   }
-};
+}
 export const endRide = async (rideId: string) => {
   try {
     const { data, error } = await supabase

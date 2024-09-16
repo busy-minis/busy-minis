@@ -25,6 +25,7 @@ export default function Riders({ formData, setFormData }: any) {
       {formData.riders.map((rider: any, index: any) => (
         <div key={index} className="grid grid-cols-5 gap-4 mb-4">
           <input
+            required
             type="text"
             placeholder={`Rider ${index + 1} Name`}
             value={rider.name}
@@ -36,6 +37,7 @@ export default function Riders({ formData, setFormData }: any) {
             className="col-span-3 p-3 border border-gray-300 rounded-lg focus:ring-teal-600 focus:border-teal-600"
           />
           <input
+            required
             type="number"
             placeholder="Age"
             value={rider.age}

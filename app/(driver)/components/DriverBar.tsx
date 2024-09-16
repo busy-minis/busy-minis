@@ -16,7 +16,12 @@ const DriverBarClient = () => {
 
   return (
     <nav className="flex z-40 sticky top-0 bg-white/90 lg:backdrop-blur-lg justify-between items-center px-12 py-4 shadow-md">
-      <Logo />
+      <div className="flex items-center space-x-4">
+        <Logo />
+        <span className="text-xl font-semibold text-gray-800 hidden md:inline">
+          Driver Portal
+        </span>
+      </div>
       <div className="hidden lg:flex items-center space-x-6">
         <NavItem
           href="/available-rides"
@@ -30,6 +35,7 @@ const DriverBarClient = () => {
           icon={<List size={24} />}
           isActive={isActive("/accepted-rides")}
         />
+        {/* Uncomment if Profile is needed */}
         {/* <NavItem
           href="/profile"
           label="Profile"

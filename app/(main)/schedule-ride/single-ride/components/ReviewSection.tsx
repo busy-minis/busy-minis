@@ -1,6 +1,19 @@
 import React from "react";
 
-export default function ReviewSection({ formData, totalPrice, setStep }: any) {
+// Utility function to convert 24-hour time format to 12-hour format with AM/PM
+function formatTime(time24: string): string {
+  const [hours, minutes] = time24.split(":").map(Number);
+  const period = hours >= 12 ? "PM" : "AM";
+  const hours12 = hours % 12 || 12;
+  return `${hours12}:${minutes < 10 ? `0${minutes}` : minutes} ${period}`;
+}
+
+export default function ReviewSection({
+  formData,
+  totalPrice,
+  setStep,
+  distance,
+}: any) {
   return (
     <>
       <div className="flex items-center mb-8">
@@ -11,6 +24,7 @@ export default function ReviewSection({ formData, totalPrice, setStep }: any) {
       </div>
 
       <section className="mb-6 p-6 bg-white shadow-lg rounded-lg">
+        {/* Riders Information */}
         <h4 className="font-semibold text-xl text-teal-700 mb-4">
           Riders Information:
         </h4>
@@ -23,6 +37,7 @@ export default function ReviewSection({ formData, totalPrice, setStep }: any) {
           ))}
         </ul>
 
+        {/* Ride Details */}
         <h4 className="font-semibold text-xl text-teal-700 mb-4">
           Ride Details:
         </h4>
@@ -34,16 +49,16 @@ export default function ReviewSection({ formData, totalPrice, setStep }: any) {
             </p>
             <p className="text-gray-600 mt-2">
               <span className="font-medium text-teal-700">Pickup Time:</span>{" "}
-              {formData.pickupTime}
+              {formatTime(formData.pickupTime)}
             </p>
           </div>
 
           <div className="flex-1 bg-gray-100 p-4 rounded-lg shadow-sm">
-            <p className="text-gray-600 mt-2">
+            <p className="text-gray-600">
               <span className="font-medium text-teal-700">Pickup Address:</span>{" "}
               {formData.pickupAddress}
             </p>
-            <p className="text-gray-600">
+            <p className="text-gray-600 mt-2">
               <span className="font-medium text-teal-700">
                 Dropoff Address:
               </span>{" "}
@@ -52,11 +67,24 @@ export default function ReviewSection({ formData, totalPrice, setStep }: any) {
           </div>
         </div>
 
+        {/* Distance Display */}
+        {distance !== null && (
+          <div className="bg-teal-50 p-4 rounded-lg shadow-md mb-4">
+            <p className="text-gray-600">
+              <span className="font-medium text-teal-700">Distance:</span>{" "}
+              {distance.toFixed(2)} miles
+            </p>
+          </div>
+        )}
+
+        {/* Final Cost */}
         <div className="bg-teal-100 p-4 rounded-lg shadow-md">
           <h4 className="font-semibold text-lg text-teal-700 mb-2">
             Final Cost: ${totalPrice}
           </h4>
         </div>
+
+        {/* Navigation Buttons */}
         <div className="flex justify-between mt-6">
           <button
             type="button"
