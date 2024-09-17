@@ -75,7 +75,9 @@ const RideCard: React.FC<RideCardProps> = ({ ride, handleAcceptRide }) => {
             {/* Distance */}
             <div className="flex items-center text-gray-600">
               <DotsThree size={20} className="text-purple-500 mr-3" />
-              <span className="font-light">Distance: {ride.distance}</span>
+              <span className="font-light">
+                Distance: {ride.distance} miles
+              </span>
             </div>
           </div>
         </div>
