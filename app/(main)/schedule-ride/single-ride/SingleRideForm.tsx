@@ -104,8 +104,6 @@ export default function SingleRideBooking(props: { userId: string }) {
     const errors: string[] = [];
     if (!formData.pickupDate) {
       errors.push("Pickup Date is required.");
-    } else if (!isAfter(parseISO(formData.pickupDate), new Date())) {
-      errors.push("Pickup Date must be in the future.");
     }
     if (!formData.pickupTime) errors.push("Pickup Time is required.");
     formData.riders.forEach((rider, index) => {

@@ -9,5 +9,9 @@ const PasswordForm = dynamic(() => import("./PasswordForm"), {
 });
 
 export default function ResetPasswordPage() {
-  return <div>Rerun</div>;
+  return (
+    <Suspense fallback={<div>Loading password form...</div>}>
+      <PasswordForm />
+    </Suspense>
+  );
 }
