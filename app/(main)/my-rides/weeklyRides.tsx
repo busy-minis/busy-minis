@@ -1,30 +1,22 @@
+// WeeklyRides.tsx
 "use client";
-
-import { PencilSimple, WarningCircle } from "@phosphor-icons/react";
+import { PencilSimple } from "@phosphor-icons/react";
 import Link from "next/link";
-import React, { useState } from "react";
-import { format, isAfter } from "date-fns";
-
-// Function to format time (24-hour to 12-hour AM/PM)
-const formatTime = (time24: string) => {
-  const [hours, minutes] = time24.split(":").map(Number);
-  const period = hours >= 12 ? "PM" : "AM";
-  const hours12 = hours % 12 || 12; // Convert 0 to 12 for midnight and noon
-  return `${hours12}:${minutes < 10 ? `0${minutes}` : minutes} ${period}`;
-};
+import React from "react";
+import { isAfter } from "date-fns";
 
 interface WeeklyRide {
   id: string;
   start_date: string;
-  end_date?: string; // Optional end_date
+  end_date?: string;
   total_price: number;
   user_id: string;
   status: string;
   pickupAddress: string;
   dropoffAddress: string;
   pickupTime: string;
-  riders: any; // Assuming riders as JSONB
-  selectedDays: string[]; // Days selected for weekly rides
+  riders: any;
+  selectedDays: string[];
 }
 
 interface WeeklyRidesProps {
@@ -36,139 +28,150 @@ export default function WeeklyRides({
   user_id,
   weekly_rides,
 }: WeeklyRidesProps) {
-  const [showModal, setShowModal] = useState<boolean>(false);
-  const [selectedRideId, setSelectedRideId] = useState<string | null>(null);
-
-  const handleManage = (id: string) => {
-    setSelectedRideId(id);
-    setShowModal(true);
-  };
-
-  const handleCancelRide = (id: string) => {
-    // Logic to cancel the ride early
-    console.log(`Cancelling weekly ride with id: ${id}`);
-    setShowModal(false);
-  };
-
-  const handleExtendRide = (id: string) => {
-    // Logic to extend the weekly ride
-    console.log(`Extending weekly ride with id: ${id}`);
-  };
-
   const currentDate = new Date();
-  const placeholderEndDate = new Date(currentDate);
-  placeholderEndDate.setDate(currentDate.getDate() + 5); // Add 5 days to the current date
+
+  // Function to determine badge color based on status
+  const getStatusBadge = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "accepted":
+        return "bg-green-100 text-green-800";
+      case "cancelled":
+        return "bg-red-100 text-red-800";
+      case "completed":
+        return "bg-blue-100 text-blue-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  // Function to determine days badge color (optional)
+  const getDaysBadge = (day: string) => {
+    // Assign colors based on day or any logic
+    // Here, we'll alternate colors for demonstration
+    const colors = [
+      "bg-blue-100 text-blue-800",
+      "bg-green-100 text-green-800",
+      "bg-purple-100 text-purple-800",
+      "bg-indigo-100 text-indigo-800",
+      "bg-pink-100 text-pink-800",
+      "bg-yellow-100 text-yellow-800",
+      "bg-red-100 text-red-800",
+    ];
+    const index = new Date(day).getDay(); // 0 (Sun) to 6 (Sat)
+    return colors[index % colors.length];
+  };
 
   return (
-    <div>
-      <h3 className="font-semibold text-2xl text-teal-700 mb-6">
+    <div className="bg-white shadow rounded-lg p-6">
+      <h3 className="font-semibold text-2xl text-gray-800 mb-6">
         Weekly Rides
       </h3>
       {weekly_rides.length > 0 ? (
-        weekly_rides.map((weeklyRide) => {
-          // Use placeholderEndDate if end_date is not available
-          const rideEndDate =
-            weeklyRide.end_date || placeholderEndDate.toISOString();
-          const isRideDiscontinued = isAfter(
-            currentDate,
-            new Date(rideEndDate)
-          );
+        <ul className="space-y-6">
+          {weekly_rides.map((weeklyRide) => {
+            const rideEndDate = weeklyRide.end_date || null;
+            const isRideDiscontinued = rideEndDate
+              ? isAfter(currentDate, new Date(rideEndDate))
+              : false;
 
-          return (
-            <div
-              key={weeklyRide.id}
-              className="p-6 mb-6 bg-white shadow-md rounded-lg relative"
-            >
-              {/* Ride discontinuation warning if end_date exists and the ride is discontinued */}
-              {isRideDiscontinued && (
-                <div className="flex items-center text-yellow-600 bg-yellow-100 p-3 rounded-lg mb-4">
-                  <WarningCircle size={24} className="mr-2" />
-                  <p>
-                    This weekly ride has been discontinued. Payment is required
-                    to continue.
-                  </p>
-                  <button
-                    onClick={() => handleExtendRide(weeklyRide.id)}
-                    className="ml-auto bg-teal-500 text-white px-4 py-2 rounded-lg hover:bg-teal-600 transition duration-300"
-                  >
-                    Extend Ride
-                  </button>
-                </div>
-              )}
-
-              <h4 className="font-bold text-lg text-gray-900">
-                Week of {format(new Date(weeklyRide.start_date), "MMMM do")} to{" "}
-                {format(new Date(rideEndDate), "MMMM do")}
-              </h4>
-
-              <ul className="mt-4 text-gray-600">
-                <li className="mb-3">
-                  <strong>Pickup Address:</strong> {weeklyRide.pickupAddress}
-                </li>
-                <li className="mb-3">
-                  <strong>Dropoff Address:</strong> {weeklyRide.dropoffAddress}
-                </li>
-                <li className="mb-3">
-                  <strong>Pickup Time:</strong>{" "}
-                  {formatTime(weeklyRide.pickupTime)}
-                </li>
-                <li className="mb-3">
-                  <strong>Selected Days:</strong>{" "}
-                  {weeklyRide.selectedDays.join(", ")}
-                </li>
-                <li className="mb-3">
-                  <strong>Riders:</strong>{" "}
-                  {weeklyRide.riders.map((rider: any) => rider.name).join(", ")}
-                </li>
-              </ul>
-
-              <button
-                className="mt-4 flex items-center bg-teal-500 text-white px-4 py-2 rounded-full hover:bg-teal-600 transition duration-300"
-                onClick={() => handleManage(weeklyRide.id)}
+            return (
+              <li
+                key={weeklyRide.id}
+                className="border border-gray-200 rounded-lg p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center hover:shadow-md transition-shadow duration-300"
               >
-                <PencilSimple size={20} className="mr-2" />
-                Cancel WeeklyRide
-              </button>
+                <div className="mb-4 sm:mb-0 w-full sm:w-2/3">
+                  {/* Pickup Location */}
+                  <div className="mb-2">
+                    <p className="text-lg font-medium text-gray-900 bg-blue-100 text-blue-800 px-3 py-1 rounded">
+                      Pickup Location
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {weeklyRide.pickupAddress}
+                    </p>
+                  </div>
 
-              {/* Cancel Ride Modal */}
-              {showModal && selectedRideId === weeklyRide.id && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                  <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-                    <h2 className="text-lg font-semibold mb-4">
-                      Cancel Weekly Ride
-                    </h2>
-                    <p>Are you sure you want to cancel this weekly ride?</p>
-                    <div className="mt-6 flex justify-end space-x-4">
-                      <button
-                        className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400"
-                        onClick={() => setShowModal(false)}
+                  {/* Drop-off Location */}
+                  <div className="mb-4">
+                    <p className="text-lg font-medium text-gray-900 bg-red-100 text-red-800 px-3 py-1 rounded">
+                      Drop-off Location
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {weeklyRide.dropoffAddress}
+                    </p>
+                  </div>
+
+                  {/* Ride Details */}
+                  <div>
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      <span
+                        className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getStatusBadge(
+                          weeklyRide.status
+                        )}`}
                       >
-                        No
-                      </button>
-                      <button
-                        className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
-                        onClick={() => handleCancelRide(weeklyRide.id)}
-                      >
-                        Yes, Cancel Ride
-                      </button>
+                        {weeklyRide.status.charAt(0).toUpperCase() +
+                          weeklyRide.status.slice(1)}
+                      </span>
+                      {weeklyRide.selectedDays.map(
+                        (day: string, index: number) => (
+                          <span
+                            key={index}
+                            className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getDaysBadge(
+                              day
+                            )}`}
+                          >
+                            {day}
+                          </span>
+                        )
+                      )}
                     </div>
+                    <p className="text-sm text-gray-600">
+                      <span className="font-semibold">Pickup Time:</span>{" "}
+                      {formatTime(weeklyRide.pickupTime)}
+                    </p>
+                    {isRideDiscontinued && (
+                      <p className="text-sm text-yellow-600 mt-2">
+                        Ride discontinued. Payment required to continue.
+                      </p>
+                    )}
                   </div>
                 </div>
-              )}
-            </div>
-          );
-        })
+                <div className="flex space-x-4 w-full sm:w-auto">
+                  <Link
+                    href={`/my-rides/weekly-ride/manage?id=${weeklyRide.id}`}
+                  >
+                    <button className="flex items-center text-sm font-medium bg-teal-100 text-teal-600 hover:bg-teal-200 px-4 py-2 rounded-md transition-colors duration-200">
+                      <PencilSimple size={20} className="mr-1" />
+                      Manage
+                    </button>
+                  </Link>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
       ) : (
-        <p>No weekly rides booked.</p>
+        <div className="text-center">
+          <p className="text-gray-600">No weekly rides booked.</p>
+          <Link href={"/schedule-ride/weekly-ride"}>
+            <button className="mt-4 bg-teal-600 text-white px-5 py-2 rounded-md hover:bg-teal-700 transition-colors duration-200">
+              Book a Weekly Ride
+            </button>
+          </Link>
+        </div>
       )}
-
-      <div className="mt-4">
-        <Link href="/schedule-ride/weekly-ride">
-          <div className="bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-all duration-200 shadow-md">
-            Book a Weekly Ride
-          </div>
-        </Link>
-      </div>
     </div>
   );
+}
+
+function formatTime(time24: string) {
+  const [hours, minutes] = time24.split(":").map(Number);
+  const date = new Date();
+  date.setHours(hours, minutes);
+  return date.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "numeric",
+    hour12: true,
+  });
 }

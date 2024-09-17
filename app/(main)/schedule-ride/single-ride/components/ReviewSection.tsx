@@ -8,17 +8,44 @@ function formatTime(time24: string): string {
   return `${hours12}:${minutes < 10 ? `0${minutes}` : minutes} ${period}`;
 }
 
+interface Stop {
+  address: string;
+  lat?: number;
+  lng?: number;
+}
+
+interface Rider {
+  name: string;
+  age: string;
+}
+
+interface FormData {
+  pickupDate: string;
+  pickupTime: string;
+  pickupAddress: string;
+  dropoffAddress: string;
+  riders: Rider[];
+  stops: Stop[];
+}
+
+interface ReviewSectionProps {
+  formData: FormData;
+  totalPrice: number;
+  setStep: (step: number) => void;
+  distance: number | null;
+}
+
 export default function ReviewSection({
   formData,
   totalPrice,
   setStep,
   distance,
-}: any) {
+}: ReviewSectionProps) {
   return (
     <>
       <div className="flex items-center mb-8">
         <div className="bg-orange-500 grid place-content-center text-sm w-8 h-8 rounded-full text-white">
-          2
+          3
         </div>
         <p className="font-semibold text-lg ml-2">Review Your Ride Details</p>
       </div>
@@ -26,10 +53,10 @@ export default function ReviewSection({
       <section className="mb-6 p-6 bg-white shadow-lg rounded-lg">
         {/* Riders Information */}
         <h4 className="font-semibold text-xl text-teal-700 mb-4">
-          Riders Information:
+          Riders Information
         </h4>
         <ul className="list-disc list-inside mb-6">
-          {formData.riders.map((rider: any, index: any) => (
+          {formData.riders.map((rider, index) => (
             <li key={index} className="text-gray-700">
               <span className="font-medium text-gray-900">{rider.name}</span>,{" "}
               {rider.age} years old
@@ -39,39 +66,54 @@ export default function ReviewSection({
 
         {/* Ride Details */}
         <h4 className="font-semibold text-xl text-teal-700 mb-4">
-          Ride Details:
+          Ride Details
         </h4>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-          <div className="flex-1 bg-gray-100 p-4 rounded-lg shadow-sm">
+        <div className="bg-gray-100 p-4 rounded-lg shadow-sm mb-6">
+          {/* Pickup Date and Time */}
+          <div className="mb-4">
             <p className="text-gray-600">
               <span className="font-medium text-teal-700">Pickup Date:</span>{" "}
               {formData.pickupDate}
             </p>
-            <p className="text-gray-600 mt-2">
+            <p className="text-gray-600">
               <span className="font-medium text-teal-700">Pickup Time:</span>{" "}
               {formatTime(formData.pickupTime)}
             </p>
           </div>
 
-          <div className="flex-1 bg-gray-100 p-4 rounded-lg shadow-sm">
-            <p className="text-gray-600">
-              <span className="font-medium text-teal-700">Pickup Address:</span>{" "}
+          {/* Route */}
+          <h5 className="font-semibold text-lg text-teal-700 mt-2">Route</h5>
+          <ol className="list-decimal list-inside text-gray-800 mt-2 space-y-2">
+            <li>
+              <span className="font-medium text-gray-900">Pickup Address:</span>{" "}
               {formData.pickupAddress}
-            </p>
-            <p className="text-gray-600 mt-2">
-              <span className="font-medium text-teal-700">
+            </li>
+            {formData.stops && formData.stops.length > 0 && (
+              <>
+                {formData.stops.map((stop, index) => (
+                  <li key={index + 1}>
+                    <span className="font-medium text-gray-900">
+                      Stop {index + 1}:
+                    </span>{" "}
+                    {stop.address}
+                  </li>
+                ))}
+              </>
+            )}
+            <li>
+              <span className="font-medium text-gray-900">
                 Dropoff Address:
               </span>{" "}
               {formData.dropoffAddress}
-            </p>
-          </div>
+            </li>
+          </ol>
         </div>
 
         {/* Distance Display */}
         {distance !== null && (
           <div className="bg-teal-50 p-4 rounded-lg shadow-md mb-4">
             <p className="text-gray-600">
-              <span className="font-medium text-teal-700">Distance:</span>{" "}
+              <span className="font-medium text-teal-700">Total Distance:</span>{" "}
               {distance.toFixed(2)} miles
             </p>
           </div>
@@ -80,11 +122,12 @@ export default function ReviewSection({
         {/* Final Cost */}
         <div className="bg-teal-100 p-4 rounded-lg shadow-md">
           <h4 className="font-semibold text-lg text-teal-700 mb-2">
-            Final Cost: ${totalPrice}
+            Total Cost: ${totalPrice.toFixed(2)}
           </h4>
         </div>
 
         {/* Navigation Buttons */}
+
         <div className="flex justify-between mt-6">
           <button
             type="button"
@@ -93,9 +136,10 @@ export default function ReviewSection({
           >
             Back
           </button>
+
           <button
             type="submit"
-            className="w-full px-4 py-2 bg-gradient-to-r from-theme-orange to-theme-yellow text-white rounded-lg shadow-md hover:shadow-lg transition-transform duration-200 ease-in-out transform hover:-translate-y-1 ml-2 flex justify-center items-center"
+            className="w-full px-4 py-2 bg-gradient-to-r from-orange-500 to-yellow-500 text-white rounded-lg shadow-md hover:shadow-lg transition-transform duration-200 ease-in-out transform hover:-translate-y-1 ml-2 flex justify-center items-center"
           >
             Continue to Payment
           </button>

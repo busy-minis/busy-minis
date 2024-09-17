@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
-
+import { isAfter, parseISO } from "date-fns";
 import LoadGoogleMapsScript from "./LoadGoogleMapsScript";
 import { loadStripe } from "@stripe/stripe-js";
 import DetailSection from "./components/DetailSection";
@@ -10,6 +10,12 @@ import ReviewSection from "./components/ReviewSection";
 const stripePromise = loadStripe(
   "pk_test_51Pq0V6AU6tLKej0RgL8EyqnGLr2FSrqtraFvpHgSi6R5jGL2J2BhRJJmumdajy3WgzuNlnZK6drMlrLAtw5cixYP00kozGoK19"
 );
+
+interface Stop {
+  address: string;
+  lat?: number;
+  lng?: number;
+}
 
 interface Rider {
   name: string;
@@ -28,6 +34,8 @@ interface FormData {
   dropoffLat?: number;
   dropoffLng?: number;
   riders: Rider[];
+  distance: number;
+  stops: Stop[]; // Add stops field
 }
 
 export default function SingleRideBooking(props: { userId: string }) {
@@ -45,6 +53,8 @@ export default function SingleRideBooking(props: { userId: string }) {
     dropoffLat: undefined,
     dropoffLng: undefined,
     riders: [{ name: "", age: "" }],
+    stops: [], // Initialize stops as empty array
+    distance: 0,
   });
 
   const [isSameDay, setIsSameDay] = useState(false);
@@ -73,6 +83,9 @@ export default function SingleRideBooking(props: { userId: string }) {
     };
     let price = 16; // Base price
     if (isSameDay) price += 25;
+    if (formData.stops && formData.stops.length > 0) {
+      price += formData.stops.length * 5;
+    }
     if (isOffPeak) price += 15;
     if (formData.riders.length > 1) {
       price += (formData.riders.length - 1) * 5;
@@ -81,7 +94,7 @@ export default function SingleRideBooking(props: { userId: string }) {
       price += calculateCost();
     }
     setTotalPrice(price);
-  }, [isSameDay, isOffPeak, formData.riders, distance]); // Add calculateCost as a dependency
+  }, [isSameDay, isOffPeak, formData.riders, distance, formData.stops]); // Add calculateCost as a dependency
 
   useEffect(() => {
     calculateTotalPrice(); // Call the memoized version of the function
@@ -89,11 +102,17 @@ export default function SingleRideBooking(props: { userId: string }) {
   // Validation function for Step 1
   const validateStep1 = () => {
     const errors: string[] = [];
-    if (!formData.pickupDate) errors.push("Pickup Date is required.");
+    if (!formData.pickupDate) {
+      errors.push("Pickup Date is required.");
+    } else if (!isAfter(parseISO(formData.pickupDate), new Date())) {
+      errors.push("Pickup Date must be in the future.");
+    }
     if (!formData.pickupTime) errors.push("Pickup Time is required.");
     formData.riders.forEach((rider, index) => {
       if (!rider.name) errors.push(`Rider ${index + 1} Name is required.`);
-      if (!rider.age) errors.push(`Rider ${index + 1} Age is required.`);
+      if (!rider.age || parseInt(rider.age) <= 0) {
+        errors.push(`Rider ${index + 1} Age must be a positive number.`);
+      }
     });
     setValidationErrors(errors);
     return errors.length === 0;
@@ -131,15 +150,15 @@ export default function SingleRideBooking(props: { userId: string }) {
   };
 
   return (
-    <div className="px-2 min-h-screen flex flex-col justify-between relative bg-teal-50">
-      <LoadGoogleMapsScript /> {/* Load Google Maps API */}
+    <div className="px-4 min-h-screen flex flex-col justify-between bg-gradient-to-br from-blue-50 to-indigo-100">
+      <LoadGoogleMapsScript />
       <div className="container mx-auto px-4 sm:px-6 pt-10 pb-24">
-        <h1 className="text-3xl sm:text-5xl font-bold text-center text-gray-900 mb-10">
+        <h1 className="text-4xl sm:text-6xl font-extrabold text-center text-gray-900 mb-10">
           Book a Single Ride
         </h1>
 
         <form
-          className="max-w-3xl mx-auto bg-white/80 backdrop-blur-3xl p-10 shadow-2xl rounded-lg"
+          className="max-w-3xl mx-auto bg-white/90 backdrop-blur-md p-10 shadow-2xl rounded-lg"
           onSubmit={handleSubmit}
         >
           <div className="mb-8">
@@ -167,6 +186,8 @@ export default function SingleRideBooking(props: { userId: string }) {
                 setDistance={setDistance}
                 handleNextStep={handleNextStep}
                 setStep={setStep}
+                setValidationErrors={setValidationErrors}
+                validationErrors={validationErrors}
               />
             )}
             {step === 3 && (

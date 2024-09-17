@@ -3,16 +3,23 @@ import { useDebounce } from "use-debounce";
 
 interface AddressAutocompleteProps {
   label: string;
+  value: string;
   onAddressSelect: (address: string, lat?: number, lng?: number) => void;
 }
 
 const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
   label,
+  value,
   onAddressSelect,
 }) => {
   const autocompleteRef = useRef<HTMLInputElement>(null);
   const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState(false);
-  const [inputValue, setInputValue] = useState("");
+  const [inputValue, setInputValue] = useState(value || "");
+
+  // Update inputValue when the value prop changes
+  useEffect(() => {
+    setInputValue(value || "");
+  }, [value]);
 
   // Debounce the inputValue by 500ms to prevent excessive API requests
   const [debouncedValue] = useDebounce(inputValue, 500);

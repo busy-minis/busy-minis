@@ -2,8 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { XCircle } from "@phosphor-icons/react";
-import { cancelRideById } from "@/utils/supabase/supabaseQueries";
-import { getRideById } from "@/utils/supabase/supabaseQueries";
+import { cancelRideById, getRideById } from "@/utils/supabase/supabaseQueries";
 import Passengers from "./components/Passengers";
 import Driver from "./components/Driver";
 import Map from "./components/Map";
@@ -48,7 +47,7 @@ export default function RideTrackingPage() {
 
     console.log("Ride canceled:", id);
     setIsModalOpen(false);
-    router.push("/my-rides"); // Redirecting to my-rides page or wherever you want
+    router.push("/my-rides");
   };
 
   if (loading) {
@@ -76,43 +75,40 @@ export default function RideTrackingPage() {
   }
 
   return (
-    <section className="bg-zinc-200 min-h-screen">
-      <div className="max-w-4xl mx-auto py-12 px-6 lg:px-8">
-        <h1 className="text-4xl font-bold text-teal-900 text-center mb-8">
+    <section className="bg-gray-100 min-h-screen">
+      <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <h1 className="text-3xl font-bold text-teal-900 text-center mb-6">
           Ride Tracking
         </h1>
 
-        <div className="bg-white shadow-lg rounded-xl p-8 mb-8">
-          <h2 className="text-2xl font-semibold text-teal-900 mb-4">
+        <div className="bg-white shadow-lg rounded-xl p-6 mb-6">
+          <h2 className="text-xl font-semibold text-teal-900 mb-4">
             Ride Details
           </h2>
 
-          <div className="flex flex-col space-y-4">
+          <div className="space-y-6">
             <RideInfo rideData={rideData} />
             <Driver rideData={rideData} />
           </div>
         </div>
 
-        {/* Passengers Section */}
         <Passengers riders={rideData.riders} />
 
-        {/* Google Maps Section */}
         <Map rideData={rideData} />
 
         <button
           onClick={() => setIsModalOpen(true)}
-          className="mt-6 bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600 transition duration-300 inline-flex items-center"
+          className="mt-6 bg-red-500 text-white px-4 py-3 rounded-full hover:bg-red-600 transition duration-300 inline-flex items-center justify-center w-full sm:w-auto"
         >
           <XCircle size={20} className="mr-2" />
           Cancel Ride
         </button>
       </div>
 
-      {/* Cancel Confirmation Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-8 shadow-lg max-w-md w-full">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+          <div className="bg-white rounded-lg p-6 shadow-lg max-w-sm w-full">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
               Confirm Cancellation
             </h2>
             <p className="text-gray-700 mb-6">

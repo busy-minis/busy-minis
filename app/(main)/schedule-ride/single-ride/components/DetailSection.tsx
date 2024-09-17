@@ -151,6 +151,7 @@ export default function DetailSection({
           <Input
             label={`Rider ${index + 1} Age`}
             type="number"
+            min="0"
             value={rider.age}
             onChange={(e) => handleInputChange(e, "age", index)}
           />

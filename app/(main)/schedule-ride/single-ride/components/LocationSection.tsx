@@ -1,14 +1,21 @@
 import React from "react";
 import AddressAutocomplete from "../AddressAutocompleteProps";
 import { format } from "date-fns"; // Import the format function
-import { ArrowLeft, ArrowRight } from "@phosphor-icons/react";
+import { ArrowLeft, ArrowRight, Plus, Trash } from "@phosphor-icons/react";
 
+interface Stop {
+  address: string;
+  lat?: number;
+  lng?: number;
+}
 export default function LocationSection({
   formData,
   setFormData,
   setDistance,
   setStep,
   handleNextStep,
+  setValidationErrors,
+  validationErrors,
 }: any) {
   const handlePickupAddressSelect = (
     address: string,
@@ -41,45 +48,107 @@ export default function LocationSection({
     return format(date, "hh:mm a"); // Format time as 12-hour format (e.g., 01:02 PM)
   };
 
+  const validateStep2 = () => {
+    const errors = [];
+
+    // Validate Pickup Address
+    if (!formData.pickupAddress || !formData.pickupLat || !formData.pickupLng) {
+      errors.push("Pickup address is required.");
+    }
+
+    // Validate Dropoff Address
+    if (
+      !formData.dropoffAddress ||
+      !formData.dropoffLat ||
+      !formData.dropoffLng
+    ) {
+      errors.push("Dropoff address is required.");
+    }
+
+    // Validate Stops
+    formData.stops.forEach((stop: any, index: any) => {
+      if (!stop.address || !stop.lat || !stop.lng) {
+        errors.push(`Stop ${index + 1} address is incomplete.`);
+      }
+    });
+
+    setValidationErrors(errors);
+    return errors.length === 0;
+  };
+
   const calculateDistance = () => {
     if (
       window.google &&
-      formData.pickupLat &&
-      formData.pickupLng &&
-      formData.dropoffLat &&
-      formData.dropoffLng
+      formData.pickupLat !== undefined &&
+      formData.pickupLng !== undefined &&
+      formData.dropoffLat !== undefined &&
+      formData.dropoffLng !== undefined
     ) {
-      const service = new google.maps.DistanceMatrixService();
+      const directionsService = new google.maps.DirectionsService();
 
-      service.getDistanceMatrix(
-        {
-          origins: [{ lat: formData.pickupLat, lng: formData.pickupLng }],
-          destinations: [
-            { lat: formData.dropoffLat, lng: formData.dropoffLng },
-          ],
-          travelMode: google.maps.TravelMode.DRIVING,
-        },
-        (response, status) => {
-          if (status === "OK" && response) {
-            const distanceInMeters =
-              response.rows[0].elements[0].distance.value; // distance in meters
-            const distanceInKilometers = distanceInMeters / 1000; // convert to kilometers
-            const distanceInMiles = distanceInKilometers * 0.621371; // convert kilometers to miles
+      const waypoints = formData.stops
+        .filter(
+          (stop: Stop) => stop.lat !== undefined && stop.lng !== undefined
+        )
+        .map((stop: Stop) => ({
+          location: new google.maps.LatLng(stop.lat!, stop.lng!),
+          stopover: true,
+        }));
 
+      const request = {
+        origin: new google.maps.LatLng(
+          formData.pickupLat!,
+          formData.pickupLng!
+        ),
+        destination: new google.maps.LatLng(
+          formData.dropoffLat!,
+          formData.dropoffLng!
+        ),
+        waypoints: waypoints,
+        travelMode: google.maps.TravelMode.DRIVING,
+      };
+
+      directionsService.route(request, (result, status) => {
+        if (
+          status === "OK" &&
+          result &&
+          result.routes &&
+          result.routes.length > 0
+        ) {
+          let totalDistance = 0;
+          const legs = result.routes[0].legs;
+          if (legs && legs.length > 0) {
+            for (let i = 0; i < legs.length; i++) {
+              const legDistanceValue = legs[i].distance?.value;
+              if (legDistanceValue !== undefined) {
+                totalDistance += legDistanceValue; // distance in meters
+              } else {
+                console.error(`Distance value is undefined for leg ${i}`);
+              }
+            }
+            const distanceInMiles = (totalDistance / 1000) * 0.621371; // convert to miles
             setDistance(distanceInMiles);
+            setFormData({
+              ...formData,
+              distance: distanceInMiles,
+            });
           } else {
-            console.error("Error calculating distance:", status);
+            console.error("No legs found in the route.");
           }
+        } else {
+          console.error("Error calculating route:", status);
         }
-      );
+      });
     } else {
       console.error("Google Maps is not available or coordinates are missing.");
     }
   };
 
   const handleNextStepWithDistance = () => {
-    calculateDistance();
-    setStep(3);
+    if (validateStep2()) {
+      calculateDistance();
+      setStep(3);
+    }
   };
 
   return (
@@ -125,6 +194,57 @@ export default function LocationSection({
         label="Dropoff Address"
         onAddressSelect={handleDropoffAddressSelect}
       />
+
+      {/* Stops Section */}
+      {formData.stops.map((stop: Stop, index: number) => (
+        <div key={index} className="mb-4">
+          <AddressAutocomplete
+            label={`Stop ${index + 1} Address`}
+            onAddressSelect={(address: string, lat?: number, lng?: number) => {
+              const updatedStops = [...formData.stops];
+              updatedStops[index] = { address, lat, lng };
+              setFormData({ ...formData, stops: updatedStops });
+            }}
+          />
+          <button
+            type="button"
+            className="text-red-600 bg-red-100 w-fit px-2 py-2 font-bold flex items-center space-x-2 mt-2"
+            onClick={() => {
+              const updatedStops = formData.stops.filter(
+                (_: any, i: any) => i !== index
+              );
+              setFormData({ ...formData, stops: updatedStops });
+            }}
+          >
+            <Trash size={20} />
+            <span>Remove Stop</span>
+          </button>
+        </div>
+      ))}
+      {validationErrors.length > 0 && (
+        <div className="text-red-600 text-sm mb-4 mt-2 text-center">
+          {validationErrors.map((error: any, index: any) => (
+            <p key={index}>{error}</p>
+          ))}
+        </div>
+      )}
+
+      <button
+        type="button"
+        className="mb-4 px-4 py-2 bg-blue-600 w-full text-white rounded-lg shadow-md hover:shadow-lg transition-transform duration-200 ease-in-out transform hover:-translate-y-1 flex justify-center items-center space-x-2"
+        onClick={() => {
+          setFormData({
+            ...formData,
+            stops: [
+              ...formData.stops,
+              { address: "", lat: undefined, lng: undefined },
+            ],
+          });
+        }}
+      >
+        <Plus size={20} />
+        <span>Add Stop</span>
+      </button>
 
       <div className="flex justify-between mt-6">
         <button

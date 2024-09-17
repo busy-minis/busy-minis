@@ -1,14 +1,18 @@
+// app/signup/actions.ts
+
 "use server";
 
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 
-// Signup function
-export async function signup(formData: FormData) {
+interface SignupResponse {
+  error?: string;
+  success?: boolean;
+}
+
+export async function signup(formData: FormData): Promise<SignupResponse> {
   const supabase = createClient();
 
-  // Type-casting here for convenience
+  // Extract and type-cast form data
   const data = {
     email: formData.get("email") as string,
     password: formData.get("password") as string,
@@ -17,6 +21,7 @@ export async function signup(formData: FormData) {
     phoneNumber: formData.get("phone_number") as string, // Added phone number
   };
 
+  // Attempt to sign up the user with Supabase Auth
   const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
     email: data.email,
     password: data.password,
@@ -30,10 +35,9 @@ export async function signup(formData: FormData) {
   });
 
   if (signUpError) {
-    // Handle error (log it, display a message, etc.)
+    // Return the error message to the client for display
     console.error("Signup error:", signUpError.message);
-    redirect("/error");
-    return;
+    return { error: signUpError.message };
   }
 
   // Insert the user into your custom `users` table
@@ -50,16 +54,14 @@ export async function signup(formData: FormData) {
   ]);
 
   if (insertError) {
-    // Handle error (log it, display a message, etc.)
+    // Return the error message if inserting into `users` table fails
     console.error(
       "Error inserting user into custom users table:",
       insertError.message
     );
-    redirect("/error");
-    return;
+    return { error: insertError.message };
   }
 
-  // Redirect to the signup success page
-  revalidatePath("/signup-success");
-  redirect("/signup-success");
+  // On successful signup, return success
+  return { success: true };
 }

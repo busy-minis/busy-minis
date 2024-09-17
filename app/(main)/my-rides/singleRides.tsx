@@ -1,3 +1,4 @@
+// SingleRides.tsx
 "use client";
 import React, { useState } from "react";
 import { Trash, Eye } from "@phosphor-icons/react";
@@ -21,12 +22,14 @@ export default function SingleRides({
 
   const handleCancel = async (id: string) => {
     try {
-      await cancelRideById(id); // Call the cancel function
-      const updatedRides = await getRidesForUser(user_id); // Re-fetch the updated rides
-      setRides(updatedRides); // Update the state with the new rides data
-      setIsModalOpen(false); // Close the modal after successful cancellation
+      await cancelRideById(id);
+      const updatedRides = await getRidesForUser(user_id);
+      setRides(updatedRides);
+      setIsModalOpen(false);
+      alert("Ride successfully cancelled.");
     } catch (error) {
       console.error("Failed to cancel the ride:", error);
+      alert("Failed to cancel the ride. Please try again.");
     }
   };
 
@@ -42,9 +45,8 @@ export default function SingleRides({
 
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
+      weekday: "short",
+      month: "short",
       day: "numeric",
     };
     const date = new Date(dateString);
@@ -62,65 +64,86 @@ export default function SingleRides({
     });
   };
 
+  // Function to determine badge color based on status
+  const getStatusBadge = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "accepted":
+        return "bg-green-100 text-green-800";
+      case "cancelled":
+        return "bg-red-100 text-red-800";
+      case "completed":
+        return "bg-blue-100 text-blue-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
   return (
-    <div>
-      <h3 className="font-semibold text-2xl text-teal-700 mb-6">
+    <div className="bg-white shadow rounded-lg p-6">
+      <h3 className="font-semibold text-2xl text-gray-800 mb-6">
         Single Rides
       </h3>
       {rides.length > 0 ? (
-        rides.map((ride: any) => (
-          <div
-            key={ride.id}
-            className="p-6 mb-6 bg-white shadow-md rounded-lg flex justify-between items-center"
-          >
-            <div>
-              <h4 className="font-bold text-lg text-gray-900">
-                {formatDate(ride.pickupDate)} - {formatTime(ride.pickupTime)}
-              </h4>
-              <p className="text-gray-600 max-w-sm">
-                Pickup: {ride.pickupAddress} <br /> <br />
-                Drop-off: {ride.dropoffAddress}
-              </p>
-              <div
-                className={`mt-2 font-semibold text-${
-                  ride.status === "pending" ? "teal-600" : "gray-500"
-                }`}
-              >
-                Status: {ride.status}
+        <ul className="space-y-6">
+          {rides.map((ride: any) => (
+            <li
+              key={ride.id}
+              className="border border-gray-200 rounded-lg p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center hover:shadow-md transition-shadow duration-300"
+            >
+              <div className="mb-4 sm:mb-0">
+                <p className="text-lg font-medium text-gray-900">
+                  {formatDate(ride.pickupDate)} at {formatTime(ride.pickupTime)}
+                </p>
+                <p className="text-sm text-gray-600">
+                  <span className="font-semibold">From:</span>{" "}
+                  {ride.pickupAddress}
+                </p>
+                <p className="text-sm text-gray-600">
+                  <span className="font-semibold">To:</span>{" "}
+                  {ride.dropoffAddress}
+                </p>
+                <p className="text-sm mt-2">
+                  <span className="font-semibold">Status:</span>{" "}
+                  <span
+                    className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${getStatusBadge(
+                      ride.status
+                    )}`}
+                  >
+                    {ride.status.charAt(0).toUpperCase() + ride.status.slice(1)}
+                  </span>
+                </p>
               </div>
-              {ride.status === "pending" && (
-                <p className="text-red-500">Waiting for driver confirmation</p>
-              )}
-            </div>
-            <div className="flex flex-col gap-2">
-              <Link href={`/my-rides/ride?id=${ride.id}`}>
-                <button className="flex items-center bg-theme-orange text-white px-4 py-2 rounded-full hover:bg-red-600 transition duration-300">
-                  <Eye size={20} className="mr-2" />
-                  View Ride
+              <div className="flex space-x-4">
+                <Link href={`/my-rides/ride?id=${ride.id}`}>
+                  <button className="flex items-center text-sm font-medium text-teal-600 hover:text-teal-800 transition-colors duration-200">
+                    <Eye size={20} className="mr-1" />
+                    View
+                  </button>
+                </Link>
+                <button
+                  onClick={() => openModal(ride.id)}
+                  className="flex items-center text-sm font-medium text-red-600 hover:text-red-800 transition-colors duration-200"
+                >
+                  <Trash size={20} className="mr-1" />
+                  Cancel
                 </button>
-              </Link>
-              <button
-                className="flex items-center bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600 transition duration-300"
-                onClick={() => openModal(ride.id)}
-              >
-                <Trash size={20} className="mr-2" />
-                Cancel
-              </button>
-            </div>
-          </div>
-        ))
+              </div>
+            </li>
+          ))}
+        </ul>
       ) : (
-        <>
-          <p>No single rides booked.</p>
-          <Link href={"/schedule-ride/single-ride"} className="">
-            <div className="bg-theme-orange mt-2 text-white px-6 py-3 w-fit rounded-lg hover:bg-indigo-700 transition-all duration-200 shadow-md">
+        <div className="text-center">
+          <p className="text-gray-600">No single rides booked.</p>
+          <Link href={"/schedule-ride/single-ride"}>
+            <button className="mt-4 bg-teal-600 text-white px-5 py-2 rounded-md hover:bg-teal-700 transition-colors duration-200">
               Book a Single Ride
-            </div>
+            </button>
           </Link>
-        </>
+        </div>
       )}
 
-      {/* Modal for confirming cancellation */}
       <ConfirmationModal
         isOpen={isModalOpen}
         onConfirm={() => rideToCancel && handleCancel(rideToCancel)}

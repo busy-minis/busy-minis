@@ -3,16 +3,14 @@ import React, { useState, useEffect, useCallback } from "react";
 import { CalendarCheck, Info } from "@phosphor-icons/react";
 import { createWeeklyRide } from "@/utils/supabase/supabaseQueries";
 import { loadStripe } from "@stripe/stripe-js";
-import { FormData } from "@/app/types/types";
 import AddressAutocomplete from "./components/AddressAutocompleteProps";
 import LoadGoogleMapsScript from "./components/LoadGoogleMapsScript";
 import Riders from "./components/Riders";
+import Stops from "./components/Stops";
 import Review from "./components/Review";
 import Time from "./components/Time";
 
-const stripePromise = loadStripe(
-  "pk_test_51Pq0V6AU6tLKej0RgL8EyqnGLr2FSrqtraFvpHgSi6R5jGL2J2BhRJJmumdajy3WgzuNlnZK6drMlrLAtw5cixYP00kozGoK19"
-);
+const stripePromise = loadStripe("your-stripe-public-key-here");
 
 const daysOfWeekMap: { [key: string]: number } = {
   Sunday: 0,
@@ -24,6 +22,34 @@ const daysOfWeekMap: { [key: string]: number } = {
   Saturday: 6,
 };
 
+interface Rider {
+  name: string;
+  age: string;
+}
+
+interface Stop {
+  address: string;
+  lat?: number;
+  lng?: number;
+}
+
+interface FormData {
+  user_id: string;
+  status: string;
+  end_date: string;
+  pickupDate: string;
+  pickupAddress: string;
+  pickupLat?: number;
+  pickupLng?: number;
+  stops: Stop[];
+  dropoffAddress: string;
+  dropoffLat?: number;
+  dropoffLng?: number;
+  riders: Rider[];
+  selectedTime: string;
+  selectedDays: string[];
+}
+
 export default function WeeklyRideBookingPage(props: { userId: string }) {
   const [formData, setFormData] = useState<FormData>({
     user_id: props.userId,
@@ -33,6 +59,7 @@ export default function WeeklyRideBookingPage(props: { userId: string }) {
     pickupAddress: "",
     pickupLat: undefined,
     pickupLng: undefined,
+    stops: [], // No initial stops
     dropoffAddress: "",
     dropoffLat: undefined,
     dropoffLng: undefined,
@@ -53,36 +80,64 @@ export default function WeeklyRideBookingPage(props: { userId: string }) {
   const calculateDistance = useCallback(() => {
     if (
       window.google &&
-      formData.pickupLat &&
-      formData.pickupLng &&
-      formData.dropoffLat &&
-      formData.dropoffLng
+      formData.pickupLat !== undefined &&
+      formData.pickupLng !== undefined &&
+      formData.dropoffLat !== undefined &&
+      formData.dropoffLng !== undefined
     ) {
-      setLoadingDistance(true); // Show loading while distance is being calculated
-      const service = new google.maps.DistanceMatrixService();
+      setLoadingDistance(true);
+      const directionsService = new google.maps.DirectionsService();
 
-      service.getDistanceMatrix(
-        {
-          origins: [{ lat: formData.pickupLat, lng: formData.pickupLng }],
-          destinations: [
-            { lat: formData.dropoffLat, lng: formData.dropoffLng },
-          ],
-          travelMode: google.maps.TravelMode.DRIVING,
-        },
-        (response, status) => {
-          setLoadingDistance(false);
-          if (status === "OK" && response) {
-            const distanceInMeters =
-              response.rows[0].elements[0].distance.value;
-            const distanceInKilometers = distanceInMeters / 1000;
-            const distanceInMiles = distanceInKilometers * 0.621371;
+      const waypoints = formData.stops
+        .filter(
+          (stop: Stop) => stop.lat !== undefined && stop.lng !== undefined
+        )
+        .map((stop: Stop) => ({
+          location: new google.maps.LatLng(stop.lat!, stop.lng!),
+          stopover: true,
+        }));
 
+      const request = {
+        origin: new google.maps.LatLng(
+          formData.pickupLat!,
+          formData.pickupLng!
+        ),
+        destination: new google.maps.LatLng(
+          formData.dropoffLat!,
+          formData.dropoffLng!
+        ),
+        waypoints: waypoints,
+        travelMode: google.maps.TravelMode.DRIVING,
+      };
+
+      directionsService.route(request, (result, status) => {
+        setLoadingDistance(false);
+        if (
+          status === "OK" &&
+          result &&
+          result.routes &&
+          result.routes.length > 0
+        ) {
+          let totalDistance = 0;
+          const legs = result.routes[0].legs;
+          if (legs && legs.length > 0) {
+            for (let i = 0; i < legs.length; i++) {
+              const legDistanceValue = legs[i].distance?.value;
+              if (legDistanceValue !== undefined) {
+                totalDistance += legDistanceValue; // distance in meters
+              } else {
+                console.error(`Distance value is undefined for leg ${i}`);
+              }
+            }
+            const distanceInMiles = (totalDistance / 1000) * 0.621371; // convert to miles
             setDistance(distanceInMiles);
           } else {
-            console.error("Error calculating distance:", status);
+            console.error("No legs found in the route.");
           }
+        } else {
+          console.error("Error calculating route:", status);
         }
-      );
+      });
     } else {
       console.error("Google Maps is not available or coordinates are missing.");
     }
@@ -91,6 +146,7 @@ export default function WeeklyRideBookingPage(props: { userId: string }) {
     formData.pickupLng,
     formData.dropoffLat,
     formData.dropoffLng,
+    formData.stops,
   ]);
 
   const calculateTotalPrice = useCallback(() => {
@@ -118,9 +174,18 @@ export default function WeeklyRideBookingPage(props: { userId: string }) {
     if (distance) {
       price += calculateCost();
     }
+    if (formData.stops.length > 0) {
+      price += formData.stops.length * 5;
+    }
 
     setTotalPrice(price);
-  }, [timeWarning, formData.riders, formData.selectedDays, distance]);
+  }, [
+    timeWarning,
+    formData.riders,
+    formData.selectedDays,
+    distance,
+    formData.stops.length,
+  ]);
 
   useEffect(() => {
     calculateTotalPrice();
@@ -145,7 +210,6 @@ export default function WeeklyRideBookingPage(props: { userId: string }) {
     return nextPickupDate.toISOString().split("T")[0];
   };
 
-  // Validate that the user has filled in all necessary fields
   const validateForm = () => {
     if (!formData.pickupAddress || !formData.dropoffAddress) {
       setValidationError("Please fill in both pickup and dropoff addresses.");
@@ -157,7 +221,6 @@ export default function WeeklyRideBookingPage(props: { userId: string }) {
       return false;
     }
 
-    // Ensure at least 4 days are selected
     if (formData.selectedDays.length < 4) {
       setValidationError("Please select at least 4 days.");
       return false;
@@ -184,7 +247,7 @@ export default function WeeklyRideBookingPage(props: { userId: string }) {
   };
 
   const handleNext = () => {
-    if (!validateForm()) return; // Prevent page navigation if validation fails
+    if (!validateForm()) return;
     calculateDistance();
     setPage(2);
   };
@@ -233,14 +296,14 @@ export default function WeeklyRideBookingPage(props: { userId: string }) {
             <div className="w-full bg-gray-200 rounded-full h-2.5 mb-6">
               <div
                 className={`h-2.5 rounded-full ${
-                  page === 1 ? "bg-teal-500 w-1/2" : "bg-teal-500 w-full"
+                  page === 1 ? "bg-gray-700 w-1/2" : "bg-gray-700 w-full"
                 }`}
               ></div>
             </div>
 
             {page === 1 ? (
               <>
-                <h1 className="text-3xl font-bold text-center text-teal-700">
+                <h1 className="text-3xl font-bold text-center text-gray-800">
                   Weekly Ride Booking
                 </h1>
 
@@ -249,6 +312,7 @@ export default function WeeklyRideBookingPage(props: { userId: string }) {
                 <div className="bg-gray-50 p-6 rounded-xl shadow-md">
                   <AddressAutocomplete
                     label="Pickup Address"
+                    value={formData.pickupAddress} // Pass current pickup address
                     onAddressSelect={(address, lat, lng) =>
                       setFormData({
                         ...formData,
@@ -260,6 +324,7 @@ export default function WeeklyRideBookingPage(props: { userId: string }) {
                   />
                   <AddressAutocomplete
                     label="Dropoff Address"
+                    value={formData.dropoffAddress} // Pass current dropoff address
                     onAddressSelect={(address, lat, lng) =>
                       setFormData({
                         ...formData,
@@ -269,18 +334,20 @@ export default function WeeklyRideBookingPage(props: { userId: string }) {
                       })
                     }
                   />
-
-                  {distance !== null && !loadingDistance && (
-                    <p className="mt-4 text-sm text-teal-700">
-                      Distance: {distance.toFixed(2)} miles
-                    </p>
-                  )}
-                  {loadingDistance && (
-                    <p className="mt-4 text-sm text-yellow-600">
-                      Calculating distance...
-                    </p>
-                  )}
                 </div>
+
+                <Stops formData={formData} setFormData={setFormData} />
+
+                {distance !== null && !loadingDistance && (
+                  <p className="mt-4 text-sm text-gray-700">
+                    Distance: {distance.toFixed(2)} miles
+                  </p>
+                )}
+                {loadingDistance && (
+                  <p className="mt-4 text-sm text-yellow-600">
+                    Calculating distance...
+                  </p>
+                )}
 
                 <Time
                   timeWarning={timeWarning}
@@ -291,8 +358,8 @@ export default function WeeklyRideBookingPage(props: { userId: string }) {
                 />
 
                 <div className="bg-gray-50 p-6 rounded-xl shadow-md">
-                  <h4 className="text-2xl font-semibold text-teal-900 mb-6 flex items-center">
-                    <CalendarCheck size={28} className="mr-2 text-teal-600" />
+                  <h4 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
+                    <CalendarCheck size={28} className="mr-2 text-gray-700" />
                     Select Days of the Week
                   </h4>
                   <div className="grid grid-cols-2 gap-4">
@@ -306,17 +373,21 @@ export default function WeeklyRideBookingPage(props: { userId: string }) {
                           value={day}
                           checked={formData.selectedDays.includes(day)}
                           onChange={() => handleDaySelection(day)}
-                          className="form-checkbox h-5 w-5 text-teal-600 focus:ring-0"
+                          className="form-checkbox h-5 w-5 text-gray-700 focus:ring-0"
                         />
-                        <span className="ml-2 text-teal-900">{day}</span>
+                        <span className="ml-2 text-gray-800">{day}</span>
                       </label>
                     ))}
                   </div>
                   <p className="mt-4 text-sm text-yellow-600">
-                    <Info size={16} className="inline" /> If you select a day
-                    that matches today, your ride will be scheduled for the same
-                    day in the following week, as same-day bookings are not
-                    allowed.
+                    <Info size={16} className="inline" /> Weekly rides will not
+                    be booked on the same day and will start on the next
+                    calendar day.
+                  </p>
+                  {/* Added informational text */}
+                  <p className="mt-2 text-sm text-gray-600">
+                    <Info size={16} className="inline" /> You must select at
+                    least <strong>4 days</strong> for weekly rides.
                   </p>
                 </div>
 
@@ -330,10 +401,10 @@ export default function WeeklyRideBookingPage(props: { userId: string }) {
                   <button
                     type="button"
                     onClick={handleNext}
-                    className="bg-teal-600 text-white px-8 py-3 rounded-xl shadow-lg justify-center hover:bg-teal-700 transition duration-300 inline-flex w-full items-center"
+                    className="bg-gray-700 text-white px-8 py-3 rounded-xl shadow-lg justify-center hover:bg-gray-800 transition duration-300 inline-flex w-full items-center"
                   >
                     <CalendarCheck size={24} className="mr-2" />
-                    Next : Review Details
+                    Next: Review Details
                   </button>
                 </div>
               </>

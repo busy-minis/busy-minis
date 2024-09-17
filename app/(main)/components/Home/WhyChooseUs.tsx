@@ -6,16 +6,17 @@ import { useInView } from "react-intersection-observer";
 
 export default function WhyChooseUs() {
   return (
-    <section className="relative bg-gradient-to-b from-theme-teal/90 to-teal-700 text-white py-24">
+    <section className="relative bg-gradient-to-b from-teal-600 to-teal-800 text-white py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Title Section */}
         <motion.div
           initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="text-center"
         >
-          <div className="mx-auto text-xs sm:text-sm px-4 py-1 w-fit bg-gradient-to-r from-emerald-300 to-teal-400 text-teal-900 font-semibold rounded-full">
+          <div className="inline-block text-xs sm:text-sm px-4 py-1 bg-gradient-to-r from-emerald-300 to-teal-400 text-teal-900 font-semibold rounded-full">
             Busy Minis
           </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mt-4">
@@ -36,7 +37,7 @@ export default function WhyChooseUs() {
       <div className="absolute bottom-0 w-full overflow-hidden leading-none">
         <svg
           width="100%"
-          height="100%"
+          height="100"
           viewBox="0 0 1440 100"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
@@ -57,7 +58,7 @@ const DriverSafetyComponent = () => {
     {
       title: "Regular Safety Inspections",
       description:
-        "Routine checks and services performed on each vehicle to ensure they meet safety standards",
+        "Routine checks and services performed on each vehicle to ensure they meet safety standards.",
     },
     {
       title: "Experienced & Compassionate Drivers",
@@ -129,15 +130,15 @@ const DriverSafetyComponent = () => {
           key={index}
           custom={index}
           variants={fadeIn}
-          className="flex flex-col items-start bg-white bg-opacity-95 shadow-lg p-6 rounded-lg transform hover:scale-105 transition-transform duration-300"
+          className="flex flex-col items-start bg-white bg-opacity-90 shadow-lg p-6 rounded-lg transform hover:scale-105 transition-transform duration-300"
         >
-          <div className="flex items-center justify-center w-12 h-12 bg-orange-500 rounded-full mb-4">
+          <div className="flex items-center justify-center w-12 h-12 bg-teal-500 rounded-full mb-4">
             <Check className="text-white" size={24} weight="bold" />
           </div>
           <h3 className="text-lg font-semibold mb-2 text-teal-900">
             {feature.title}
           </h3>
-          <p className="text-sm text-gray-600">{feature.description}</p>
+          <p className="text-sm text-gray-700">{feature.description}</p>
         </motion.div>
       ))}
     </motion.div>

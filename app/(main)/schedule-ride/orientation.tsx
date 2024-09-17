@@ -1,6 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
-
+import React, { useState, useEffect, useRef } from "react";
 import { CalendarCheck, CheckCircle } from "@phosphor-icons/react";
 import {
   getAvailableTimeSlots,
@@ -22,6 +21,10 @@ export default function OrientationPage(props: { user_id: string }) {
   const [confirmedDate, setConfirmedDate] = useState<string>("");
   const [confirmedTime, setConfirmedTime] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
+  const [isLoading, setIsLoading] = useState(false); // State for loading spinner
+  const [toastMessage, setToastMessage] = useState<string>(""); // State for toast notification
+
+  const cancelButtonRef = useRef<HTMLButtonElement | null>(null); // Ref for modal button
 
   useEffect(() => {
     async function checkUserOrientationStatus() {
@@ -47,6 +50,12 @@ export default function OrientationPage(props: { user_id: string }) {
     checkUserOrientationStatus();
   }, [props.user_id]);
 
+  useEffect(() => {
+    if (isModalOpen) {
+      cancelButtonRef.current?.focus();
+    }
+  }, [isModalOpen]);
+
   const handleDateChange = (date: string) => {
     setSelectedDate(date);
     setSelectedTime("");
@@ -54,30 +63,29 @@ export default function OrientationPage(props: { user_id: string }) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (selectedDate && selectedTime) {
-      const user_id = props.user_id;
+    setIsLoading(true);
 
-      const isBooked = await bookOrientation(
-        user_id,
-        selectedDate,
-        selectedTime
-      );
+    if (!selectedDate || !selectedTime) {
+      alert("Please select both a date and time.");
+      setIsLoading(false);
+      return;
+    }
 
-      if (isBooked) {
-        setIsConfirmed(true);
-        setConfirmedDate(selectedDate);
-        setConfirmedTime(selectedTime);
-      } else {
-        alert("There was an error booking your orientation. Please try again.");
-      }
+    const user_id = props.user_id;
+    const isBooked = await bookOrientation(user_id, selectedDate, selectedTime);
+
+    setIsLoading(false);
+    if (isBooked) {
+      setIsConfirmed(true);
+      setConfirmedDate(selectedDate);
+      setConfirmedTime(selectedTime);
     } else {
-      alert("Please select a date and time for your orientation.");
+      alert("There was an error booking your orientation. Please try again.");
     }
   };
 
   const handleCancel = async () => {
     const user_id = props.user_id;
-
     const isCanceled = await cancelOrientation(
       user_id,
       confirmedDate,
@@ -88,17 +96,27 @@ export default function OrientationPage(props: { user_id: string }) {
       setIsConfirmed(false);
       setConfirmedDate("");
       setConfirmedTime("");
-      setIsModalOpen(false); // Close the modal after canceling
-      alert(
-        "Your orientation has been canceled. You can book a new appointment."
-      );
+      setIsModalOpen(false);
+      showToast("Your orientation has been canceled.");
     } else {
-      alert("There was an error canceling your orientation. Please try again.");
+      showToast("There was an error canceling your orientation.");
     }
   };
 
+  function showToast(message: string) {
+    setToastMessage(message);
+    setTimeout(() => setToastMessage(""), 3000);
+  }
+
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-teal-50 to-teal-100">
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-4 right-4 bg-teal-600 text-white px-4 py-2 rounded-lg shadow-md">
+          {toastMessage}
+        </div>
+      )}
+
       <div className="absolute inset-0 -z-10">
         <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-teal-400 to-teal-100 opacity-70"></div>
         <div className="absolute bottom-0 right-0 w-full h-1/2 bg-gradient-to-t from-orange-200 to-yellow-100 opacity-70"></div>
@@ -111,7 +129,7 @@ export default function OrientationPage(props: { user_id: string }) {
             <h2 className="font-bold text-5xl sm:text-6xl text-gray-900 mb-6">
               {isConfirmed ? "Orientation Confirmed" : "Book Your Orientation"}
             </h2>
-            <p className="text-lg max-w-3xl mx-auto text-gray-600">
+            <p className="text-lg max-w-3xl mx-auto text-gray-600 leading-relaxed">
               {isConfirmed
                 ? `Your orientation has been successfully booked! You will receive a call on ${formatDate(
                     confirmedDate
@@ -174,9 +192,14 @@ export default function OrientationPage(props: { user_id: string }) {
               <div className="text-center">
                 <button
                   type="submit"
-                  className="bg-teal-600 text-white px-8 py-4 rounded-full shadow-lg hover:bg-teal-700 transition duration-300"
+                  className={`${
+                    isLoading || !selectedDate || !selectedTime
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-teal-600 hover:bg-teal-700"
+                  } text-white px-8 py-4 rounded-full shadow-lg transition duration-300`}
+                  disabled={isLoading || !selectedDate || !selectedTime}
                 >
-                  Confirm Orientation
+                  {isLoading ? "Booking..." : "Confirm Orientation"}
                 </button>
               </div>
             </form>
@@ -210,6 +233,7 @@ export default function OrientationPage(props: { user_id: string }) {
         <CancelModal
           onClose={() => setIsModalOpen(false)}
           onConfirm={handleCancel}
+          cancelButtonRef={cancelButtonRef}
         />
       )}
     </div>
@@ -228,11 +252,23 @@ function formatDate(dateString: string) {
 type CancelModalProps = {
   onClose: () => void;
   onConfirm: () => void;
+  cancelButtonRef: React.RefObject<HTMLButtonElement>;
 };
-function CancelModal({ onClose, onConfirm }: CancelModalProps) {
+
+function CancelModal({
+  onClose,
+  onConfirm,
+  cancelButtonRef,
+}: CancelModalProps) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-lg shadow-lg max-w-md w-full p-6"
+        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the modal
+      >
         <h3 className="text-xl font-semibold text-gray-900 mb-4">
           Cancel Orientation?
         </h3>
@@ -248,6 +284,7 @@ function CancelModal({ onClose, onConfirm }: CancelModalProps) {
             No, Keep It
           </button>
           <button
+            ref={cancelButtonRef}
             onClick={onConfirm}
             className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
           >

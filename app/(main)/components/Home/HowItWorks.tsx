@@ -1,75 +1,76 @@
 "use client";
+import React from "react";
 import {
   CursorClick,
   UsersThree,
   CashRegister,
   RocketLaunch,
-} from "@phosphor-icons/react/dist/ssr";
-import React from "react";
+} from "@phosphor-icons/react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 
 export default function HowItWorks() {
   return (
-    <section className="relative py-24 bg-gradient-to-br from-theme-orange/10 via-theme-teal/10 to-theme-yellow/10 overflow-hidden">
-      {/* Background Images */}
+    <section className="relative py-24 bg-gradient-to-br from-orange-100 via-teal-100 to-yellow-100 overflow-hidden">
+      {/* Decorative Background Images */}
       <div className="hidden xl:block">
         <Image
           src="/assets/blackcar.svg"
           alt="Black Car"
           width={300}
           height={300}
-          className="absolute top-12 left-24 -z-10"
+          className="absolute top-12 left-24 -z-10 opacity-70"
         />
         <Image
           src="/assets/blackcar.svg"
           alt="Black Car"
           width={300}
           height={300}
-          className="absolute top-64 right-0 -z-10"
+          className="absolute top-64 right-0 -z-10 opacity-70"
         />
         <Image
           src="/assets/whitecar.svg"
           alt="White Car"
           width={300}
           height={300}
-          className="absolute top-12 right-48 -z-10"
+          className="absolute top-12 right-48 -z-10 opacity-70"
         />
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 md:px-8">
         {/* Title Section */}
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-4xl sm:text-5xl font-bold text-gray-900 text-center tracking-tight"
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="text-center"
         >
-          How Busy Mini Works
-        </motion.h2>
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="text-center mt-6 text-lg sm:text-xl text-gray-700 max-w-2xl mx-auto"
-        >
-          We simplify the process for you to register, schedule rides, and enjoy
-          a seamless experience every step of the way.
-        </motion.p>
+          <div className="inline-block text-xs sm:text-sm px-4 py-1 bg-gradient-to-r from-emerald-300 to-teal-400 text-teal-900 font-semibold rounded-full">
+            Busy Minis
+          </div>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mt-4 text-gray-900">
+            How Busy Minis Works
+          </h2>
+          <p className="max-w-2xl mx-auto mt-4 text-sm md:text-lg leading-relaxed text-gray-700">
+            We simplify the process for you to register, schedule rides, and
+            enjoy a seamless experience every step of the way.
+          </p>
+        </motion.div>
 
         {/* Contact Us Button */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
           transition={{ duration: 1, delay: 0.4 }}
           className="flex justify-center mt-10"
         >
-          <Link
-            href="/contact"
-            className="px-8 py-3 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-full transition-all shadow-lg hover:shadow-xl text-lg"
-          >
-            Contact Us
+          <Link href="/contact">
+            <div className="px-8 py-3 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-full transition-all shadow-lg hover:shadow-xl text-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+              Contact Us
+            </div>
           </Link>
         </motion.div>
 
@@ -87,6 +88,23 @@ export default function HowItWorks() {
           ))}
         </div>
       </div>
+
+      {/* Decorative SVG at Bottom */}
+      <div className="absolute bottom-0 w-full overflow-hidden leading-none">
+        <svg
+          width="100%"
+          height="100"
+          viewBox="0 0 1440 100"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            fillOpacity="1"
+            d="M0,64L48,80C96,96,192,128,288,133.3C384,139,480,117,576,106.7C672,96,768,96,864,101.3C960,107,1056,117,1152,117.3C1248,117,1344,107,1392,101.3L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+            fill="#FFA500"
+          />
+        </svg>
+      </div>
     </section>
   );
 }
@@ -94,7 +112,7 @@ export default function HowItWorks() {
 // Step data
 const steps = [
   {
-    title: "Register your rider",
+    title: "Register Your Rider",
     text: "Quickly fill out a form to create a rider profile.",
     Icon: CursorClick,
     delay: 0.5,

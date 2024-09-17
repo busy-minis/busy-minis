@@ -1,9 +1,16 @@
+// app/components/DriverBarClient.tsx
 "use client";
 
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation"; // Client-side hook for active state
-import { Car, List, UserCircle } from "@phosphor-icons/react"; // Phosphor icons for nav items
+import {
+  Car,
+  List,
+  UserCircle,
+  UserGear,
+  SignOut,
+} from "@phosphor-icons/react/dist/ssr"; // Phosphor icons for nav items
 
 import Logout from "./Logout";
 import DriverMobile from "./DriverMobile";
@@ -15,7 +22,7 @@ const DriverBarClient = () => {
   const isActive = (path: string) => pathname === path;
 
   return (
-    <nav className="flex z-40 sticky top-0 bg-white/90 lg:backdrop-blur-lg justify-between items-center px-12 py-4 shadow-md">
+    <nav className="flex z-40 sticky top-0 bg-white/90 backdrop-blur-lg justify-between items-center px-6 py-4 shadow-md">
       <div className="flex items-center space-x-4">
         <Logo />
         <span className="text-xl font-semibold text-gray-800 hidden md:inline">
@@ -26,22 +33,21 @@ const DriverBarClient = () => {
         <NavItem
           href="/available-rides"
           label="Browse Rides"
-          icon={<Car size={24} />}
+          icon={<Car size={20} />}
           isActive={isActive("/available-rides")}
         />
         <NavItem
           href="/accepted-rides"
           label="My Rides"
-          icon={<List size={24} />}
+          icon={<List size={20} />}
           isActive={isActive("/accepted-rides")}
         />
-        {/* Uncomment if Profile is needed */}
-        {/* <NavItem
+        <NavItem
           href="/profile"
-          label="Profile"
-          icon={<UserCircle size={24} />}
+          label="My Profile"
+          icon={<UserGear size={20} />}
           isActive={isActive("/profile")}
-        /> */}
+        />
         <Logout />
       </div>
       <DriverMobile isLoggedIn={true} dashboardHref="Dashboard" />
@@ -66,6 +72,7 @@ const NavItem = ({ href, label, icon, isActive }: NavItemProps) => {
             ? "bg-gradient-to-r from-indigo-500 to-purple-500 text-white"
             : "text-gray-700 hover:bg-gray-100"
         }`}
+        aria-current={isActive ? "page" : undefined}
       >
         {icon}
         <span className="font-medium">{label}</span>

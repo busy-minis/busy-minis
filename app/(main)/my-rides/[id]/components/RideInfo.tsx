@@ -1,4 +1,4 @@
-import { MapPin } from "@phosphor-icons/react";
+import { MapPin, MapTrifold } from "@phosphor-icons/react";
 import React from "react";
 
 const formatDateTime = (date: string, time: string) => {
@@ -12,10 +12,11 @@ const formatDateTime = (date: string, time: string) => {
     hour12: true,
   });
 };
+
 export default function RideInfo({ rideData }: any) {
   return (
-    <div>
-      <div className="flex items-center space-x-4">
+    <div className="space-y-6">
+      <div className="flex items-start space-x-4">
         <MapPin size={24} className="text-teal-600" />
         <div>
           <p className="text-gray-700">Pickup:</p>
@@ -29,15 +30,22 @@ export default function RideInfo({ rideData }: any) {
         </div>
       </div>
 
-      <div className="flex items-center space-x-4">
+      <div className="flex items-start space-x-4">
         <MapPin size={24} className="text-teal-600" />
         <div>
           <p className="text-gray-700">Dropoff:</p>
           <p className="text-lg font-semibold text-gray-900">
             {rideData.dropoffAddress}
           </p>
-          <p className="text-gray-600">
-            Estimated Dropoff Time: {rideData.dropoffTime}
+        </div>
+      </div>
+
+      <div className="flex items-start space-x-4">
+        <MapTrifold size={24} className="text-teal-600" />
+        <div>
+          <p className="text-gray-700">Distance:</p>
+          <p className="text-lg font-semibold text-gray-900">
+            {rideData.distance} miles
           </p>
         </div>
       </div>

@@ -1,10 +1,14 @@
 import React from "react";
 import { format, addDays, compareAsc } from "date-fns";
-import { MapPin, User, Clock } from "@phosphor-icons/react";
+import { MapPin, User, Clock, MapPinLine } from "@phosphor-icons/react";
 
 interface Rider {
   name: string;
   age: string;
+}
+
+interface Stop {
+  address: string;
 }
 
 interface FormData {
@@ -16,6 +20,7 @@ interface FormData {
   pickupAddress: string;
   pickupLat?: number;
   pickupLng?: number;
+  stops: Stop[];
   dropoffAddress: string;
   dropoffLat?: number;
   dropoffLng?: number;
@@ -73,82 +78,121 @@ export default function Review({
     .sort((a, b) => compareAsc(a.date, b.date));
 
   return (
-    <div className="  rounded-2xl  space-y-8">
-      <h2 className="text-4xl font-extrabold mb-8 text-teal-700 text-center">
+    <div className="rounded-2xl space-y-8 bg-white p-8 shadow-lg">
+      <h2 className="text-3xl font-bold mb-8 text-black text-center">
         Review Your Booking
       </h2>
 
-      {/* Pickup and Dropoff Information */}
-      <div className="mb-8 border-b border-gray-200 pb-6">
-        <h3 className="text-2xl font-bold text-gray-900 flex items-center">
-          <MapPin size={28} className="text-teal-600 mr-3" />
-          Pickup & Dropoff
+      {/* Trip Details */}
+      <div className="mb-8 border-b border-gray-300 pb-6">
+        <h3 className="text-2xl font-semibold text-black flex items-center">
+          <MapPinLine size={28} className="text-black mr-3" />
+          Trip Details
         </h3>
-        <div className="text-gray-700 space-y-3 mt-4">
-          <p>
-            <strong className="text-teal-700">Pickup Address:</strong>{" "}
-            {formData.pickupAddress}
-          </p>
-          <p>
-            <strong className="text-teal-700">Dropoff Address:</strong>{" "}
-            {formData.dropoffAddress}
-          </p>
+        <div className="text-gray-800 space-y-3 mt-4">
+          {/* Pickup Address */}
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <MapPin size={24} className="text-green-500 mt-1" />
+            </div>
+            <div className="ml-3">
+              <p className="font-medium text-black">Pickup Address</p>
+              <p>{formData.pickupAddress}</p>
+            </div>
+          </div>
+
+          {/* Stops */}
+          {formData.stops && formData.stops.length > 0 && (
+            <>
+              {formData.stops.map((stop, index) => (
+                <div key={index} className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <MapPin size={24} className="text-yellow-500 mt-1" />
+                  </div>
+                  <div className="ml-3">
+                    <p className="font-medium text-black">Stop {index + 1}</p>
+                    <p>{stop.address}</p>
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
+
+          {/* Dropoff Address */}
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <MapPin size={24} className="text-red-500 mt-1" />
+            </div>
+            <div className="ml-3">
+              <p className="font-medium text-black">Dropoff Address</p>
+              <p>{formData.dropoffAddress}</p>
+            </div>
+          </div>
+
+          {/* Distance */}
           {distance !== null && (
-            <p>
-              <strong className="text-teal-700">Distance:</strong>{" "}
+            <p className="mt-4">
+              <strong className="text-black">Estimated Distance:</strong>{" "}
               {distance.toFixed(2)} miles
             </p>
           )}
         </div>
       </div>
 
-      {/* Date & Time Information */}
-      <div className="mb-8 border-b border-gray-200 pb-6">
-        <h3 className="text-2xl font-bold text-gray-900 flex items-center">
-          <Clock size={28} className="text-teal-600 mr-3" />
-          Time & Days
+      {/* Schedule */}
+      <div className="mb-8 border-b border-gray-300 pb-6">
+        <h3 className="text-2xl font-semibold text-black flex items-center">
+          <Clock size={28} className="text-black mr-3" />
+          Schedule
         </h3>
-        <p className="text-gray-700 mt-4">
-          <strong className="text-teal-700">Pickup Time:</strong>{" "}
+        <p className="text-gray-800 mt-4">
+          <strong className="text-black">Pickup Time:</strong>{" "}
           {formatTime(formData.selectedTime)}
         </p>
 
+        {/* Selected Days */}
         <div className="mt-6">
-          <h4 className="text-xl font-semibold text-gray-900">Selected Days</h4>
-          <ul className="text-gray-700 space-y-3 mt-4">
+          <h4 className="text-xl font-semibold text-black">Selected Days</h4>
+          <ul className="text-gray-800 space-y-3 mt-4">
             {formattedDays.map(({ formatted }, index) => (
               <li
                 key={index}
-                className="p-4 bg-gradient-to-r from-teal-50 to-teal-100 rounded-lg shadow-md flex items-center justify-between"
+                className="p-4 bg-gray-100 rounded-lg shadow-sm flex items-center justify-between"
               >
-                <strong className="text-teal-900">{formatted}</strong>
+                <strong className="text-black">{formatted}</strong>
               </li>
             ))}
           </ul>
         </div>
       </div>
 
-      {/* Riders Information */}
-      <div className="mb-8 border-b border-gray-200 pb-6">
-        <h3 className="text-2xl font-bold text-gray-900 flex items-center">
-          <User size={28} className="text-teal-600 mr-3" />
+      {/* Riders */}
+      <div className="mb-8 border-b border-gray-300 pb-6">
+        <h3 className="text-2xl font-semibold text-black flex items-center">
+          <User size={28} className="text-black mr-3" />
           Riders
         </h3>
-        <div className="space-y-3 mt-4 text-gray-700">
+        <div className="space-y-3 mt-4 text-gray-800">
           {formData.riders.map((rider: Rider, index: number) => (
             <p key={index}>
-              <strong className="text-teal-700">Rider {index + 1}:</strong>{" "}
+              <strong className="text-black">Rider {index + 1}:</strong>{" "}
               {rider.name} (Age: {rider.age})
             </p>
           ))}
         </div>
       </div>
+      <div className="mb-8">
+        <p className="text-gray-700 text-center">
+          You will have the option to renew your weekly ride on the last
+          scheduled day of your ride.
+        </p>
+      </div>
 
       {/* Total Price */}
       <div className="mb-8">
-        <h3 className="text-2xl font-bold text-gray-900">$ Total Price</h3>
-        <p className="text-gray-700 mt-4">
-          <strong className="text-teal-700">Final Price:</strong> $
+        <h3 className="text-2xl font-semibold text-black">Total Price</h3>
+        <p className="text-gray-800 mt-4">
+          <strong className="text-black">Final Price:</strong> $
           {totalPrice.toFixed(2)}
         </p>
       </div>
@@ -158,13 +202,13 @@ export default function Review({
         <button
           type="button"
           onClick={() => setPage(1)}
-          className="w-1/2 px-6 py-3 bg-gray-400 text-white rounded-lg shadow-lg hover:bg-gray-500 transition duration-300"
+          className="w-1/2 px-6 py-3 bg-gray-200 text-black rounded-lg shadow hover:bg-gray-300 transition duration-300"
         >
           Back
         </button>
         <button
           type="submit"
-          className="w-1/2 px-6 py-3 bg-gradient-to-r from-orange-500 to-yellow-500 text-white rounded-lg shadow-lg hover:from-orange-600 hover:to-yellow-600 transition duration-300"
+          className="w-1/2 px-6 py-3 bg-black text-white rounded-lg shadow hover:bg-gray-800 transition duration-300"
         >
           Continue To Payment
         </button>

@@ -1,15 +1,19 @@
 "use client";
-import { useState, useEffect } from "react";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
-  Users,
   UsersThree,
-  UsersFour,
-  User,
+  PhoneOutgoing,
+  Wheelchair,
+  SoccerBall,
+  Church,
+  Ticket,
+  Gift,
+  MapPinLine,
   MinusSquare,
   PlusSquare,
 } from "@phosphor-icons/react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 
 type RideType = "single" | "regular";
 
@@ -37,40 +41,75 @@ export default function PricingPage() {
   }, [selectedRideType, passengers, stops, miles]);
 
   return (
-    <section className="bg-gradient-to-br px-2 from-teal-50 to-teal-100 min-h-screen">
-      <div className="pb-24">
-        <div className="max-w-7xl mx-auto pt-12 px-6 lg:px-8">
-          <h3 className="text-3xl sm:text-5xl text-center font-bold text-teal-900">
+    <section className="bg-gradient-to-br from-teal-50 to-teal-100 min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="text-center"
+        >
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-teal-900">
             Pricing Calculator
-          </h3>
-          <p className="text-center text-gray-700 mt-4 text-lg">
-            Calculate your ride cost in just a few clicks.
+          </h1>
+          <p className="mt-4 text-lg sm:text-xl text-gray-700">
+            Estimate your ride cost in just a few clicks.
           </p>
+        </motion.div>
 
-          <div className="grid md:grid-cols-2 gap-12 mt-16">
-            <div className="bg-white rounded-xl shadow-lg p-8">
-              <RidePricingCalculator
-                selectedRideType={selectedRideType}
-                setSelectedRideType={setSelectedRideType}
-                passengers={passengers}
-                setPassengers={setPassengers}
-                miles={miles}
-                setMiles={setMiles}
-                stops={stops}
-                setStops={setStops}
-                totalPrice={totalPrice}
-              />
-            </div>
-            <div className="bg-teal-900 text-white rounded-xl shadow-lg p-8">
-              <RideInfo selectedRideType={selectedRideType} />
-            </div>
-          </div>
+        {/* Main Content */}
+        <div className="mt-12 grid md:grid-cols-2 gap-12">
+          {/* Pricing Calculator */}
+          <motion.div
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="bg-white rounded-xl shadow-lg p-8"
+          >
+            <RidePricingCalculator
+              selectedRideType={selectedRideType}
+              setSelectedRideType={setSelectedRideType}
+              passengers={passengers}
+              setPassengers={setPassengers}
+              miles={miles}
+              setMiles={setMiles}
+              stops={stops}
+              setStops={setStops}
+              totalPrice={totalPrice}
+            />
+          </motion.div>
+
+          {/* Ride Information */}
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="bg-teal-900 text-white rounded-xl shadow-lg p-8 flex flex-col justify-center"
+          >
+            <RideInfo selectedRideType={selectedRideType} />
+          </motion.div>
         </div>
+
+        {/* Pricing Details */}
+        <motion.div
+          className="mt-24"
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        >
+          <PricingChart />
+        </motion.div>
       </div>
     </section>
   );
 }
 
+// Ride Pricing Calculator Component
 const RidePricingCalculator = ({
   selectedRideType,
   setSelectedRideType,
@@ -84,13 +123,14 @@ const RidePricingCalculator = ({
 }: any) => {
   return (
     <div>
-      <h4 className="text-3xl font-semibold text-teal-900">
+      <h2 className="text-2xl font-semibold text-teal-900">
         Customize Your Ride
-      </h4>
+      </h2>
       <p className="text-gray-500 mt-2">Estimate your ride cost</p>
 
+      {/* Ride Type Selection */}
       <div className="mt-6">
-        <h5 className="text-lg font-semibold text-teal-900">Ride Type</h5>
+        <h3 className="text-lg font-medium text-teal-900">Ride Type</h3>
         <div className="flex items-center space-x-4 mt-4">
           <RadioOption
             label="One-time Ride"
@@ -107,8 +147,9 @@ const RidePricingCalculator = ({
         </div>
       </div>
 
+      {/* Passengers Selection */}
       <div className="mt-8">
-        <h5 className="text-lg font-semibold text-teal-900">Passengers</h5>
+        <h3 className="text-lg font-medium text-teal-900">Passengers</h3>
         <div className="flex space-x-4 mt-4">
           {["1", "2", "3", "4"].map((num) => (
             <PassengerButton
@@ -121,15 +162,19 @@ const RidePricingCalculator = ({
         </div>
       </div>
 
+      {/* Miles Slider */}
       <MileSlider setMiles={setMiles} miles={miles} />
+
+      {/* Additional Stops */}
       <AdditionalStops stops={stops} setStops={setStops} />
 
+      {/* Total Price */}
       <div className="mt-12 text-center">
         <p className="text-3xl font-bold text-teal-900">
           Total Price: ${totalPrice.toFixed(2)}
         </p>
-        <Link href={"/contact"}>
-          <div className="bg-teal-600 text-white px-6 py-3 mt-6 rounded-lg shadow-md hover:bg-teal-700 transition">
+        <Link href="/contact">
+          <div className="mt-6 inline-block bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg shadow-md hover:shadow-xl transition transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
             Contact Us
           </div>
         </Link>
@@ -138,6 +183,7 @@ const RidePricingCalculator = ({
   );
 };
 
+// Radio Option Component
 const RadioOption = ({
   label,
   value,
@@ -156,12 +202,13 @@ const RadioOption = ({
       value={value}
       checked={selectedValue === value}
       onChange={onChange}
-      className="form-radio text-teal-600 focus:ring-0"
+      className="form-radio text-teal-600 h-5 w-5"
     />
     <span className="text-lg text-teal-900 font-medium">{label}</span>
   </label>
 );
 
+// Passenger Button Component
 const PassengerButton = ({
   number,
   setPassengers,
@@ -171,18 +218,20 @@ const PassengerButton = ({
   setPassengers: (passengers: number) => void;
   passengers: number;
 }) => (
-  <div
+  <button
     onClick={() => setPassengers(parseInt(number))}
-    className={`w-16 h-16 flex items-center justify-center rounded-lg border ${
+    className={`w-16 h-16 flex items-center justify-center rounded-lg border transition ${
       parseInt(number) === passengers
-        ? "bg-teal-600 text-white"
-        : "bg-white text-teal-900 hover:bg-teal-100"
-    } cursor-pointer transition`}
+        ? "bg-teal-600 text-white border-teal-600"
+        : "bg-white text-teal-900 border-gray-300 hover:bg-teal-100"
+    }`}
+    aria-pressed={parseInt(number) === passengers}
   >
     <span className="text-lg font-semibold">{number}</span>
-  </div>
+  </button>
 );
 
+// Mile Slider Component
 const MileSlider = ({
   setMiles,
   miles,
@@ -191,7 +240,7 @@ const MileSlider = ({
   miles: number;
 }) => (
   <div className="mt-8">
-    <h5 className="text-lg font-semibold text-teal-900">Distance (miles)</h5>
+    <h3 className="text-lg font-medium text-teal-900">Distance (miles)</h3>
     <input
       type="range"
       min="0"
@@ -199,6 +248,10 @@ const MileSlider = ({
       value={miles}
       onChange={(e) => setMiles(parseInt(e.target.value))}
       className="w-full mt-4"
+      aria-valuemin={0}
+      aria-valuemax={50}
+      aria-valuenow={miles}
+      aria-label="Distance in miles"
     />
     <div className="flex justify-between mt-2 text-teal-600">
       <span>0 miles</span>
@@ -208,6 +261,7 @@ const MileSlider = ({
   </div>
 );
 
+// Additional Stops Component
 const AdditionalStops = ({
   stops,
   setStops,
@@ -216,19 +270,21 @@ const AdditionalStops = ({
   setStops: (stops: number) => void;
 }) => (
   <div className="mt-8">
-    <h5 className="text-lg font-semibold text-teal-900">
+    <h3 className="text-lg font-medium text-teal-900">
       Additional Stops: {stops}
-    </h5>
+    </h3>
     <div className="flex items-center mt-4 space-x-4">
       <button
         onClick={() => setStops(Math.max(0, stops - 1))}
         className="bg-gray-200 p-2 rounded-lg hover:bg-gray-300 transition"
+        aria-label="Decrease stops"
       >
         <MinusSquare size={24} />
       </button>
       <button
         onClick={() => setStops(stops + 1)}
         className="bg-teal-600 text-white p-2 rounded-lg hover:bg-teal-700 transition"
+        aria-label="Increase stops"
       >
         <PlusSquare size={24} />
       </button>
@@ -236,24 +292,27 @@ const AdditionalStops = ({
   </div>
 );
 
+// Ride Information Component
 const RideInfo = ({ selectedRideType }: { selectedRideType: RideType }) => (
   <div className="text-center">
     {selectedRideType === "single" ? (
       <>
         <h4 className="text-2xl sm:text-3xl font-bold">One-Time Ride</h4>
-        <p className="mt-4 text-base sm:text-lg text-white">
-          One-Time rides start at $16/trip. The base rate covers up to 5 miles
-          and 1 passenger. Additional charges apply for extra miles, passengers,
-          and stops.
+        <p className="mt-4 text-base sm:text-lg">
+          One-Time rides start at{" "}
+          <span className="font-semibold">$16/trip</span>. The base rate covers
+          up to 5 miles and 1 passenger. Additional charges apply for extra
+          miles, passengers, and stops.
         </p>
       </>
     ) : (
       <>
         <h4 className="text-2xl sm:text-3xl font-bold">Regular Rides</h4>
-        <p className="mt-4 text-base sm:text-lg text-white">
-          Regular rides start at $13/trip. Ideal for frequent travelers, this
-          rate covers up to 5 miles and 1 passenger. Additional charges apply
-          for extra miles, passengers, and stops.
+        <p className="mt-4 text-base sm:text-lg">
+          Regular rides start at <span className="font-semibold">$13/trip</span>
+          . Ideal for frequent travelers, this rate covers up to 5 miles and 1
+          passenger. Additional charges apply for extra miles, passengers, and
+          stops.
         </p>
       </>
     )}
@@ -261,28 +320,37 @@ const RideInfo = ({ selectedRideType }: { selectedRideType: RideType }) => (
   </div>
 );
 
+// Pricing Chart Component
 const PricingChart = () => (
-  <div className="bg-white text-teal-900 z-10 text-xs sm:text-base rounded-lg shadow-md p-4 sm:p-8 mt-8 sm:mt-16">
-    <h2 className="text-xl sm:text-2xl font-bold text-teal-900 mb-4 text-center sm:text-left">
-      Add-On Services
-    </h2>
+  <div className="bg-white text-teal-900 rounded-lg shadow-md p-6 mt-8">
+    <h3 className="text-xl font-bold mb-4 text-center">Pricing Details</h3>
     <div className="overflow-x-auto">
-      <table className="min-w-full text-left">
+      <table className="min-w-full table-auto">
         <thead>
           <tr>
-            <th className="border-b p-2 sm:p-4 text-teal-900">Category</th>
-            <th className="border-b p-2 sm:p-4 text-teal-900">Description</th>
-            <th className="border-b p-2 sm:p-4 text-teal-900">Cost</th>
+            <th className="px-4 py-2 border-b-2 border-gray-200 text-left">
+              Category
+            </th>
+            <th className="px-4 py-2 border-b-2 border-gray-200 text-left">
+              Description
+            </th>
+            <th className="px-4 py-2 border-b-2 border-gray-200 text-left">
+              Cost
+            </th>
           </tr>
         </thead>
         <tbody>
           {pricingDetails.map((row, index) => (
-            <tr key={index}>
-              <td className="border-b p-2 sm:p-4 font-semibold">
+            <tr key={index} className="hover:bg-gray-100">
+              <td className="px-4 py-2 border-b border-gray-200">
                 {row.category}
               </td>
-              <td className="border-b p-2 sm:p-4">{row.description}</td>
-              <td className="border-b p-2 sm:p-4">{row.cost}</td>
+              <td className="px-4 py-2 border-b border-gray-200">
+                {row.description}
+              </td>
+              <td className="px-4 py-2 border-b border-gray-200 font-semibold">
+                {row.cost}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -291,6 +359,7 @@ const PricingChart = () => (
   </div>
 );
 
+// Pricing Details Data
 const pricingDetails = [
   {
     category: "Additional Miles",

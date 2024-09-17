@@ -1,5 +1,4 @@
 import React from "react";
-
 import { CheckCircle, Clock, XCircle } from "@phosphor-icons/react/dist/ssr";
 import { createClient } from "@/utils/supabase/server";
 import { getCompletedOrCanceledRides } from "@/utils/supabase/supabaseQueries";
@@ -18,19 +17,18 @@ export default async function RideHistory() {
     redirect("/login");
   }
 
-  // Fetch pending rides for the logged-in user
+  // Fetch completed or canceled rides for the logged-in user
   const rides = await getCompletedOrCanceledRides(user.id);
-  console.log(rides);
 
   return (
-    <div className="relative ">
+    <div className="relative min-h-screen bg-gray-50">
       {/* Background Decorations */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-teal-200 to-white opacity-80"></div>
         <div className="absolute bottom-0 right-0 w-full h-1/2 bg-gradient-to-t from-orange-100 to-white opacity-80"></div>
       </div>
 
-      <section className="relative pt-24  pb-16 lg:pb-32">
+      <section className="relative pt-24 pb-16 lg:pb-32">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
             <span className="font-semibold text-xl text-teal-600 mb-2 block">
@@ -40,42 +38,51 @@ export default async function RideHistory() {
               Your Previous Rides
             </h2>
             <p className="text-lg max-w-2xl mx-auto text-gray-600">
-              Review your past rides with Busy Minis. Keep track of completed,
-              pending, and canceled rides with detailed information for each
-              trip.
+              Review your past rides with Busy Minis and check your ride status.
             </p>
           </div>
 
           {/* Desktop Table */}
           <div className="hidden lg:block bg-white shadow-lg rounded-lg overflow-hidden">
-            <table className="min-w-full leading-normal">
+            <table className="min-w-full leading-normal text-left">
               <thead>
-                <tr>
-                  <th className="px-5 py-3 bg-teal-600 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                <tr className="bg-teal-600 text-white">
+                  <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wider">
                     Date
                   </th>
-                  <th className="px-5 py-3 bg-teal-600 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                  <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wider">
                     Ride Type
                   </th>
-                  <th className="px-5 py-3 bg-teal-600 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                  <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wider">
                     Pickup Location
                   </th>
-                  <th className="px-5 py-3 bg-teal-600 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                  <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wider">
                     Drop-Off Location
                   </th>
-                  <th className="px-5 py-3 bg-teal-600 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                  <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wider">
                     Status
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {rides.map((ride, index) => (
-                  <tr key={index} className="border-b">
-                    <td className="px-5 py-5 text-sm">{ride.pickupDate}</td>
-                    <td className="px-5 py-5 text-sm">Single Ride</td>
-                    <td className="px-5 py-5 text-sm">{ride.pickupAddress}</td>
-                    <td className="px-5 py-5 text-sm">{ride.dropoffAddress}</td>
-                    <td className="px-5 py-5 text-sm">
+                  <tr
+                    key={index}
+                    className="border-b hover:bg-gray-50 transition"
+                  >
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      {ride.pickupDate}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      Single Ride
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      {ride.pickupAddress}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      {ride.dropoffAddress}
+                    </td>
+                    <td className="px-6 py-4 text-sm">
                       <div className="flex items-center">
                         {ride.status === "completed" && (
                           <>
@@ -83,19 +90,25 @@ export default async function RideHistory() {
                               size={24}
                               className="text-green-500 mr-2"
                             />
-                            <span className="text-green-500">Completed</span>
+                            <span className="text-green-600 font-medium">
+                              Completed
+                            </span>
                           </>
                         )}
                         {ride.status === "pending" && (
                           <>
                             <Clock size={24} className="text-yellow-500 mr-2" />
-                            <span className="text-yellow-500">Pending</span>
+                            <span className="text-yellow-600 font-medium">
+                              Pending
+                            </span>
                           </>
                         )}
                         {ride.status === "canceled" && (
                           <>
                             <XCircle size={24} className="text-red-500 mr-2" />
-                            <span className="text-red-500">Canceled</span>
+                            <span className="text-red-600 font-medium">
+                              Canceled
+                            </span>
                           </>
                         )}
                       </div>
@@ -111,9 +124,42 @@ export default async function RideHistory() {
             {rides.map((ride, index) => (
               <div
                 key={index}
-                className="bg-white shadow-lg rounded-lg p-6 space-y-4"
+                className="bg-white shadow-lg rounded-lg p-6 space-y-4 hover:bg-gray-50 transition"
               >
-                <div className="text-lg font-semibold">{ride.pickupDate}</div>
+                <div className="flex justify-between items-center">
+                  <div className="text-lg font-semibold text-gray-900">
+                    {ride.pickupDate}
+                  </div>
+                  <div className="flex items-center">
+                    {ride.status === "completed" && (
+                      <>
+                        <CheckCircle
+                          size={24}
+                          className="text-green-500 mr-2"
+                        />
+                        <span className="text-green-600 font-medium">
+                          Completed
+                        </span>
+                      </>
+                    )}
+                    {ride.status === "pending" && (
+                      <>
+                        <Clock size={24} className="text-yellow-500 mr-2" />
+                        <span className="text-yellow-600 font-medium">
+                          Pending
+                        </span>
+                      </>
+                    )}
+                    {ride.status === "canceled" && (
+                      <>
+                        <XCircle size={24} className="text-red-500 mr-2" />
+                        <span className="text-red-600 font-medium">
+                          Canceled
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
                 <div className="text-sm">
                   <span className="font-semibold">Ride Type:</span> Single Ride
                 </div>
@@ -124,26 +170,6 @@ export default async function RideHistory() {
                 <div className="text-sm">
                   <span className="font-semibold">Drop-Off Location:</span>{" "}
                   {ride.dropoffAddress}
-                </div>
-                <div className="flex items-center text-sm">
-                  {ride.status === "completed" && (
-                    <>
-                      <CheckCircle size={24} className="text-green-500 mr-2" />
-                      <span className="text-green-500">Completed</span>
-                    </>
-                  )}
-                  {ride.status === "pending" && (
-                    <>
-                      <Clock size={24} className="text-yellow-500 mr-2" />
-                      <span className="text-yellow-500">Pending</span>
-                    </>
-                  )}
-                  {ride.status === "canceled" && (
-                    <>
-                      <XCircle size={24} className="text-red-500 mr-2" />
-                      <span className="text-red-500">Canceled</span>
-                    </>
-                  )}
                 </div>
               </div>
             ))}

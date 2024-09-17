@@ -1,32 +1,35 @@
 "use client";
 import React from "react";
-import { ArrowRight } from "@phosphor-icons/react/dist/ssr"; // Remove unused Star import
 import Link from "next/link";
 import {
-  Star,
-  Book,
-  Sun,
-  PhoneOutgoing,
+  CursorClick,
+  UsersThree,
+  CashRegister,
+  RocketLaunch,
   Wheelchair,
   SoccerBall,
   Church,
   Ticket,
   Gift,
   MapPinLine,
+  PhoneOutgoing,
 } from "@phosphor-icons/react";
+import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
+import { motion } from "framer-motion";
+
 export default function WhatWeOffer() {
   const services = [
     {
       name: "Tutoring/After School Transport",
       description:
         "Ensuring your child's academic success with safe, reliable rides to and from tutoring sessions and after-school activities.",
-      icon: <Book size={24} className="text-white" />,
+      icon: <CursorClick size={24} className="text-white" />,
     },
     {
       name: "Summer Camp Transport",
       description:
         "Making summer camp memories hassle-free with secure and dependable transportation tailored to your schedule.",
-      icon: <Sun size={24} className="text-white" />,
+      icon: <RocketLaunch size={24} className="text-white" />,
     },
     {
       name: "Last-Minute or Sick Child Pick-Up",
@@ -73,53 +76,82 @@ export default function WhatWeOffer() {
   ];
 
   return (
-    <section className="py-20 px-6 bg-white">
+    <section className="py-20 px-6 bg-gradient-to-b from-teal-50 to-white">
       <div className="max-w-7xl mx-auto text-center">
         <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 tracking-tight leading-tight">
           What Do We Offer?
         </h2>
         <p className="mt-6 text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">
-          Busy Minis Transportation offers services tailored to your familys
-          needs. From safe school transportation to extracurricular activities,
-          we ensure a reliable experience.
+          Busy Minis Transportation offers services tailored to your
+          family&lsquo;s needs. From safe school transportation to
+          extracurricular activities, we ensure a reliable experience.
         </p>
       </div>
 
       {/* Offers Grid */}
-      <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+      <motion.div
+        className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={{
+          visible: {
+            transition: {
+              staggerChildren: 0.2,
+            },
+          },
+        }}
+      >
         {services.map((service, index) => (
           <OfferItem
             key={index}
             icon={service.icon}
             title={service.name}
             description={service.description}
+            delay={index * 0.2}
           />
         ))}
-      </div>
+      </motion.div>
 
       {/* Call to Action */}
-      <div className="flex justify-center mt-16">
-        <Link
-          href="/pricing"
-          className="flex items-center bg-orange-600 hover:bg-orange-700 text-white transition-all px-8 py-4 gap-3 rounded-full shadow-lg text-lg font-semibold hover:shadow-xl transform hover:scale-105"
-        >
-          <span>Get A Quote</span>
-          <ArrowRight className="text-2xl" weight="bold" />
+      <motion.div
+        className="flex justify-center mt-16"
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 1, delay: 1.2 }}
+      >
+        <Link href="/pricing">
+          <div className="flex items-center bg-orange-600 hover:bg-orange-700 text-white transition-all px-8 py-4 gap-3 rounded-full shadow-lg text-lg font-semibold hover:shadow-xl transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+            <span>Get A Quote</span>
+            <ArrowRight className="text-2xl" weight="bold" />
+          </div>
         </Link>
-      </div>
+      </motion.div>
     </section>
   );
 }
 
 // Offer Item Component
-const OfferItem = ({ icon, title, description }: any) => {
+const OfferItem = ({ icon, title, description, delay }: any) => {
   return (
-    <div className="flex flex-col text-center items-center p-6 bg-gray-100 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 hover:bg-white">
-      <div className="flex items-center justify-center w-16 h-16 bg-orange-600 rounded-full mb-4">
+    <motion.div
+      className="flex flex-col text-center items-center p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.7, delay }}
+    >
+      {/* Icon Container */}
+      <div className="flex items-center justify-center w-16 h-16 bg-orange-600 rounded-full mb-4 shadow-lg">
         {icon}
       </div>
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
-      <p className="text-sm text-gray-600 text-center">{description}</p>
-    </div>
+
+      {/* Service Title */}
+      <h3 className="text-xl font-semibold text-gray-900 mb-2">{title}</h3>
+
+      {/* Service Description */}
+      <p className="text-gray-600">{description}</p>
+    </motion.div>
   );
 };

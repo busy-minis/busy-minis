@@ -4,6 +4,78 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl as string, supabaseKey as string);
 
+export async function getWeeklyRideById(id: string) {
+  try {
+    // Fetch the weekly ride details
+    const { data: weeklyRide, error: rideError } = await supabase
+      .from("weekly_rides")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (rideError) throw rideError;
+
+    // Fetch the associated ride sessions for this weekly ride
+    const { data: rideSessions, error: sessionError } = await supabase
+      .from("ride_sessions")
+      .select("*")
+      .eq("user_id", weeklyRide.user_id)
+      .eq("status", "scheduled")
+      .eq("start_date", weeklyRide.start_date)
+      .eq("end_date", weeklyRide.end_date);
+
+    if (sessionError) throw sessionError;
+
+    return { weeklyRide, rideSessions };
+  } catch (error) {
+    console.error("Error fetching ride data:", error);
+    throw error;
+  }
+}
+export async function updateWeeklyRide(rideId: string, canceledDay: string) {
+  try {
+    // Fetch the current `selectedDays` from the weekly ride
+    const { data: weeklyRide, error: rideError } = await supabase
+      .from("weekly_rides")
+      .select("selectedDays")
+      .eq("id", rideId)
+      .single();
+
+    if (rideError) throw rideError;
+
+    // Remove the canceled day from the `selectedDays` array in JavaScript
+    const updatedSelectedDays = weeklyRide.selectedDays.filter(
+      (day: string) => day !== canceledDay
+    );
+
+    // Update the weekly ride with the new `selectedDays`
+    const { error: updateError } = await supabase
+      .from("weekly_rides")
+      .update({ selectedDays: updatedSelectedDays })
+      .eq("id", rideId);
+
+    if (updateError) throw updateError;
+
+    // Delete the ride session for the canceled day
+    const { error: deleteError } = await supabase
+      .from("ride_sessions")
+      .delete()
+      .eq("start_date", canceledDay)
+      .eq("status", "scheduled")
+      .eq("id", rideId);
+
+    if (deleteError) throw deleteError;
+
+    return {
+      success: true,
+      message:
+        "Day successfully canceled. Note: No refunds will be processed for this day.",
+    };
+  } catch (error) {
+    console.error("Error updating ride:", error);
+    throw error;
+  }
+}
 export const getTimeBlocks = async () => {
   try {
     let { data: drivers, error } = await supabase

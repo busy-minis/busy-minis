@@ -1,6 +1,7 @@
 import { getAcceptedRidesByDriver } from "@/utils/supabase/supabaseQueries";
 import { createClient } from "@/utils/supabase/server";
 import Link from "next/link";
+import { Flag, MapPin, Users } from "@phosphor-icons/react/dist/ssr";
 
 export default async function MyRides() {
   const supabase = createClient();
@@ -45,7 +46,7 @@ export default async function MyRides() {
     <div className="min-h-screen bg-gray-50 p-6">
       {/* Header Section */}
       <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-gray-900">
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">
           Your Accepted Rides
         </h2>
         <p className="text-md text-gray-600">
@@ -59,44 +60,50 @@ export default async function MyRides() {
         {acceptedRides.map((ride) => (
           <div
             key={ride.id}
-            className="bg-white p-5 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200"
+            className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300"
           >
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-500">
+            {/* Ride Header */}
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-sm text-gray-500 flex items-center">
                 {formatDateTime(ride.pickupDate, ride.pickupTime)}
               </span>
-              <p className="text-sm text-gray-500">
+              <span className="flex items-center text-sm text-gray-500">
+                <Users size={20} className="mr-1" />
                 {ride.riders.length}{" "}
                 {ride.riders.length > 1 ? "Passengers" : "Passenger"}
-              </p>
+              </span>
             </div>
 
             {/* Ride Title */}
-            <h3 className="mt-4 text-xl font-semibold text-gray-800">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">
               Ride to {ride.dropoffAddress}
             </h3>
 
             {/* Pickup and Dropoff Info */}
-            <div className="mt-4">
-              <div className="flex items-center text-gray-600 mb-3">
-                <span className="w-4 h-4 bg-teal-500 rounded-full mr-2"></span>
-                <p className="text-base">Pickup: {ride.pickupAddress}</p>
+            <div className="mb-6">
+              <div className="flex items-start text-gray-600 mb-3">
+                <MapPin size={20} className="mt-1 mr-2 text-teal-500" />
+                <p className="text-base">
+                  <span className="font-medium">Pickup:</span>{" "}
+                  {ride.pickupAddress}
+                </p>
               </div>
 
-              <div className="flex items-center text-gray-600">
-                <span className="w-4 h-4 bg-amber-500 rounded-full mr-2"></span>
-                <p className="text-base">Dropoff: {ride.dropoffAddress}</p>
+              <div className="flex items-start text-gray-600">
+                <Flag size={20} className="mt-1 mr-2 text-amber-500" />
+                <p className="text-base">
+                  <span className="font-medium">Dropoff:</span>{" "}
+                  {ride.dropoffAddress}
+                </p>
               </div>
             </div>
 
             {/* View Details Button */}
-            <div className="mt-5">
-              <Link href={`/accepted-rides/ride?ride_id=${ride.id}`}>
-                <div className="block text-center text-gray-800 border border-gray-300 py-2 rounded-md hover:bg-gray-100 transition-colors">
-                  Go To Ride Page
-                </div>
-              </Link>
-            </div>
+            <Link href={`/accepted-rides/ride?ride_id=${ride.id}`}>
+              <div className="w-full block text-center text-white bg-teal-600 hover:bg-teal-700 transition-colors duration-200 py-2 rounded-md">
+                View Ride Details
+              </div>
+            </Link>
           </div>
         ))}
       </div>
