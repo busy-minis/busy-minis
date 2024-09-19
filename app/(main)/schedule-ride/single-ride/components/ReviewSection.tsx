@@ -50,7 +50,7 @@ export default function ReviewSection({
         <p className="font-semibold text-lg ml-2">Review Your Ride Details</p>
       </div>
 
-      <section className="mb-6 p-6 bg-white shadow-lg rounded-lg">
+      <section className="mb-6 p-2   md:p-6 bg-white shadow-lg rounded-lg">
         {/* Riders Information */}
         <h4 className="font-semibold text-xl text-teal-700 mb-4">
           Riders Information

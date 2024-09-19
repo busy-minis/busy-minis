@@ -78,7 +78,7 @@ export default function Review({
     .sort((a, b) => compareAsc(a.date, b.date));
 
   return (
-    <div className="rounded-2xl space-y-8 bg-white p-8 shadow-lg">
+    <div className="rounded-2xl space-y-8 bg-white p-2 md:p-8 shadow-lg">
       <h2 className="text-3xl font-bold mb-8 text-black text-center">
         Review Your Booking
       </h2>

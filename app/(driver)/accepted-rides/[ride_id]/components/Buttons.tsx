@@ -1,15 +1,20 @@
+// components/Buttons.tsx
+"use client";
+
 import React from "react";
 
-export default function Buttons({
-  setShowModal,
-  rideStarted,
-  endRideHandler,
-}: any) {
+interface ButtonsProps {
+  onStart: () => void;
+  onEnd: () => void;
+  rideStarted: boolean;
+}
+
+const Buttons: React.FC<ButtonsProps> = ({ onStart, onEnd, rideStarted }) => {
   return (
     <div className="flex justify-between items-center space-x-4">
       <button
-        onClick={() => setShowModal(true)} // Open the modal
-        disabled={rideStarted} // Disable the button if the ride is already started
+        onClick={onStart} // Trigger the start ride confirmation
+        disabled={rideStarted} // Disable if ride has started
         className={`w-full py-3 px-4 rounded-md transition-colors duration-200 ${
           rideStarted
             ? "bg-gray-400 text-gray-200 cursor-not-allowed"
@@ -19,8 +24,8 @@ export default function Buttons({
         {rideStarted ? "Ride Started" : "Start Ride"}
       </button>
       <button
-        onClick={endRideHandler}
-        disabled={!rideStarted} // Disable the button if the ride hasn't started
+        onClick={onEnd} // Trigger the end ride confirmation
+        disabled={!rideStarted} // Disable if ride hasn't started
         className={`w-full py-3 px-4 rounded-md transition-colors duration-200 ${
           rideStarted
             ? "bg-red-600 text-white hover:bg-red-700"
@@ -31,4 +36,6 @@ export default function Buttons({
       </button>
     </div>
   );
-}
+};
+
+export default Buttons;

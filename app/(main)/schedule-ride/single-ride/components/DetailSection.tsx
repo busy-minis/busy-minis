@@ -107,7 +107,7 @@ export default function DetailSection({
         <p className="font-semibold text-lg ml-2">Ride Details</p>
       </section>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+      <div className="w-full md:w-auto  grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
         <div>
           <Input
             label="Pickup Date"

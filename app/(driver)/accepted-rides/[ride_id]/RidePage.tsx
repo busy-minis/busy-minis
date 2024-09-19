@@ -1,7 +1,7 @@
 // RidePage.tsx
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   getRideById,
@@ -24,6 +24,7 @@ export default function RidePage({ userId }: any) {
   const [rideData, setRideData] = useState<Ride | null>(null);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [modalAction, setModalAction] = useState<"start" | "end" | null>(null);
   const [rideStarted, setRideStarted] = useState(false);
   const [driverLocation, setDriverLocation] = useState<{
     lat: number | null;
@@ -55,6 +56,8 @@ export default function RidePage({ userId }: any) {
         }
       } else {
         console.error("rideId is null or undefined");
+        setError("Invalid ride ID.");
+        setLoading(false);
       }
     };
     fetchRide();
@@ -112,6 +115,43 @@ export default function RidePage({ userId }: any) {
     };
   }, [rideStarted, rideId, driverId]);
 
+  // Define the onConfirm handler based on the action
+  const handleConfirm = async () => {
+    if (!rideId || !driverId) {
+      setError("Invalid ride or driver ID.");
+      return;
+    }
+
+    try {
+      if (modalAction === "start") {
+        await startRide(rideId);
+        setRideStarted(true);
+        console.log("Ride started successfully"); // Debug log
+      } else if (modalAction === "end") {
+        await endRide(rideId);
+        setRideStarted(false);
+        console.log("Ride ended successfully"); // Debug log
+      }
+    } catch (err) {
+      setError("Failed to perform the action.");
+      console.error("Action failed:", err);
+    } finally {
+      setShowModal(false);
+      setModalAction(null);
+    }
+  };
+
+  // Handlers to open modal with specific action
+  const handleStartRide = () => {
+    setModalAction("start");
+    setShowModal(true);
+  };
+
+  const handleEndRide = () => {
+    setModalAction("end");
+    setShowModal(true);
+  };
+
   if (loading) {
     return <p className="text-center text-gray-500">Loading ride details...</p>;
   }
@@ -158,22 +198,27 @@ export default function RidePage({ userId }: any) {
 
         {/* Actions */}
         <Buttons
-          setShowModal={setShowModal}
+          onStart={handleStartRide}
+          onEnd={handleEndRide}
           rideStarted={rideStarted}
-          setRideStarted={setRideStarted}
-          rideId={rideId}
-          driverId={driverId}
         />
       </div>
 
       {/* Confirmation Modal */}
-      {showModal && (
+      {showModal && modalAction && (
         <Modal
           setShowModal={setShowModal}
-          rideId={rideId}
-          driverId={driverId}
-          rideStarted={rideStarted}
-          setRideStarted={setRideStarted}
+          onConfirm={handleConfirm}
+          title={
+            modalAction === "start"
+              ? "Start Ride Confirmation"
+              : "End Ride Confirmation"
+          }
+          message={
+            modalAction === "start"
+              ? "Are you sure you want to start the ride?"
+              : "Are you sure you want to end the ride?"
+          }
         />
       )}
     </div>

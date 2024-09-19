@@ -122,13 +122,13 @@ export default function SingleRideBooking(props: { userId: string }) {
   return (
     <div className="min-h-screen flex flex-col justify-between bg-gradient-to-br from-blue-50 to-indigo-100">
       <LoadGoogleMapsScript />
-      <div className="container mx-auto px-4 sm:px-6 pt-10 pb-24">
+      <div className="container mx-auto px-2 md:px-4 sm:px-6 pt-10 pb-24">
         <h1 className="text-4xl sm:text-6xl font-extrabold text-center text-gray-900 mb-10">
           Book a Single Ride
         </h1>
 
         <form
-          className="max-w-3xl mx-auto bg-white/90 backdrop-blur-md p-10 shadow-2xl rounded-lg"
+          className="max-w-3xl mx-auto bg-white/90 backdrop-blur-md  md:p-10 shadow-2xl rounded-lg"
           onSubmit={handleSubmit}
         >
           <div className="mb-8">

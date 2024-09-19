@@ -291,7 +291,7 @@ export default function WeeklyRideBookingPage(props: { userId: string }) {
         <div className="container mx-auto px-6">
           <form
             onSubmit={handleSubmit}
-            className="max-w-3xl mx-auto bg-white p-10 rounded-xl shadow-xl space-y-10"
+            className="max-w-3xl mx-auto bg-white p-2   md:p-10 rounded-xl shadow-xl space-y-10"
           >
             <div className="w-full bg-gray-200 rounded-full h-2.5 mb-6">
               <div
@@ -309,7 +309,7 @@ export default function WeeklyRideBookingPage(props: { userId: string }) {
 
                 <Riders formData={formData} setFormData={setFormData} />
 
-                <div className="bg-gray-50 p-6 rounded-xl shadow-md">
+                <div className="bg-gray-50   md:p-6 rounded-xl shadow-md">
                   <AddressAutocomplete
                     label="Pickup Address"
                     value={formData.pickupAddress} // Pass current pickup address
@@ -357,7 +357,7 @@ export default function WeeklyRideBookingPage(props: { userId: string }) {
                   dateError={dateError}
                 />
 
-                <div className="bg-gray-50 p-6 rounded-xl shadow-md">
+                <div className="bg-gray-50   md:p-6 rounded-xl shadow-md">
                   <h4 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
                     <CalendarCheck size={28} className="mr-2 text-gray-700" />
                     Select Days of the Week

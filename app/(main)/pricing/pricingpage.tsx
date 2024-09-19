@@ -51,23 +51,23 @@ export default function PricingPage() {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="text-center"
         >
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-teal-900">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-teal-900">
             Pricing Calculator
           </h1>
-          <p className="mt-4 text-lg sm:text-xl text-gray-700">
+          <p className="mt-4 text-base sm:text-lg lg:text-xl text-gray-700">
             Estimate your ride cost in just a few clicks.
           </p>
         </motion.div>
 
         {/* Main Content */}
-        <div className="mt-12 grid md:grid-cols-2 gap-12">
+        <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-12">
           {/* Pricing Calculator */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, ease: "easeOut" }}
-            className="bg-white rounded-xl shadow-lg p-8"
+            className="bg-white rounded-xl shadow-lg p-6 sm:p-8"
           >
             <RidePricingCalculator
               selectedRideType={selectedRideType}
@@ -88,7 +88,7 @@ export default function PricingPage() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, ease: "easeOut" }}
-            className="bg-teal-900 text-white rounded-xl shadow-lg p-8 flex flex-col justify-center"
+            className="bg-teal-900 text-white rounded-xl shadow-lg p-6 sm:p-8 flex flex-col justify-center"
           >
             <RideInfo selectedRideType={selectedRideType} />
           </motion.div>
@@ -123,15 +123,19 @@ const RidePricingCalculator = ({
 }: any) => {
   return (
     <div>
-      <h2 className="text-2xl font-semibold text-teal-900">
+      <h2 className="text-xl sm:text-2xl font-semibold text-teal-900">
         Customize Your Ride
       </h2>
-      <p className="text-gray-500 mt-2">Estimate your ride cost</p>
+      <p className="text-gray-500 mt-2 text-sm sm:text-base">
+        Estimate your ride cost
+      </p>
 
       {/* Ride Type Selection */}
       <div className="mt-6">
-        <h3 className="text-lg font-medium text-teal-900">Ride Type</h3>
-        <div className="flex items-center space-x-4 mt-4">
+        <h3 className="text-md sm:text-lg font-medium text-teal-900">
+          Ride Type
+        </h3>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4 mt-4">
           <RadioOption
             label="One-time Ride"
             value="single"
@@ -149,8 +153,10 @@ const RidePricingCalculator = ({
 
       {/* Passengers Selection */}
       <div className="mt-8">
-        <h3 className="text-lg font-medium text-teal-900">Passengers</h3>
-        <div className="flex space-x-4 mt-4">
+        <h3 className="text-md sm:text-lg font-medium text-teal-900">
+          Passengers
+        </h3>
+        <div className="flex flex-wrap sm:flex-nowrap space-x-0 sm:space-x-4 space-y-4 sm:space-y-0 mt-4">
           {["1", "2", "3", "4"].map((num) => (
             <PassengerButton
               key={num}
@@ -170,11 +176,11 @@ const RidePricingCalculator = ({
 
       {/* Total Price */}
       <div className="mt-12 text-center">
-        <p className="text-3xl font-bold text-teal-900">
+        <p className="text-2xl sm:text-3xl font-bold text-teal-900">
           Total Price: ${totalPrice.toFixed(2)}
         </p>
         <Link href="/contact">
-          <div className="mt-6 inline-block bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg shadow-md hover:shadow-xl transition transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+          <div className="mt-6 inline-block bg-teal-600 hover:bg-teal-700 text-white px-5 py-3 rounded-lg shadow-md hover:shadow-xl transition transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 text-sm sm:text-base">
             Contact Us
           </div>
         </Link>
@@ -204,7 +210,9 @@ const RadioOption = ({
       onChange={onChange}
       className="form-radio text-teal-600 h-5 w-5"
     />
-    <span className="text-lg text-teal-900 font-medium">{label}</span>
+    <span className="text-sm sm:text-lg text-teal-900 font-medium">
+      {label}
+    </span>
   </label>
 );
 
@@ -220,14 +228,14 @@ const PassengerButton = ({
 }) => (
   <button
     onClick={() => setPassengers(parseInt(number))}
-    className={`w-16 h-16 flex items-center justify-center rounded-lg border transition ${
+    className={`w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center rounded-lg border transition ${
       parseInt(number) === passengers
         ? "bg-teal-600 text-white border-teal-600"
         : "bg-white text-teal-900 border-gray-300 hover:bg-teal-100"
     }`}
     aria-pressed={parseInt(number) === passengers}
   >
-    <span className="text-lg font-semibold">{number}</span>
+    <span className="text-base sm:text-lg font-semibold">{number}</span>
   </button>
 );
 
@@ -240,7 +248,9 @@ const MileSlider = ({
   miles: number;
 }) => (
   <div className="mt-8">
-    <h3 className="text-lg font-medium text-teal-900">Distance (miles)</h3>
+    <h3 className="text-md sm:text-lg font-medium text-teal-900">
+      Distance (miles)
+    </h3>
     <input
       type="range"
       min="0"
@@ -253,7 +263,7 @@ const MileSlider = ({
       aria-valuenow={miles}
       aria-label="Distance in miles"
     />
-    <div className="flex justify-between mt-2 text-teal-600">
+    <div className="flex justify-between mt-2 text-teal-600 text-sm sm:text-base">
       <span>0 miles</span>
       <span>{miles} miles</span>
       <span>50+ miles</span>
@@ -270,23 +280,23 @@ const AdditionalStops = ({
   setStops: (stops: number) => void;
 }) => (
   <div className="mt-8">
-    <h3 className="text-lg font-medium text-teal-900">
+    <h3 className="text-md sm:text-lg font-medium text-teal-900">
       Additional Stops: {stops}
     </h3>
-    <div className="flex items-center mt-4 space-x-4">
+    <div className="flex items-center mt-4 space-x-4 justify-center">
       <button
         onClick={() => setStops(Math.max(0, stops - 1))}
         className="bg-gray-200 p-2 rounded-lg hover:bg-gray-300 transition"
         aria-label="Decrease stops"
       >
-        <MinusSquare size={24} />
+        <MinusSquare size={20} />
       </button>
       <button
         onClick={() => setStops(stops + 1)}
         className="bg-teal-600 text-white p-2 rounded-lg hover:bg-teal-700 transition"
         aria-label="Increase stops"
       >
-        <PlusSquare size={24} />
+        <PlusSquare size={20} />
       </button>
     </div>
   </div>
@@ -297,8 +307,8 @@ const RideInfo = ({ selectedRideType }: { selectedRideType: RideType }) => (
   <div className="text-center">
     {selectedRideType === "single" ? (
       <>
-        <h4 className="text-2xl sm:text-3xl font-bold">One-Time Ride</h4>
-        <p className="mt-4 text-base sm:text-lg">
+        <h4 className="text-xl sm:text-2xl font-bold">One-Time Ride</h4>
+        <p className="mt-4 text-sm sm:text-base">
           One-Time rides start at{" "}
           <span className="font-semibold">$16/trip</span>. The base rate covers
           up to 5 miles and 1 passenger. Additional charges apply for extra
@@ -307,8 +317,8 @@ const RideInfo = ({ selectedRideType }: { selectedRideType: RideType }) => (
       </>
     ) : (
       <>
-        <h4 className="text-2xl sm:text-3xl font-bold">Regular Rides</h4>
-        <p className="mt-4 text-base sm:text-lg">
+        <h4 className="text-xl sm:text-2xl font-bold">Regular Rides</h4>
+        <p className="mt-4 text-sm sm:text-base">
           Regular rides start at <span className="font-semibold">$13/trip</span>
           . Ideal for frequent travelers, this rate covers up to 5 miles and 1
           passenger. Additional charges apply for extra miles, passengers, and
@@ -316,25 +326,27 @@ const RideInfo = ({ selectedRideType }: { selectedRideType: RideType }) => (
         </p>
       </>
     )}
-    <PricingChart />
+    {/* Removed duplicate PricingChart inside RideInfo */}
   </div>
 );
 
 // Pricing Chart Component
 const PricingChart = () => (
-  <div className="bg-white text-teal-900 rounded-lg shadow-md p-6 mt-8">
-    <h3 className="text-xl font-bold mb-4 text-center">Pricing Details</h3>
+  <div className="bg-white text-teal-900 rounded-lg shadow-md p-6 sm:p-8">
+    <h3 className="text-xl sm:text-2xl font-bold mb-4 text-center">
+      Pricing Details
+    </h3>
     <div className="overflow-x-auto">
       <table className="min-w-full table-auto">
         <thead>
           <tr>
-            <th className="px-4 py-2 border-b-2 border-gray-200 text-left">
+            <th className="px-4 py-2 border-b-2 border-gray-200 text-left text-sm sm:text-base">
               Category
             </th>
-            <th className="px-4 py-2 border-b-2 border-gray-200 text-left">
+            <th className="px-4 py-2 border-b-2 border-gray-200 text-left text-sm sm:text-base">
               Description
             </th>
-            <th className="px-4 py-2 border-b-2 border-gray-200 text-left">
+            <th className="px-4 py-2 border-b-2 border-gray-200 text-left text-sm sm:text-base">
               Cost
             </th>
           </tr>
@@ -342,13 +354,13 @@ const PricingChart = () => (
         <tbody>
           {pricingDetails.map((row, index) => (
             <tr key={index} className="hover:bg-gray-100">
-              <td className="px-4 py-2 border-b border-gray-200">
+              <td className="px-4 py-2 border-b border-gray-200 text-sm sm:text-base">
                 {row.category}
               </td>
-              <td className="px-4 py-2 border-b border-gray-200">
+              <td className="px-4 py-2 border-b border-gray-200 text-sm sm:text-base">
                 {row.description}
               </td>
-              <td className="px-4 py-2 border-b border-gray-200 font-semibold">
+              <td className="px-4 py-2 border-b border-gray-200 font-semibold text-sm sm:text-base">
                 {row.cost}
               </td>
             </tr>

@@ -61,12 +61,12 @@ const Riders: React.FC<RidersProps> = ({ formData, setFormData }) => {
   };
 
   return (
-    <div className="bg-gray-50 p-6 rounded-xl shadow-md">
+    <div className="bg-gray-50  p-2  md:p-6 rounded-xl shadow-md">
       <h4 className="text-2xl font-semibold text-teal-900 mb-6 flex items-center">
         <UserPlus size={28} className="mr-2 text-teal-600" /> Add Riders
       </h4>
       {formData.riders.map((rider, index) => (
-        <div key={index} className="grid grid-cols-5 gap-4 mb-4">
+        <div key={index} className="grid grid-cols-5 gap-2 md:gap-4 mb-4">
           <div className="col-span-3">
             <label
               htmlFor={`rider-name-${index}`}
