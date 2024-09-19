@@ -1,3 +1,4 @@
+// RidePage.tsx
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
@@ -13,9 +14,6 @@ import Buttons from "./components/Buttons";
 import RideInfo from "./components/RideInfo";
 import Map from "./components/Map";
 import { Ride } from "@/app/types/types";
-
-const THROTTLE_INTERVAL = 5000; // 5 seconds
-const MIN_DISTANCE_CHANGE = 10; // 10 meters
 
 export default function RidePage({ userId }: any) {
   const router = useRouter();
@@ -37,146 +35,82 @@ export default function RidePage({ userId }: any) {
   const [driverHeading, setDriverHeading] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
 
-  const stopTrackingDriverRef = useRef<(() => void) | null>(null);
+  const watchIdRef = useRef<number | null>(null);
 
   useEffect(() => {
     const fetchRide = async () => {
       if (rideId) {
+        console.log("Fetching ride with ID:", rideId); // Debug log
         try {
           const ride = await getRideById(rideId);
           if (!ride) throw new Error("Ride not found.");
           setRideData(ride);
           setRideStarted(ride.status === "ongoing");
+          console.log("Ride data fetched:", ride); // Debug log
         } catch (error) {
           setError("Failed to fetch ride details.");
           console.error("Failed to fetch ride:", error);
         } finally {
           setLoading(false);
         }
+      } else {
+        console.error("rideId is null or undefined");
       }
     };
     fetchRide();
   }, [rideId]);
 
-  // Function to start tracking the driver's location and heading
-  const startTrackingDriver = (rideId: string) => {
-    let lastUpdateTime = 0;
-    let lastPosition: { latitude: number; longitude: number } | null = null;
+  // Start tracking driver's location when ride is started
+  useEffect(() => {
+    if (!rideStarted) return;
 
-    const watchId = navigator.geolocation.watchPosition(
-      async (position) => {
-        const { latitude, longitude, heading } = position.coords;
-        const currentTime = Date.now();
+    if (!navigator.geolocation) {
+      setError("Geolocation is not supported by your browser.");
+      return;
+    }
 
-        // Log position data
-        console.log("Geolocation success:", position.coords);
+    const successCallback: PositionCallback = (position) => {
+      const { latitude, longitude, heading } = position.coords;
+      setDriverLocation({
+        lat: latitude,
+        lng: longitude,
+      });
+      setDriverHeading(heading || 0);
 
-        // Update driver's location and heading in state
-        setDriverLocation({ lat: latitude, lng: longitude });
-        setDriverHeading(heading !== null ? heading : driverHeading);
+      if (rideId && driverId) {
+        updateDriverLocation(rideId, driverId, latitude, longitude)
+          .then(() => {
+            console.log("Driver location updated in Supabase"); // Debug log
+          })
+          .catch((err) => {
+            console.error("Failed to update driver location:", err);
+          });
+      }
+    };
 
-        // Log updated state
-        console.log("Driver Location Updated:", {
-          lat: latitude,
-          lng: longitude,
-        });
-        console.log("Driver Heading Updated:", driverHeading);
+    const errorCallback: PositionErrorCallback = (error) => {
+      setError("Failed to retrieve your location.");
+      console.error("Geolocation error:", error);
+    };
 
-        // Throttle updates to avoid too many requests
-        if (
-          currentTime - lastUpdateTime > THROTTLE_INTERVAL &&
-          (!lastPosition ||
-            getDistance(
-              lastPosition.latitude,
-              lastPosition.longitude,
-              latitude,
-              longitude
-            ) > MIN_DISTANCE_CHANGE)
-        ) {
-          lastUpdateTime = currentTime;
-          lastPosition = { latitude, longitude };
-
-          // Update the driver's location in Supabase
-          await updateDriverLocation(rideId, driverId, latitude, longitude);
-        }
-      },
-      (error) => {
-        console.error("Error tracking location:", error);
-        setError(
-          "Failed to retrieve your location. Please ensure location services are enabled and refresh the page."
-        );
-      },
+    // Start watching the position
+    watchIdRef.current = navigator.geolocation.watchPosition(
+      successCallback,
+      errorCallback,
       {
         enableHighAccuracy: true,
-        maximumAge: 10000,
+        maximumAge: 0,
         timeout: 5000,
       }
     );
 
-    return () => navigator.geolocation.clearWatch(watchId);
-  };
-
-  // Utility function to calculate the distance between two coordinates
-  const getDistance = (
-    lat1: number,
-    lon1: number,
-    lat2: number,
-    lon2: number
-  ) => {
-    const R = 6371e3; // Earth's radius in meters
-    const φ1 = (lat1 * Math.PI) / 180;
-    const φ2 = (lat2 * Math.PI) / 180;
-    const Δφ = ((lat2 - lat1) * Math.PI) / 180;
-    const Δλ = ((lon2 - lon1) * Math.PI) / 180;
-
-    const a =
-      Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-    return R * c; // Distance in meters
-  };
-
-  const startRideHandler = async () => {
-    try {
-      await startRide(rideId!);
-      console.log("Ride started.");
-      setRideStarted(true);
-      setShowModal(false);
-
-      // Start tracking driver's location
-      stopTrackingDriverRef.current = startTrackingDriver(rideId!);
-    } catch (error) {
-      console.error("Failed to start the ride:", error);
-    }
-  };
-
-  const endRideHandler = async () => {
-    try {
-      await endRide(rideId!);
-      console.log("Ride ended.");
-      setRideStarted(false);
-
-      // Stop tracking driver's location
-      if (stopTrackingDriverRef.current) {
-        stopTrackingDriverRef.current();
-        stopTrackingDriverRef.current = null;
-      }
-
-      router.push("/my-rides");
-    } catch (error) {
-      console.error("Failed to end the ride:", error);
-    }
-  };
-
-  // Cleanup on component unmount
-  useEffect(() => {
+    // Cleanup on unmount
     return () => {
-      if (stopTrackingDriverRef.current) {
-        stopTrackingDriverRef.current();
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
       }
     };
-  }, []);
+  }, [rideStarted, rideId, driverId]);
 
   if (loading) {
     return <p className="text-center text-gray-500">Loading ride details...</p>;
@@ -211,8 +145,10 @@ export default function RidePage({ userId }: any) {
 
         {/* Google Map with driver's live location and heading */}
         <Map
-          dropoffLng={rideData.dropoffLng}
+          pickupLat={rideData.pickupLat}
+          pickupLng={rideData.pickupLng}
           dropoffLat={rideData.dropoffLat}
+          dropoffLng={rideData.dropoffLng}
           driverLat={driverLocation.lat}
           driverLng={driverLocation.lng}
           driverHeading={driverHeading}
@@ -223,8 +159,10 @@ export default function RidePage({ userId }: any) {
         {/* Actions */}
         <Buttons
           setShowModal={setShowModal}
-          endRideHandler={endRideHandler}
           rideStarted={rideStarted}
+          setRideStarted={setRideStarted}
+          rideId={rideId}
+          driverId={driverId}
         />
       </div>
 
@@ -232,7 +170,10 @@ export default function RidePage({ userId }: any) {
       {showModal && (
         <Modal
           setShowModal={setShowModal}
-          startRideHandler={startRideHandler}
+          rideId={rideId}
+          driverId={driverId}
+          rideStarted={rideStarted}
+          setRideStarted={setRideStarted}
         />
       )}
     </div>

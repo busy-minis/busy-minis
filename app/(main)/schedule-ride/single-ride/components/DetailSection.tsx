@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+import React from "react";
 import { Input } from "./Input";
-
 import {
   Calendar,
   Clock,
@@ -11,27 +10,28 @@ import {
 } from "@phosphor-icons/react";
 import { format, isBefore, parseISO, addHours } from "date-fns";
 import { Warning } from "./Warning";
+import { FormData, Rider } from "./FormTypes";
 
-interface Rider {
-  name: string;
-  age: string;
+interface DetailSectionProps {
+  formData: FormData;
+  setFormData: React.Dispatch<React.SetStateAction<FormData>>;
+  validationErrors: string[];
+  setValidationErrors: any;
+  handleNextStep: () => void;
+  isSameDay: boolean;
+  setIsSameDay: React.Dispatch<React.SetStateAction<boolean>>;
+  isOffPeak: boolean;
+  setIsOffPeak: React.Dispatch<React.SetStateAction<boolean>>;
+  isMoreRiders: boolean;
+  setIsMoreRiders: React.Dispatch<React.SetStateAction<boolean>>;
+  isWithinOneHour: boolean;
+  setIsWithinOneHour: React.Dispatch<React.SetStateAction<boolean>>;
 }
-interface FormData {
-  user_id: string;
-  status: string;
-  pickupDate: string;
-  pickupTime: string;
-  pickupAddress: string;
-  pickupLat?: number;
-  pickupLng?: number;
-  dropoffAddress: string;
-  dropoffLat?: number;
-  dropoffLng?: number;
-  riders: Rider[];
-}
+
 export default function DetailSection({
   formData,
   setFormData,
+  setValidationErrors,
   validationErrors,
   handleNextStep,
   isSameDay,
@@ -42,8 +42,9 @@ export default function DetailSection({
   setIsMoreRiders,
   isWithinOneHour,
   setIsWithinOneHour,
-}: any) {
+}: DetailSectionProps) {
   const today = format(new Date(), "yyyy-MM-dd");
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     field: keyof FormData | keyof Rider,
@@ -63,6 +64,7 @@ export default function DetailSection({
         checkSameDayAndTime(formData.pickupDate, value);
     }
   };
+
   const checkSameDayAndTime = (pickupDate: string, pickupTime: string) => {
     const isSame = pickupDate === today;
     const isOffPeakTime =
@@ -81,39 +83,38 @@ export default function DetailSection({
     setIsOffPeak(Boolean(isOffPeakTime));
     setIsWithinOneHour(Boolean(withinOneHour));
   };
+
   const handleAddRider = () => {
     setFormData({
       ...formData,
       riders: [...formData.riders, { name: "", age: "" }],
     });
-    setIsMoreRiders(true);
+    setIsMoreRiders(formData.riders.length + 1 > 1);
   };
 
   const handleRemoveRider = (index: number) => {
-    setFormData({
-      ...formData,
-      riders: formData.riders.filter((_: any, i: any) => i !== index),
-    });
-    setIsMoreRiders(false);
+    const updatedRiders = formData.riders.filter((_, i) => i !== index);
+    setFormData({ ...formData, riders: updatedRiders });
+    setIsMoreRiders(updatedRiders.length > 1);
   };
 
   return (
     <>
-      <section className="flex gap-2 mb-8 items-center">
-        <div className="bg-orange-500 grid place-content-center text-sm size-6 rounded-full text-white">
+      <section className="flex items-center mb-8">
+        <div className="bg-orange-500 grid place-content-center text-sm w-8 h-8 rounded-full text-white">
           1
         </div>
-        <p className=" font-semibold"> Details</p>
+        <p className="font-semibold text-lg ml-2">Ride Details</p>
       </section>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
         <div>
           <Input
             label="Pickup Date"
             type="date"
             icon={<Calendar size={24} />}
             value={formData.pickupDate}
-            min={today} // Restrict past dates
+            min={today}
             onChange={(e) => handleInputChange(e, "pickupDate")}
           />
           {isSameDay && (
@@ -137,10 +138,10 @@ export default function DetailSection({
         </div>
       </div>
 
-      {formData.riders.map((rider: Rider, index: any) => (
+      {formData.riders.map((rider: Rider, index: number) => (
         <div
           key={index}
-          className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 mb-6"
+          className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-end mb-4"
         >
           <Input
             label={`Rider ${index + 1} Name`}
@@ -158,7 +159,7 @@ export default function DetailSection({
           {index > 0 && (
             <button
               type="button"
-              className="text-red-600 bg-red-100 w-fit px-2 py-2 font-bold  flex items-center space-x-2"
+              className="text-red-600 bg-red-100 px-2 py-2 font-bold flex items-center space-x-2 mt-2"
               onClick={() => handleRemoveRider(index)}
             >
               <Trash size={20} />
@@ -167,8 +168,9 @@ export default function DetailSection({
           )}
         </div>
       ))}
+
       {isMoreRiders && (
-        <Warning text="More Riders will incur an additional fee." />
+        <Warning text="Adding more riders will incur an additional fee." />
       )}
 
       {formData.riders.length < 4 && (
@@ -183,8 +185,8 @@ export default function DetailSection({
       )}
 
       {validationErrors.length > 0 && (
-        <div className="text-red-600 text-sm mb-4 mt-2 text-center">
-          {validationErrors.map((error: any, index: any) => (
+        <div className="text-red-600 text-sm mb-4 mt-2">
+          {validationErrors.map((error: string, index: number) => (
             <p key={index}>{error}</p>
           ))}
         </div>
@@ -192,10 +194,11 @@ export default function DetailSection({
 
       <button
         type="button"
-        className="w-full px-4 py-2 bg-gradient-to-r from-theme-orange to-theme-yellow text-white rounded-lg shadow-md hover:shadow-lg  ease-in-out transform flex justify-center items-center"
+        className="w-full px-4 py-2 bg-gradient-to-r from-orange-500 to-yellow-500 text-white rounded-lg shadow-md hover:shadow-lg transition-transform duration-200 ease-in-out transform hover:-translate-y-1 flex justify-center items-center"
         onClick={handleNextStep}
       >
         Next
+        <ArrowRight size={24} className="ml-2" />
       </button>
     </>
   );

@@ -1,20 +1,63 @@
-"use client";
+// components/Riders.tsx
 import React from "react";
-import { UserPlus, UserMinus, Info } from "@phosphor-icons/react";
+import { UserPlus, UserMinus } from "@phosphor-icons/react";
 
-export default function Riders({ formData, setFormData }: any) {
+interface Stop {
+  address: string;
+  lat?: number;
+  lng?: number;
+}
+
+interface FormData {
+  user_id: string;
+  status: string;
+  end_date: string;
+  pickupDate: string;
+  pickupAddress: string;
+  pickupLat?: number;
+  pickupLng?: number;
+  stops: Stop[];
+  dropoffAddress: string;
+  dropoffLat?: number;
+  dropoffLng?: number;
+  riders: Rider[];
+  selectedTime: string;
+  selectedDays: string[];
+}
+
+interface Rider {
+  name: string;
+  age: string;
+}
+
+interface RidersProps {
+  formData: FormData;
+  setFormData: React.Dispatch<React.SetStateAction<FormData>>;
+}
+
+const Riders: React.FC<RidersProps> = ({ formData, setFormData }) => {
   const addPassenger = () => {
-    setFormData((prevData: any) => ({
+    setFormData((prevData) => ({
       ...prevData,
       riders: [...prevData.riders, { name: "", age: "" }],
     }));
   };
 
   const removePassenger = (index: number) => {
-    setFormData((prevData: any) => ({
+    setFormData((prevData) => ({
       ...prevData,
-      riders: prevData.riders.filter((_: any, i: any) => i !== index),
+      riders: prevData.riders.filter((_, i) => i !== index),
     }));
+  };
+
+  const handleRiderChange = (
+    index: number,
+    field: keyof Rider,
+    value: string
+  ) => {
+    const newRiders = [...formData.riders];
+    newRiders[index][field] = value;
+    setFormData({ ...formData, riders: newRiders });
   };
 
   return (
@@ -22,40 +65,54 @@ export default function Riders({ formData, setFormData }: any) {
       <h4 className="text-2xl font-semibold text-teal-900 mb-6 flex items-center">
         <UserPlus size={28} className="mr-2 text-teal-600" /> Add Riders
       </h4>
-      {formData.riders.map((rider: any, index: any) => (
+      {formData.riders.map((rider, index) => (
         <div key={index} className="grid grid-cols-5 gap-4 mb-4">
-          <input
-            required
-            type="text"
-            placeholder={`Rider ${index + 1} Name`}
-            value={rider.name}
-            onChange={(e) => {
-              const newRiders = [...formData.riders];
-              newRiders[index].name = e.target.value;
-              setFormData({ ...formData, riders: newRiders });
-            }}
-            className="col-span-3 p-3 border border-gray-300 rounded-lg focus:ring-teal-600 focus:border-teal-600"
-          />
-          <input
-            required
-            type="number"
-            placeholder="Age"
-            value={rider.age}
-            onChange={(e) => {
-              const newRiders = [...formData.riders];
-              newRiders[index].age = e.target.value;
-              setFormData({ ...formData, riders: newRiders });
-            }}
-            className="col-span-1 p-3 border border-gray-300 rounded-lg focus:ring-teal-600 focus:border-teal-600"
-          />
-          {formData.riders.length > 1 && (
-            <button
-              type="button"
-              onClick={() => removePassenger(index)}
-              className="col-span-1 bg-red-500 text-white p-2 rounded-lg shadow hover:bg-red-600 transition"
+          <div className="col-span-3">
+            <label
+              htmlFor={`rider-name-${index}`}
+              className="block text-gray-700"
             >
-              <UserMinus size={24} />
-            </button>
+              Rider {index + 1} Name
+            </label>
+            <input
+              id={`rider-name-${index}`}
+              type="text"
+              placeholder={`Rider ${index + 1} Name`}
+              value={rider.name}
+              onChange={(e) => handleRiderChange(index, "name", e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-teal-600 focus:border-teal-600"
+              required
+            />
+          </div>
+          <div className="col-span-1">
+            <label
+              htmlFor={`rider-age-${index}`}
+              className="block text-gray-700"
+            >
+              Age
+            </label>
+            <input
+              id={`rider-age-${index}`}
+              type="number"
+              min="1"
+              placeholder="Age"
+              value={rider.age}
+              onChange={(e) => handleRiderChange(index, "age", e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-teal-600 focus:border-teal-600"
+              required
+            />
+          </div>
+          {formData.riders.length > 1 && (
+            <div className="col-span-1 flex items-end">
+              <button
+                type="button"
+                onClick={() => removePassenger(index)}
+                className="w-full bg-red-500 text-white p-2 rounded-lg shadow hover:bg-red-600 transition"
+                aria-label={`Remove Rider ${index + 1}`}
+              >
+                <UserMinus size={24} />
+              </button>
+            </div>
           )}
         </div>
       ))}
@@ -68,4 +125,6 @@ export default function Riders({ formData, setFormData }: any) {
       </button>
     </div>
   );
-}
+};
+
+export default Riders;

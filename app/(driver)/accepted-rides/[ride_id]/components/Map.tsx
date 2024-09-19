@@ -1,140 +1,133 @@
-import React, { useEffect, useState, useRef } from "react";
+// components/Map.tsx
+"use client";
+
+import React, { useEffect, useState, useCallback } from "react";
 import {
   GoogleMap,
   Marker,
   DirectionsRenderer,
-  useLoadScript,
-  Libraries,
+  useJsApiLoader,
 } from "@react-google-maps/api";
 
-const libraries: Libraries = ["places"];
-
 interface MapProps {
+  pickupLat: number;
+  pickupLng: number;
   dropoffLat: number;
   dropoffLng: number;
-  driverLat: number | null; // Allow for null values
+  driverLat: number | null;
   driverLng: number | null;
   driverHeading: number;
 }
 
-export default function Map({
+const containerStyle = {
+  width: "100%",
+  height: "400px",
+};
+
+const Map: React.FC<MapProps> = ({
+  pickupLat,
+  pickupLng,
   dropoffLat,
   dropoffLng,
   driverLat,
   driverLng,
   driverHeading,
-}: MapProps) {
-  const mapContainerStyle = {
-    width: "100%",
-    height: "100vh",
-  };
+}) => {
+  const { isLoaded, loadError } = useJsApiLoader({
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
+    libraries: ["places"],
+  });
 
   const [directions, setDirections] =
     useState<google.maps.DirectionsResult | null>(null);
-  const [currentStep, setCurrentStep] = useState<string | null>(null);
-  const mapRef = useRef<google.maps.Map | null>(null);
 
-  // Load the Google Maps API
-  const { isLoaded } = useLoadScript({
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
-    libraries,
-  });
+  const center = {
+    lat: driverLat || pickupLat,
+    lng: driverLng || pickupLng,
+  };
 
-  // Get directions from driver to dropoff location
+  const directionsCallback = useCallback(
+    (
+      result: google.maps.DirectionsResult | null,
+      status: google.maps.DirectionsStatus
+    ) => {
+      if (status === google.maps.DirectionsStatus.OK && result) {
+        setDirections(result);
+        console.log("Directions fetched successfully"); // Debug log
+      } else {
+        console.error("Directions request failed due to " + status);
+      }
+    },
+    []
+  );
+
   useEffect(() => {
-    if (
-      isLoaded &&
-      driverLat != null &&
-      driverLng != null &&
-      dropoffLat != null &&
-      dropoffLng != null
-    ) {
+    if (isLoaded && driverLat && driverLng) {
+      console.log("Requesting directions from driver to pickup"); // Debug log
       const directionsService = new google.maps.DirectionsService();
       directionsService.route(
         {
           origin: { lat: driverLat, lng: driverLng },
-          destination: { lat: dropoffLat, lng: dropoffLng },
+          destination: { lat: pickupLat, lng: pickupLng },
           travelMode: google.maps.TravelMode.DRIVING,
         },
-        (result, status) => {
-          if (status === google.maps.DirectionsStatus.OK && result) {
-            setDirections(result);
-            if (result.routes[0]?.legs[0]?.steps.length > 0) {
-              setCurrentStep(result.routes[0].legs[0].steps[0].instructions);
-            }
-          } else {
-            console.error(`Error fetching directions: ${status}`);
-          }
-        }
+        directionsCallback
       );
     }
-  }, [isLoaded, driverLat, driverLng, dropoffLat, dropoffLng]);
+  }, [
+    isLoaded,
+    driverLat,
+    driverLng,
+    pickupLat,
+    pickupLng,
+    directionsCallback,
+  ]);
 
-  // Center the map on the driver’s position as they move and rotate it based on heading
-  useEffect(() => {
-    if (
-      mapRef.current &&
-      driverLat != null &&
-      driverLng != null &&
-      driverHeading != null
-    ) {
-      const driverPosition = { lat: driverLat, lng: driverLng };
-
-      // Pan the map to the driver's current position
-      mapRef.current.panTo(driverPosition);
-
-      // Rotate the map based on driver's heading
-      mapRef.current.setHeading(driverHeading);
-    }
-  }, [driverLat, driverLng, driverHeading]);
-
-  if (!isLoaded || driverLat == null || driverLng == null) {
-    return <div>Loading Map...</div>;
+  if (loadError) {
+    return <div>Error loading maps</div>;
   }
 
-  return (
-    <div className="bg-gray-50 p-4 rounded-lg">
-      <GoogleMap
-        mapContainerStyle={mapContainerStyle}
-        center={{ lat: driverLat, lng: driverLng }}
-        zoom={16}
-        tilt={45}
-        options={{
-          zoomControl: false,
-          streetViewControl: false,
-          mapTypeControl: false,
-          fullscreenControl: false,
+  return isLoaded ? (
+    <GoogleMap mapContainerStyle={containerStyle} center={center} zoom={14}>
+      {/* Pickup Marker */}
+      <Marker
+        position={{ lat: pickupLat, lng: pickupLng }}
+        label="Pickup"
+        icon={{
+          url: "/pickup-icon.png",
+          scaledSize: new google.maps.Size(30, 30),
         }}
-        onLoad={(map) => {
-          mapRef.current = map;
+      />
+
+      {/* Dropoff Marker */}
+      <Marker
+        position={{ lat: dropoffLat, lng: dropoffLng }}
+        label="Dropoff"
+        icon={{
+          url: "/dropoff-icon.png",
+          scaledSize: new google.maps.Size(30, 30),
         }}
-      >
-        {/* Directions Renderer */}
-        {directions && <DirectionsRenderer directions={directions} />}
+      />
 
-        {/* Driver's Marker with Rotation */}
-        {driverLat != null && driverLng != null && (
-          <Marker
-            position={{ lat: driverLat, lng: driverLng }}
-            icon={{
-              path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
-              scale: 5,
-              rotation: driverHeading || 0,
-              fillColor: "blue",
-              fillOpacity: 1,
-              strokeWeight: 1,
-            }}
-          />
-        )}
-      </GoogleMap>
-
-      {/* Current step for turn-by-turn instructions */}
-      <div className="mt-4">
-        <h4>Next Turn:</h4>
-        <p
-          dangerouslySetInnerHTML={{ __html: currentStep || "No next turn." }}
+      {/* Driver Marker */}
+      {driverLat && driverLng && (
+        <Marker
+          position={{ lat: driverLat, lng: driverLng }}
+          label="Driver"
+          icon={{
+            url: "/driver-icon.png",
+            scaledSize: new google.maps.Size(40, 40),
+            // Note: Rotation not directly supported; consider using symbols for rotation
+          }}
         />
-      </div>
-    </div>
+      )}
+
+      {/* Directions Renderer */}
+      {directions && <DirectionsRenderer directions={directions} />}
+    </GoogleMap>
+  ) : (
+    <div>Loading Map...</div>
   );
-}
+};
+
+export default React.memo(Map);

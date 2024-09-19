@@ -1,5 +1,5 @@
+// components/AddressAutocompleteProps.tsx
 import React, { useEffect, useRef, useState } from "react";
-import { useDebounce } from "use-debounce";
 
 interface AddressAutocompleteProps {
   label: string;
@@ -15,14 +15,11 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
   const autocompleteRef = useRef<HTMLInputElement>(null);
   const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState(false);
   const [inputValue, setInputValue] = useState(value || "");
+  const [error, setError] = useState<string | null>(null);
 
-  // Update inputValue when the value prop changes
   useEffect(() => {
     setInputValue(value || "");
   }, [value]);
-
-  // Debounce the inputValue by 500ms to prevent excessive API requests
-  const [debouncedValue] = useDebounce(inputValue, 500);
 
   useEffect(() => {
     const checkGoogleMaps = () => {
@@ -39,6 +36,9 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
             clearInterval(interval);
           }
         }, 100);
+
+        // Cleanup
+        return () => clearInterval(interval);
       }
     };
 
@@ -49,10 +49,8 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
     if (!autocompleteRef.current || !isGoogleMapsLoaded) return;
 
     const autocomplete = new window.google.maps.places.Autocomplete(
-      autocompleteRef.current!,
-      {
-        types: ["geocode"],
-      }
+      autocompleteRef.current,
+      { types: ["geocode"] }
     );
 
     autocomplete.addListener("place_changed", () => {
@@ -62,13 +60,13 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
         const lat = place.geometry.location.lat();
         const lng = place.geometry.location.lng();
 
-        // Update the input value with the selected address
         setInputValue(address);
         onAddressSelect(address, lat, lng);
+        setError(null);
       } else {
         const address = place.formatted_address || "";
-        setInputValue(address); // Update input with address
-        onAddressSelect(address); // Provide only the address, lat/lng undefined
+        setInputValue(address);
+        onAddressSelect(address);
       }
     });
 
@@ -80,15 +78,30 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
 
   return (
     <div className="mb-6">
-      <label className="block text-gray-700 font-semibold mb-2">{label}</label>
+      <label
+        htmlFor={`autocomplete-${label}`}
+        className="block text-gray-700 font-semibold mb-2"
+      >
+        {label}
+      </label>
       <input
+        id={`autocomplete-${label}`}
         ref={autocompleteRef}
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
-        className="block w-full px-4 py-2 text-gray-700 bg-gray-200 rounded-lg"
+        className={`block w-full px-4 py-2 text-gray-700 bg-gray-200 rounded-lg focus:outline-none focus:ring-2 ${
+          error ? "focus:ring-red-500" : "focus:ring-teal-600"
+        }`}
         placeholder={`Enter ${label.toLowerCase()}`}
         required
+        aria-invalid={error ? "true" : "false"}
+        aria-describedby={error ? `error-${label}` : undefined}
       />
+      {error && (
+        <p id={`error-${label}`} className="mt-2 text-sm text-red-600">
+          {error}
+        </p>
+      )}
     </div>
   );
 };

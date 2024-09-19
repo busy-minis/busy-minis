@@ -1,6 +1,6 @@
+import { ArrowLeft } from "@phosphor-icons/react";
 import React from "react";
 
-// Utility function to convert 24-hour time format to 12-hour format with AM/PM
 function formatTime(time24: string): string {
   const [hours, minutes] = time24.split(":").map(Number);
   const period = hours >= 12 ? "PM" : "AM";
@@ -127,13 +127,13 @@ export default function ReviewSection({
         </div>
 
         {/* Navigation Buttons */}
-
         <div className="flex justify-between mt-6">
           <button
             type="button"
             className="w-full px-4 py-2 bg-gray-500 text-white rounded-lg shadow-md hover:shadow-lg transition-transform duration-200 ease-in-out transform hover:-translate-y-1 mr-2 flex justify-center items-center"
             onClick={() => setStep(2)}
           >
+            <ArrowLeft size={24} className="mr-2" />
             Back
           </button>
 

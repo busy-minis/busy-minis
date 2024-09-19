@@ -1,11 +1,43 @@
-"use client";
+// components/Stops.tsx
 import React from "react";
 import { MapPinPlus, MinusCircle } from "@phosphor-icons/react";
 import AddressAutocomplete from "./AddressAutocompleteProps";
 
-export default function Stops({ formData, setFormData }: any) {
+interface Stop {
+  address: string;
+  lat?: number;
+  lng?: number;
+}
+interface FormData {
+  user_id: string;
+  status: string;
+  end_date: string;
+  pickupDate: string;
+  pickupAddress: string;
+  pickupLat?: number;
+  pickupLng?: number;
+  stops: Stop[];
+  dropoffAddress: string;
+  dropoffLat?: number;
+  dropoffLng?: number;
+  riders: Rider[];
+  selectedTime: string;
+  selectedDays: string[];
+}
+
+interface Rider {
+  name: string;
+  age: string;
+}
+
+interface StopsProps {
+  formData: FormData;
+  setFormData: React.Dispatch<React.SetStateAction<FormData>>;
+}
+
+const Stops: React.FC<StopsProps> = ({ formData, setFormData }) => {
   const addStop = () => {
-    setFormData((prevData: any) => ({
+    setFormData((prevData) => ({
       ...prevData,
       stops: [
         ...prevData.stops,
@@ -15,9 +47,9 @@ export default function Stops({ formData, setFormData }: any) {
   };
 
   const removeStop = (index: number) => {
-    setFormData((prevData: any) => ({
+    setFormData((prevData) => ({
       ...prevData,
-      stops: prevData.stops.filter((_: any, i: any) => i !== index),
+      stops: prevData.stops.filter((_, i) => i !== index),
     }));
   };
 
@@ -26,13 +58,12 @@ export default function Stops({ formData, setFormData }: any) {
       <h4 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
         <MapPinPlus size={28} className="mr-2 text-gray-700" /> Add Stops
       </h4>
-      {/* Only show stop fields if there are stops added */}
       {formData.stops.length > 0 &&
-        formData.stops.map((stop: any, index: any) => (
+        formData.stops.map((stop, index) => (
           <div key={index} className="mb-4">
             <AddressAutocomplete
               label={`Stop ${index + 1} Address`}
-              value={stop.address} // Pass current stop address
+              value={stop.address}
               onAddressSelect={(address, lat, lng) => {
                 const newStops = [...formData.stops];
                 newStops[index] = { address, lat, lng };
@@ -44,6 +75,7 @@ export default function Stops({ formData, setFormData }: any) {
                 type="button"
                 onClick={() => removeStop(index)}
                 className="mt-2 bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition inline-flex items-center"
+                aria-label={`Remove Stop ${index + 1}`}
               >
                 <MinusCircle size={20} className="mr-2" /> Remove Stop
               </button>
@@ -59,4 +91,6 @@ export default function Stops({ formData, setFormData }: any) {
       </button>
     </div>
   );
-}
+};
+
+export default Stops;

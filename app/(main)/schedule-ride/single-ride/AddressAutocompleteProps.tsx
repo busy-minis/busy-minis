@@ -27,10 +27,10 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
         const address = place.formatted_address || "";
         const lat = place.geometry.location.lat();
         const lng = place.geometry.location.lng();
-        onAddressSelect(address, lat, lng); // Provide lat/lng
+        onAddressSelect(address, lat, lng);
       } else {
         const address = place.formatted_address || "";
-        onAddressSelect(address); // Provide only address, lat/lng undefined
+        onAddressSelect(address);
       }
     });
   }, [onAddressSelect]);
@@ -40,7 +40,7 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
       <label className="block text-gray-700 font-semibold mb-2">{label}</label>
       <input
         ref={autocompleteRef}
-        className="block w-full px-4 py-2 text-gray-700 bg-gray-200 rounded-lg"
+        className="block w-full px-4 py-2 text-gray-900 bg-gray-200 rounded-lg border-2 border-transparent focus:border-orange-500 focus:bg-white focus:outline-none transition-colors duration-200"
         placeholder={`Enter ${label.toLowerCase()}`}
         required
       />
