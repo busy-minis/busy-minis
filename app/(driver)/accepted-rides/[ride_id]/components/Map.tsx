@@ -1,6 +1,4 @@
-// components/Map.tsx
-"use client";
-
+"use clinet";
 import React, { useEffect, useState, useCallback } from "react";
 import {
   GoogleMap,
@@ -17,6 +15,8 @@ interface MapProps {
   driverLat: number | null;
   driverLng: number | null;
   driverHeading: number;
+  isPickupComplete: boolean;
+  onArrival: () => void;
 }
 
 const containerStyle = {
@@ -32,6 +32,8 @@ const Map: React.FC<MapProps> = ({
   driverLat,
   driverLng,
   driverHeading,
+  isPickupComplete,
+  onArrival,
 }) => {
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
@@ -40,6 +42,9 @@ const Map: React.FC<MapProps> = ({
 
   const [directions, setDirections] =
     useState<google.maps.DirectionsResult | null>(null);
+  const [nextInstruction, setNextInstruction] = useState<string>("");
+  const [estimatedTime, setEstimatedTime] = useState<string>("");
+  const [remainingDistance, setRemainingDistance] = useState<string>("");
 
   const center = {
     lat: driverLat || pickupLat,
@@ -53,7 +58,7 @@ const Map: React.FC<MapProps> = ({
     ) => {
       if (status === google.maps.DirectionsStatus.OK && result) {
         setDirections(result);
-        console.log("Directions fetched successfully"); // Debug log
+        updateNavigationInfo(result);
       } else {
         console.error("Directions request failed due to " + status);
       }
@@ -61,14 +66,35 @@ const Map: React.FC<MapProps> = ({
     []
   );
 
+  const updateNavigationInfo = (result: google.maps.DirectionsResult) => {
+    if (result.routes[0] && result.routes[0].legs[0]) {
+      const leg = result.routes[0].legs[0];
+      const nextStep = leg.steps[0];
+      setNextInstruction(nextStep.instructions);
+      setEstimatedTime(leg.duration?.text || "");
+      setRemainingDistance(leg.distance?.text || "");
+
+      // Text-to-speech for the next instruction
+      const utterance = new SpeechSynthesisUtterance(nextStep.instructions);
+      window.speechSynthesis.speak(utterance);
+
+      // Check for arrival
+      if (leg.distance?.value && leg.distance.value < 50) {
+        // Within 50 meters
+        onArrival();
+      }
+    }
+  };
+
   useEffect(() => {
     if (isLoaded && driverLat && driverLng) {
-      console.log("Requesting directions from driver to pickup"); // Debug log
       const directionsService = new google.maps.DirectionsService();
       directionsService.route(
         {
           origin: { lat: driverLat, lng: driverLng },
-          destination: { lat: pickupLat, lng: pickupLng },
+          destination: isPickupComplete
+            ? { lat: dropoffLat, lng: dropoffLng }
+            : { lat: pickupLat, lng: pickupLng },
           travelMode: google.maps.TravelMode.DRIVING,
         },
         directionsCallback
@@ -80,6 +106,9 @@ const Map: React.FC<MapProps> = ({
     driverLng,
     pickupLat,
     pickupLng,
+    dropoffLat,
+    dropoffLng,
+    isPickupComplete,
     directionsCallback,
   ]);
 
@@ -88,43 +117,44 @@ const Map: React.FC<MapProps> = ({
   }
 
   return isLoaded ? (
-    <GoogleMap mapContainerStyle={containerStyle} center={center} zoom={14}>
-      {/* Pickup Marker */}
-      <Marker
-        position={{ lat: pickupLat, lng: pickupLng }}
-        label="Pickup"
-        icon={{
-          url: "/pickup-icon.png",
-          scaledSize: new google.maps.Size(30, 30),
-        }}
-      />
-
-      {/* Dropoff Marker */}
-      <Marker
-        position={{ lat: dropoffLat, lng: dropoffLng }}
-        label="Dropoff"
-        icon={{
-          url: "/dropoff-icon.png",
-          scaledSize: new google.maps.Size(30, 30),
-        }}
-      />
-
-      {/* Driver Marker */}
-      {driverLat && driverLng && (
+    <div>
+      <GoogleMap mapContainerStyle={containerStyle} center={center} zoom={14}>
         <Marker
-          position={{ lat: driverLat, lng: driverLng }}
-          label="Driver"
+          position={{ lat: pickupLat, lng: pickupLng }}
+          label="Pickup"
           icon={{
-            url: "/driver-icon.png",
-            scaledSize: new google.maps.Size(40, 40),
-            // Note: Rotation not directly supported; consider using symbols for rotation
+            url: "/pickup-icon.png",
+            scaledSize: new google.maps.Size(30, 30),
           }}
         />
-      )}
-
-      {/* Directions Renderer */}
-      {directions && <DirectionsRenderer directions={directions} />}
-    </GoogleMap>
+        <Marker
+          position={{ lat: dropoffLat, lng: dropoffLng }}
+          label="Dropoff"
+          icon={{
+            url: "/dropoff-icon.png",
+            scaledSize: new google.maps.Size(30, 30),
+          }}
+        />
+        {driverLat && driverLng && (
+          <Marker
+            position={{ lat: driverLat, lng: driverLng }}
+            label="Driver"
+            icon={{
+              path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+              scale: 5,
+              rotation: driverHeading,
+            }}
+          />
+        )}
+        {directions && <DirectionsRenderer directions={directions} />}
+      </GoogleMap>
+      <div className="mt-4 p-4 bg-blue-100 rounded">
+        <h3 className="font-bold">Navigation Info:</h3>
+        <p>{nextInstruction}</p>
+        <p>Estimated Time: {estimatedTime}</p>
+        <p>Remaining Distance: {remainingDistance}</p>
+      </div>
+    </div>
   ) : (
     <div>Loading Map...</div>
   );

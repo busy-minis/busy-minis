@@ -1,6 +1,4 @@
-// RidePage.tsx
 "use client";
-
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -19,12 +17,14 @@ export default function RidePage({ userId }: any) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const rideId = searchParams.get("ride_id");
-  const driverId = userId; // Driver ID from your auth or session logic
+  const driverId = userId;
 
   const [rideData, setRideData] = useState<Ride | null>(null);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [modalAction, setModalAction] = useState<"start" | "end" | null>(null);
+  const [modalAction, setModalAction] = useState<
+    "start" | "end" | "arrive" | null
+  >(null);
   const [rideStarted, setRideStarted] = useState(false);
   const [driverLocation, setDriverLocation] = useState<{
     lat: number | null;
@@ -35,19 +35,23 @@ export default function RidePage({ userId }: any) {
   });
   const [driverHeading, setDriverHeading] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
+  const [isOffline, setIsOffline] = useState(false);
+  const [isPickupComplete, setIsPickupComplete] = useState(false);
 
   const watchIdRef = useRef<number | null>(null);
+  const lastUpdateTimeRef = useRef<number>(0);
+  const cachedRouteRef = useRef<any>(null);
 
   useEffect(() => {
     const fetchRide = async () => {
       if (rideId) {
-        console.log("Fetching ride with ID:", rideId); // Debug log
         try {
           const ride = await getRideById(rideId);
           if (!ride) throw new Error("Ride not found.");
           setRideData(ride);
           setRideStarted(ride.status === "ongoing");
-          console.log("Ride data fetched:", ride); // Debug log
+          setIsPickupComplete(ride.pickupComplete || false);
+          cachedRouteRef.current = ride.cachedRoute;
         } catch (error) {
           setError("Failed to fetch ride details.");
           console.error("Failed to fetch ride:", error);
@@ -55,7 +59,6 @@ export default function RidePage({ userId }: any) {
           setLoading(false);
         }
       } else {
-        console.error("rideId is null or undefined");
         setError("Invalid ride ID.");
         setLoading(false);
       }
@@ -63,7 +66,19 @@ export default function RidePage({ userId }: any) {
     fetchRide();
   }, [rideId]);
 
-  // Start tracking driver's location when ride is started
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
   useEffect(() => {
     if (!rideStarted) return;
 
@@ -74,20 +89,34 @@ export default function RidePage({ userId }: any) {
 
     const successCallback: PositionCallback = (position) => {
       const { latitude, longitude, heading } = position.coords;
-      setDriverLocation({
-        lat: latitude,
-        lng: longitude,
-      });
-      setDriverHeading(heading || 0);
+      const currentTime = Date.now();
 
-      if (rideId && driverId) {
-        updateDriverLocation(rideId, driverId, latitude, longitude)
-          .then(() => {
-            console.log("Driver location updated in Supabase"); // Debug log
-          })
-          .catch((err) => {
-            console.error("Failed to update driver location:", err);
-          });
+      // Update location every 5 seconds or if the driver has moved more than 10 meters
+      if (
+        currentTime - lastUpdateTimeRef.current > 5000 ||
+        (driverLocation.lat &&
+          driverLocation.lng &&
+          calculateDistance(
+            driverLocation.lat,
+            driverLocation.lng,
+            latitude,
+            longitude
+          ) > 10)
+      ) {
+        setDriverLocation({
+          lat: latitude,
+          lng: longitude,
+        });
+        setDriverHeading(heading || 0);
+        lastUpdateTimeRef.current = currentTime;
+
+        if (rideId && driverId && !isOffline) {
+          updateDriverLocation(rideId, driverId, latitude, longitude).catch(
+            (err) => {
+              console.error("Failed to update driver location:", err);
+            }
+          );
+        }
       }
     };
 
@@ -96,7 +125,6 @@ export default function RidePage({ userId }: any) {
       console.error("Geolocation error:", error);
     };
 
-    // Start watching the position
     watchIdRef.current = navigator.geolocation.watchPosition(
       successCallback,
       errorCallback,
@@ -107,15 +135,33 @@ export default function RidePage({ userId }: any) {
       }
     );
 
-    // Cleanup on unmount
     return () => {
       if (watchIdRef.current !== null) {
         navigator.geolocation.clearWatch(watchIdRef.current);
       }
     };
-  }, [rideStarted, rideId, driverId]);
+  }, [rideStarted, rideId, driverId, isOffline]);
 
-  // Define the onConfirm handler based on the action
+  const calculateDistance = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+  ) => {
+    const R = 6371e3; // Earth's radius in meters
+    const φ1 = (lat1 * Math.PI) / 180;
+    const φ2 = (lat2 * Math.PI) / 180;
+    const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+    const Δλ = ((lon2 - lon1) * Math.PI) / 180;
+
+    const a =
+      Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c;
+  };
+
   const handleConfirm = async () => {
     if (!rideId || !driverId) {
       setError("Invalid ride or driver ID.");
@@ -126,11 +172,12 @@ export default function RidePage({ userId }: any) {
       if (modalAction === "start") {
         await startRide(rideId);
         setRideStarted(true);
-        console.log("Ride started successfully"); // Debug log
       } else if (modalAction === "end") {
         await endRide(rideId);
         setRideStarted(false);
-        console.log("Ride ended successfully"); // Debug log
+      } else if (modalAction === "arrive") {
+        setIsPickupComplete(true);
+        // Update pickup complete status in your backend here
       }
     } catch (err) {
       setError("Failed to perform the action.");
@@ -141,7 +188,6 @@ export default function RidePage({ userId }: any) {
     }
   };
 
-  // Handlers to open modal with specific action
   const handleStartRide = () => {
     setModalAction("start");
     setShowModal(true);
@@ -149,6 +195,11 @@ export default function RidePage({ userId }: any) {
 
   const handleEndRide = () => {
     setModalAction("end");
+    setShowModal(true);
+  };
+
+  const handleArrival = () => {
+    setModalAction("arrive");
     setShowModal(true);
   };
 
@@ -169,7 +220,6 @@ export default function RidePage({ userId }: any) {
       <div className="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-lg space-y-6">
         <h2 className="text-3xl font-extrabold text-gray-900">Ride Details</h2>
 
-        {/* Ride Status */}
         <div className="bg-teal-100 p-4 rounded-lg">
           <h3 className="text-lg font-semibold text-teal-900">
             Ride ID: <span className="text-teal-800">{rideData.id}</span>
@@ -181,9 +231,11 @@ export default function RidePage({ userId }: any) {
           >
             {rideStarted ? "Ride is Ongoing" : "Ride Not Started"}
           </p>
+          {isOffline && (
+            <p className="text-yellow-600 font-semibold">Offline Mode</p>
+          )}
         </div>
 
-        {/* Google Map with driver's live location and heading */}
         <Map
           pickupLat={rideData.pickupLat}
           pickupLng={rideData.pickupLng}
@@ -192,11 +244,12 @@ export default function RidePage({ userId }: any) {
           driverLat={driverLocation.lat}
           driverLng={driverLocation.lng}
           driverHeading={driverHeading}
+          isPickupComplete={isPickupComplete}
+          onArrival={handleArrival}
         />
 
         <RideInfo rideData={rideData} />
 
-        {/* Actions */}
         <Buttons
           onStart={handleStartRide}
           onEnd={handleEndRide}
@@ -204,7 +257,6 @@ export default function RidePage({ userId }: any) {
         />
       </div>
 
-      {/* Confirmation Modal */}
       {showModal && modalAction && (
         <Modal
           setShowModal={setShowModal}
@@ -212,12 +264,18 @@ export default function RidePage({ userId }: any) {
           title={
             modalAction === "start"
               ? "Start Ride Confirmation"
-              : "End Ride Confirmation"
+              : modalAction === "end"
+              ? "End Ride Confirmation"
+              : "Arrival Confirmation"
           }
           message={
             modalAction === "start"
               ? "Are you sure you want to start the ride?"
-              : "Are you sure you want to end the ride?"
+              : modalAction === "end"
+              ? "Are you sure you want to end the ride?"
+              : isPickupComplete
+              ? "Have you arrived at the drop-off location?"
+              : "Have you arrived at the pickup location?"
           }
         />
       )}
