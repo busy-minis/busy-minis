@@ -2,9 +2,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 
-export const config = {
-  runtime: "nodejs",
-};
+export const runtime = "nodejs";
 
 // Initialize Stripe and Supabase clients
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
