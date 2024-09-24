@@ -68,7 +68,7 @@ function ImageGallery() {
     <div className="grid grid-cols-2 gap-2 sm:gap-4">
       <ImageItem src="/assets/LiaCostaRica.jpg" alt="Photo of Lia" />
       <ImageItem src="/assets/LiaRace.jpg" alt="Photo of Lia" />
-      <ImageItem src="/assets/LiaSc.jpg" alt="Photo of Lia" />
+      <ImageItem src="/assets/LiaSC.jpg" alt="Photo of Lia" />
     </div>
   );
 }
