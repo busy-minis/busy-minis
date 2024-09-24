@@ -32,9 +32,10 @@ export default function SingleRideBooking(props: { userId: string }) {
 
   const [isSameDay, setIsSameDay] = useState(false);
   const [isOffPeak, setIsOffPeak] = useState(false);
+
   const [isMoreRiders, setIsMoreRiders] = useState(false);
   const [isWithinOneHour, setIsWithinOneHour] = useState(false);
-
+  const [isWithin30Minutes, setIsWithin30Minutes] = useState<boolean>(false);
   const [totalPrice, setTotalPrice] = useState(16);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [distance, setDistance] = useState<number | null>(null);
@@ -134,6 +135,8 @@ export default function SingleRideBooking(props: { userId: string }) {
           <div className="mb-8">
             {step === 1 && (
               <DetailSection
+                setIsWithin30Minutes={setIsWithin30Minutes}
+                isWithin30Minutes={isWithin30Minutes}
                 setValidationErrors={setValidationErrors}
                 validationErrors={validationErrors}
                 formData={formData}

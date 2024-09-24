@@ -8,7 +8,13 @@ import {
   Trash,
   ArrowRight,
 } from "@phosphor-icons/react";
-import { format, isBefore, parseISO, addHours } from "date-fns";
+import {
+  format,
+  isBefore,
+  parseISO,
+  addHours,
+  differenceInMinutes,
+} from "date-fns"; // Imported differenceInMinutes
 import { Warning } from "./Warning";
 import { FormData, Rider } from "./FormTypes";
 
@@ -16,9 +22,10 @@ interface DetailSectionProps {
   formData: FormData;
   setFormData: React.Dispatch<React.SetStateAction<FormData>>;
   validationErrors: string[];
-  setValidationErrors: any;
+  setValidationErrors: React.Dispatch<React.SetStateAction<string[]>>;
   handleNextStep: () => void;
   isSameDay: boolean;
+
   setIsSameDay: React.Dispatch<React.SetStateAction<boolean>>;
   isOffPeak: boolean;
   setIsOffPeak: React.Dispatch<React.SetStateAction<boolean>>;
@@ -26,6 +33,8 @@ interface DetailSectionProps {
   setIsMoreRiders: React.Dispatch<React.SetStateAction<boolean>>;
   isWithinOneHour: boolean;
   setIsWithinOneHour: React.Dispatch<React.SetStateAction<boolean>>;
+  isWithin30Minutes: boolean; // New prop
+  setIsWithin30Minutes: React.Dispatch<React.SetStateAction<boolean>>; // New prop
 }
 
 export default function DetailSection({
@@ -42,6 +51,8 @@ export default function DetailSection({
   setIsMoreRiders,
   isWithinOneHour,
   setIsWithinOneHour,
+  isWithin30Minutes, // New prop
+  setIsWithin30Minutes, // New prop
 }: DetailSectionProps) {
   const today = format(new Date(), "yyyy-MM-dd");
 
@@ -79,9 +90,37 @@ export default function DetailSection({
         addHours(new Date(), 1)
       );
 
+    // Calculate difference in minutes
+    const pickupDateTime = parseISO(`${pickupDate}T${pickupTime}`);
+    const now = new Date();
+    const diffMinutes = differenceInMinutes(pickupDateTime, now);
+    const within30Minutes = diffMinutes < 30;
+
     setIsSameDay(isSame);
     setIsOffPeak(Boolean(isOffPeakTime));
     setIsWithinOneHour(Boolean(withinOneHour));
+    setIsWithin30Minutes(within30Minutes);
+
+    // Handle validation errors
+    if (within30Minutes) {
+      if (
+        !validationErrors.includes(
+          "Pickup time must be at least 30 minutes from now."
+        )
+      ) {
+        setValidationErrors([
+          ...validationErrors,
+          "Pickup time must be at least 30 minutes from now.",
+        ]);
+      }
+    } else {
+      setValidationErrors(
+        validationErrors.filter(
+          (error) =>
+            error !== "Pickup time must be at least 30 minutes from now."
+        )
+      );
+    }
   };
 
   const handleAddRider = () => {
@@ -107,7 +146,7 @@ export default function DetailSection({
         <p className="font-semibold text-lg ml-2">Ride Details</p>
       </section>
 
-      <div className="w-full md:w-auto  grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+      <div className="w-full md:w-auto grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
         <div>
           <Input
             label="Pickup Date"
@@ -134,6 +173,9 @@ export default function DetailSection({
           )}
           {isWithinOneHour && (
             <Warning text="Rides within one hour will incur an additional fee." />
+          )}
+          {isWithin30Minutes && (
+            <Warning text="Pickup time must be at least 30 minutes from now." />
           )}
         </div>
       </div>
@@ -194,8 +236,11 @@ export default function DetailSection({
 
       <button
         type="button"
-        className="w-full px-4 py-2 bg-gradient-to-r from-orange-500 to-yellow-500 text-white rounded-lg shadow-md hover:shadow-lg transition-transform duration-200 ease-in-out transform hover:-translate-y-1 flex justify-center items-center"
+        className={`w-full px-4 py-2 bg-gradient-to-r from-orange-500 to-yellow-500 text-white rounded-lg shadow-md hover:shadow-lg transition-transform duration-200 ease-in-out transform hover:-translate-y-1 flex justify-center items-center ${
+          validationErrors.length > 0 ? "opacity-50 cursor-not-allowed" : ""
+        }`}
         onClick={handleNextStep}
+        disabled={validationErrors.length > 0} // Disable button if there are validation errors
       >
         Next
         <ArrowRight size={24} className="ml-2" />
