@@ -14,6 +14,7 @@ export interface Rider {
 export interface FormData {
   user_id: string;
   status: string;
+  weekly: boolean;
   pickupDate: string;
   pickupTime: string;
   pickupAddress: string;

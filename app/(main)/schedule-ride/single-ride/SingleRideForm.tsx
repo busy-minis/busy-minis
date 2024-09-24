@@ -8,6 +8,7 @@ import LocationSection from "./components/LocationSection";
 import ReviewSection from "./components/ReviewSection";
 import { Spinner } from "./components/Spinner";
 import { FormData, Rider } from "./components/FormTypes";
+import { createRide } from "@/utils/supabase/supabaseQueries";
 const stripePromise = loadStripe("YOUR_STRIPE_PUBLIC_KEY");
 
 export default function SingleRideBooking(props: { userId: string }) {
@@ -19,6 +20,7 @@ export default function SingleRideBooking(props: { userId: string }) {
     status: "pending",
     pickupDate: "",
     pickupTime: "",
+    weekly: false,
     pickupAddress: "",
     pickupLat: undefined,
     pickupLng: undefined,
@@ -99,25 +101,27 @@ export default function SingleRideBooking(props: { userId: string }) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const stripe = await stripePromise;
+    await createRide(formData);
 
-    if (stripe) {
-      setLoading(true);
-      const response = await fetch("/api/create-checkout-session", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          price: totalPrice,
-          rideData: formData,
-        }),
-      });
+    // const stripe = await stripePromise;
 
-      const session = await response.json();
-      await stripe.redirectToCheckout({ sessionId: session.id });
-      setLoading(false);
-    }
+    // if (stripe) {
+    //   setLoading(true);
+    //   const response = await fetch("/api/create-checkout-session", {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //     },
+    //     body: JSON.stringify({
+    //       price: totalPrice,
+    //       rideData: formData,
+    //     }),
+    //   });
+
+    //   const session = await response.json();
+    //   await stripe.redirectToCheckout({ sessionId: session.id });
+    //   setLoading(false);
+    // }
   };
 
   return (

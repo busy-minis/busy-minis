@@ -103,6 +103,7 @@ export const createRide = async (rideData: {
   dropoffAddress: string;
   dropoffLat?: number;
   dropoffLng?: number;
+  weekly: boolean;
   riders: { name: string; age: string }[];
   status: string;
 }) => {
