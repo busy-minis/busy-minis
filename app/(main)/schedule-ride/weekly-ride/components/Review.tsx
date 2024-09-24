@@ -20,6 +20,7 @@ interface FormData {
   pickupAddress: string;
   pickupLat?: number;
   pickupLng?: number;
+  renewal_date: string;
   stops: Stop[];
   dropoffAddress: string;
   dropoffLat?: number;
@@ -30,6 +31,8 @@ interface FormData {
 interface ReviewProps {
   formData: FormData;
   totalPrice: number;
+  regularPrice: number;
+  savings: number;
   distance: number | null;
   setPage: (page: number) => void;
 }
@@ -69,6 +72,8 @@ export default function Review({
   totalPrice,
   setPage,
   distance,
+  regularPrice,
+  savings,
 }: ReviewProps) {
   const formattedDays = formData.selectedDays
     .map((day) => {
@@ -182,19 +187,31 @@ export default function Review({
         </div>
       </div>
       <div className="mb-8">
-        <p className="text-gray-700 text-center">
-          You will have the option to renew your weekly ride on the last
-          scheduled day of your ride.
+        <h3 className="text-2xl font-semibold text-black">Renewal Date</h3>
+        <p className="text-gray-800 mt-4">
+          Your weekly ride subscription will renew on:{" "}
+          <strong className="text-black">{formData.renewal_date}</strong>
+        </p>
+        <p className="text-gray-700 mt-2">
+          You will have the option to renew your weekly ride on this date.
         </p>
       </div>
 
       {/* Total Price */}
       <div className="mb-8">
         <h3 className="text-2xl font-semibold text-black">Total Price</h3>
+
         <p className="text-gray-800 mt-4">
-          <strong className="text-black">Final Price:</strong> $
-          {totalPrice.toFixed(2)}
+          <strong className="text-black">Total Price</strong>{" "}
+          <span className=" line-through text-red-600 ">
+            ${regularPrice.toFixed(2)}
+          </span>
+          $<strong>{totalPrice.toFixed(2)}</strong>
         </p>
+
+        {/* <p className="text-green-600 mt-2 text-lg font-semibold">
+          You save: ${savings.toFixed(2)} by booking weekly rides!
+        </p> */}
       </div>
 
       {/* Navigation Buttons */}

@@ -1,5 +1,6 @@
 export interface Ride {
   id: string;
+  distance: number;
   pickupAddress: string;
   dropoffAddress: string;
   pickupTime: string;

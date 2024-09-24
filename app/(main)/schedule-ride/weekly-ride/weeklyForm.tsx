@@ -34,12 +34,14 @@ interface Stop {
 }
 
 interface FormData {
+  renewal_date: string; // Add this line
   user_id: string;
   status: string;
   end_date: string;
   pickupDate: string;
   pickupAddress: string;
   pickupLat?: number;
+  total_price: number;
   pickupLng?: number;
   stops: Stop[];
   dropoffAddress: string;
@@ -51,11 +53,15 @@ interface FormData {
 }
 
 export default function WeeklyRideBookingPage(props: { userId: string }) {
+  const [totalPrice, setTotalPrice] = useState(13);
+
   const [formData, setFormData] = useState<FormData>({
+    renewal_date: "",
     user_id: props.userId,
     status: "pending",
     end_date: "",
     pickupDate: "",
+    total_price: totalPrice,
     pickupAddress: "",
     pickupLat: undefined,
     pickupLng: undefined,
@@ -71,7 +77,9 @@ export default function WeeklyRideBookingPage(props: { userId: string }) {
   const [timeWarning, setTimeWarning] = useState("");
   const [validationError, setValidationError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  const [totalPrice, setTotalPrice] = useState(13);
+  const [regularPrice, setRegularPrice] = useState(0); // Add this line
+  const [savings, setSavings] = useState(0); // Add this line
+
   const [distance, setDistance] = useState<number | null>(null);
   const [loadingDistance, setLoadingDistance] = useState(false);
 
@@ -151,9 +159,10 @@ export default function WeeklyRideBookingPage(props: { userId: string }) {
 
   const calculateTotalPrice = useCallback(() => {
     const basePricePerDay = 13;
+    const regularPricePerDay = 16; // Regular ride price per trip
     const selectedDaysCount = formData.selectedDays.length;
 
-    const calculateCost = () => {
+    const calculateAdditionalCost = () => {
       const miles = distance;
       let totalCost = 0;
 
@@ -165,6 +174,7 @@ export default function WeeklyRideBookingPage(props: { userId: string }) {
       return Math.round(totalCost * 100) / 100;
     };
 
+    // Calculate total price for weekly rides
     let price = selectedDaysCount * basePricePerDay;
 
     if (timeWarning) price += 10;
@@ -172,13 +182,33 @@ export default function WeeklyRideBookingPage(props: { userId: string }) {
       price += (formData.riders.length - 1) * 5;
     }
     if (distance) {
-      price += calculateCost();
+      price += calculateAdditionalCost();
     }
     if (formData.stops.length > 0) {
       price += formData.stops.length * 5;
     }
 
     setTotalPrice(price);
+
+    // Calculate total price for regular rides
+    let regularPriceTotal = selectedDaysCount * regularPricePerDay;
+
+    if (timeWarning) regularPriceTotal += 10;
+    if (formData.riders.length > 1) {
+      regularPriceTotal += (formData.riders.length - 1) * 5;
+    }
+    if (distance) {
+      regularPriceTotal += calculateAdditionalCost();
+    }
+    if (formData.stops.length > 0) {
+      regularPriceTotal += formData.stops.length * 5;
+    }
+
+    setRegularPrice(regularPriceTotal);
+
+    // Calculate savings
+    const savingsAmount = regularPriceTotal - price;
+    setSavings(savingsAmount);
   }, [
     timeWarning,
     formData.riders,
@@ -189,7 +219,14 @@ export default function WeeklyRideBookingPage(props: { userId: string }) {
 
   useEffect(() => {
     calculateTotalPrice();
-  }, [calculateTotalPrice]);
+  }, [
+    calculateTotalPrice,
+    formData.selectedDays.length,
+    formData.riders.length,
+    formData.stops.length,
+    distance,
+    timeWarning,
+  ]);
 
   const calculateNextPickupDate = (selectedDays: string[]): string | null => {
     if (selectedDays.length === 0) return null;
@@ -209,6 +246,43 @@ export default function WeeklyRideBookingPage(props: { userId: string }) {
     nextPickupDate.setDate(today.getDate() + minOffset);
     return nextPickupDate.toISOString().split("T")[0];
   };
+
+  function calculateRenewalDate(
+    pickupDate: string,
+    selectedDays: string[]
+  ): string {
+    const daysOfWeekMap: { [key: string]: number } = {
+      Sunday: 0,
+      Monday: 1,
+      Tuesday: 2,
+      Wednesday: 3,
+      Thursday: 4,
+      Friday: 5,
+      Saturday: 6,
+    };
+
+    const dates = selectedDays.map((day) => {
+      const targetDay = daysOfWeekMap[day];
+      const initialDate = new Date(pickupDate);
+      const currentDay = initialDate.getDay();
+
+      let dayDifference = targetDay - currentDay;
+      if (dayDifference < 0) dayDifference += 7; // Adjust for days that have already passed in the week
+      if (dayDifference === 0) dayDifference = 7; // Ensure the day is in the next week
+
+      const nextDate = new Date(initialDate);
+      nextDate.setDate(initialDate.getDate() + dayDifference);
+
+      return nextDate;
+    });
+
+    // Find the latest date
+    const renewalDate = dates.reduce((latest, current) =>
+      current > latest ? current : latest
+    );
+
+    return renewalDate.toISOString().split("T")[0]; // Return in YYYY-MM-DD format
+  }
 
   const validateForm = () => {
     if (!formData.pickupAddress || !formData.dropoffAddress) {
@@ -236,12 +310,19 @@ export default function WeeklyRideBookingPage(props: { userId: string }) {
         ? prevData.selectedDays.filter((selectedDay) => selectedDay !== day)
         : [...prevData.selectedDays, day];
 
-      const pickupDate = calculateNextPickupDate(updatedDays);
+      const pickupDate = calculateNextPickupDate(updatedDays) || "";
+
+      // Calculate the renewal date
+      const renewalDate =
+        pickupDate && updatedDays.length > 0
+          ? calculateRenewalDate(pickupDate, updatedDays)
+          : "";
 
       return {
         ...prevData,
         selectedDays: updatedDays,
-        pickupDate: pickupDate || "",
+        pickupDate,
+        renewal_date: renewalDate, // Set the renewal date here
       };
     });
   };
@@ -414,6 +495,8 @@ export default function WeeklyRideBookingPage(props: { userId: string }) {
                 formData={formData}
                 setPage={setPage}
                 totalPrice={totalPrice}
+                regularPrice={regularPrice} // Add this line
+                savings={savings} // Add this line
               />
             )}
           </form>

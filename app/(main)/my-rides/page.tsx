@@ -3,6 +3,7 @@ import React from "react";
 import SingleRides from "./singleRides";
 import WeeklyRides from "./weeklyRides";
 import { createClient } from "@/utils/supabase/server";
+import { revalidatePath } from "next/cache";
 import {
   getRidesForUser,
   getWeeklyRidesForUser,
@@ -10,6 +11,8 @@ import {
 import { redirect } from "next/navigation";
 
 export default async function MyRides() {
+  revalidatePath("/my-rides");
+
   const supabase = createClient();
 
   // Get the currently logged-in user
@@ -28,9 +31,10 @@ export default async function MyRides() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className=" shadow">
-        <div className="container mx-auto px-4 py-6">
+      <header className="shadow bg-white">
+        <div className="container mx-auto px-4 py-6 flex items-center justify-between">
           <h1 className="text-3xl font-bold text-gray-900">My Rides</h1>
+          {/* Optional: Add a user avatar or settings button here */}
         </div>
       </header>
       <main className="py-8">

@@ -1,5 +1,5 @@
-"use clinet";
-import React, { useEffect, useState, useCallback } from "react";
+"use client";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import {
   GoogleMap,
   Marker,
@@ -46,10 +46,16 @@ const Map: React.FC<MapProps> = ({
   const [estimatedTime, setEstimatedTime] = useState<string>("");
   const [remainingDistance, setRemainingDistance] = useState<string>("");
 
-  const center = {
-    lat: driverLat || pickupLat,
-    lng: driverLng || pickupLng,
-  };
+  const mapRef = useRef<google.maps.Map | null>(null);
+  const previousDestinationRef = useRef<string>("");
+
+  // Ref and state for throttling panTo
+  const isPanningRef = useRef<boolean>(false);
+  const panDelay = 1000; // 1 second delay
+
+  const onLoad = useCallback((map: google.maps.Map) => {
+    mapRef.current = map;
+  }, []);
 
   const directionsCallback = useCallback(
     (
@@ -86,19 +92,48 @@ const Map: React.FC<MapProps> = ({
     }
   };
 
+  // Custom throttle function using refs and setTimeout
+  const throttlePan = useCallback((lat: number, lng: number) => {
+    if (isPanningRef.current) {
+      return;
+    }
+
+    isPanningRef.current = true;
+
+    if (mapRef.current) {
+      mapRef.current.panTo({ lat, lng });
+    }
+
+    setTimeout(() => {
+      isPanningRef.current = false;
+    }, panDelay);
+  }, []);
+
   useEffect(() => {
     if (isLoaded && driverLat && driverLng) {
-      const directionsService = new google.maps.DirectionsService();
-      directionsService.route(
-        {
-          origin: { lat: driverLat, lng: driverLng },
-          destination: isPickupComplete
-            ? { lat: dropoffLat, lng: dropoffLng }
-            : { lat: pickupLat, lng: pickupLng },
-          travelMode: google.maps.TravelMode.DRIVING,
-        },
-        directionsCallback
-      );
+      const destination = isPickupComplete
+        ? `${dropoffLat},${dropoffLng}`
+        : `${pickupLat},${pickupLng}`;
+
+      // Request directions only if destination has changed
+      if (previousDestinationRef.current !== destination) {
+        const directionsService = new google.maps.DirectionsService();
+        directionsService.route(
+          {
+            origin: { lat: driverLat, lng: driverLng },
+            destination: isPickupComplete
+              ? { lat: dropoffLat, lng: dropoffLng }
+              : { lat: pickupLat, lng: pickupLng },
+            travelMode: google.maps.TravelMode.DRIVING,
+          },
+          directionsCallback
+        );
+
+        previousDestinationRef.current = destination;
+      }
+
+      // Throttled panning to the driver's new location
+      throttlePan(driverLat, driverLng);
     }
   }, [
     isLoaded,
@@ -110,6 +145,7 @@ const Map: React.FC<MapProps> = ({
     dropoffLng,
     isPickupComplete,
     directionsCallback,
+    throttlePan,
   ]);
 
   if (loadError) {
@@ -118,7 +154,16 @@ const Map: React.FC<MapProps> = ({
 
   return isLoaded ? (
     <div>
-      <GoogleMap mapContainerStyle={containerStyle} center={center} zoom={14}>
+      <GoogleMap
+        mapContainerStyle={containerStyle}
+        center={{ lat: driverLat || pickupLat, lng: driverLng || pickupLng }}
+        zoom={14}
+        onLoad={onLoad}
+        options={{
+          disableDefaultUI: false,
+          gestureHandling: "greedy",
+        }}
+      >
         <Marker
           position={{ lat: pickupLat, lng: pickupLng }}
           label="Pickup"
@@ -146,7 +191,15 @@ const Map: React.FC<MapProps> = ({
             }}
           />
         )}
-        {directions && <DirectionsRenderer directions={directions} />}
+        {directions && (
+          <DirectionsRenderer
+            directions={directions}
+            options={{
+              preserveViewport: true, // Prevents automatic viewport change
+              suppressMarkers: true, // Suppress default markers
+            }}
+          />
+        )}
       </GoogleMap>
       <div className="mt-4 p-4 bg-blue-100 rounded">
         <h3 className="font-bold">Navigation Info:</h3>

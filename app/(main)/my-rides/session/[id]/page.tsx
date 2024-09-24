@@ -18,7 +18,7 @@ export default async function RideSessionPage({
 
   // Fetch the ride session data
   const { data: rideSession, error } = await supabase
-    .from("ride_sessions")
+    .from("rides")
     .select("*")
     .eq("id", rideId)
     .single();

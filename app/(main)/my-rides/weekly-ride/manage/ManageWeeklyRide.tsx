@@ -1,14 +1,40 @@
+// ManageWeeklyRide.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { format, parseISO, addDays, isSameDay, isBefore } from "date-fns";
+import {
+  format,
+  parseISO,
+  addDays,
+  isSameDay,
+  isBefore,
+  isAfter,
+  addWeeks,
+  getDay,
+} from "date-fns";
 import { createClient } from "@/utils/supabase/client";
-import { CheckCircle, Clock, XCircle, MapPin } from "@phosphor-icons/react";
+import {
+  CheckCircle,
+  Clock,
+  XCircle,
+  MapPin,
+  Info,
+} from "@phosphor-icons/react";
 import Link from "next/link";
 
 interface ManageWeeklyRideProps {
-  weeklyRide: any;
+  weeklyRide: {
+    id: string;
+    renewal_date: string; // New Field
+    pickupTime: string;
+    pickupAddress: string;
+    dropoffAddress: string;
+    riders: { name: string }[];
+    selectedDays: string[]; // e.g., ['Monday', 'Wednesday']
+    status: string;
+    // Add other necessary fields if any
+  };
   userId: string;
 }
 
@@ -30,7 +56,7 @@ export default function ManageWeeklyRide({
     const fetchRideSessions = async () => {
       try {
         const { data: sessions, error: rideSessionsError } = await supabase
-          .from("ride_sessions")
+          .from("rides")
           .select("id, pickupDate, status")
           .eq("weekly_ride_id", weeklyRide.id)
           .order("pickupDate", { ascending: true });
@@ -46,6 +72,9 @@ export default function ManageWeeklyRide({
 
         if (parsedSessions.length > 0) {
           setLastRideDate(parsedSessions[parsedSessions.length - 1].pickupDate);
+        } else {
+          // If no sessions, use renewal_date as the last ride date
+          setLastRideDate(parseISO(weeklyRide.renewal_date));
         }
       } catch (error) {
         console.error(error);
@@ -54,7 +83,28 @@ export default function ManageWeeklyRide({
     };
 
     fetchRideSessions();
-  }, [supabase, weeklyRide.id]);
+  }, [supabase, weeklyRide.id, weeklyRide.renewal_date]);
+
+  // Determine if the Renew button should be visible
+  const isRenewButtonVisible = lastRideDate
+    ? isSameDay(lastRideDate, new Date()) || isBefore(lastRideDate, new Date())
+    : false;
+
+  // Function to determine badge color based on status
+  const getStatusBadge = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "accepted":
+        return "bg-green-100 text-green-800";
+      case "canceled":
+        return "bg-red-100 text-red-800";
+      case "completed":
+        return "bg-gray-200 text-gray-600";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
 
   const handleCancelWeeklyRide = async () => {
     setIsSubmitting(true);
@@ -73,7 +123,7 @@ export default function ManageWeeklyRide({
 
       const { data: futureSessions, error: futureSessionsError } =
         await supabase
-          .from("ride_sessions")
+          .from("rides")
           .select("id, pickupDate")
           .eq("weekly_ride_id", weeklyRide.id)
           .gte("pickupDate", format(today, "yyyy-MM-dd"));
@@ -82,7 +132,7 @@ export default function ManageWeeklyRide({
 
       if (futureSessions.length > 0) {
         const { error: deleteError } = await supabase
-          .from("ride_sessions")
+          .from("rides")
           .delete()
           .in(
             "id",
@@ -108,41 +158,54 @@ export default function ManageWeeklyRide({
     setIsSubmitting(true);
 
     try {
+      if (!lastRideDate) {
+        throw new Error("Last ride date is not available.");
+      }
+
       // Calculate new ride_sessions based on the selectedDays
-      const newRideSessions = [];
-      const startDate = addDays(lastRideDate!, 1); // Day after the last ride date
+      const newRideSessions: any[] = [];
+      const renewalDate = parseISO(weeklyRide.renewal_date);
+      const startDate = addDays(renewalDate, 1); // Day after the renewal date
       const numWeeks = 1; // Extend by 1 week (adjust as needed)
-      const totalDays = numWeeks * 7;
 
-      for (let i = 0; i < totalDays; i++) {
-        const date = addDays(startDate, i);
-        const dayName = format(date, "EEEE");
-
-        if (weeklyRide.selectedDays.includes(dayName)) {
-          const newSession = {
+      // Generate dates for the next 'numWeeks' weeks based on selectedDays
+      for (let week = 0; week < numWeeks; week++) {
+        weeklyRide.selectedDays.forEach((day) => {
+          const dayNumber = getDayNameToNumber(day); // Convert day name to number
+          const date = addDays(startDate, week * 7);
+          const nextDate = getNextDateByDay(date, dayNumber);
+          newRideSessions.push({
             user_id: userId,
             weekly_ride_id: weeklyRide.id,
-            pickupDate: format(date, "yyyy-MM-dd"),
+            pickupDate: format(nextDate, "yyyy-MM-dd"),
             pickupTime: weeklyRide.pickupTime,
             pickupAddress: weeklyRide.pickupAddress,
             dropoffAddress: weeklyRide.dropoffAddress,
             riders: weeklyRide.riders,
             status: "available",
             // Add other necessary fields as per your database schema
-          };
-          newRideSessions.push(newSession);
-        }
+          });
+        });
       }
 
       // Insert new ride_sessions
       if (newRideSessions.length > 0) {
         const { error: insertError } = await supabase
-          .from("ride_sessions")
+          .from("rides")
           .insert(newRideSessions);
 
         if (insertError) throw insertError;
 
         alert("Your weekly ride has been renewed.");
+        // Update the renewal_date to the next week
+        const newRenewalDate = addWeeks(renewalDate, numWeeks);
+        const { error: renewalError } = await supabase
+          .from("weekly_rides")
+          .update({ renewal_date: format(newRenewalDate, "yyyy-MM-dd") })
+          .eq("id", weeklyRide.id);
+
+        if (renewalError) throw renewalError;
+
         // Refresh the data
         router.refresh();
       } else {
@@ -156,9 +219,26 @@ export default function ManageWeeklyRide({
     }
   };
 
-  const isRenewButtonVisible = lastRideDate
-    ? isSameDay(lastRideDate, new Date()) || isBefore(lastRideDate, new Date())
-    : false;
+  // Helper function to convert day name to day number
+  const getDayNameToNumber = (dayName: string) => {
+    const days = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ];
+    return days.indexOf(dayName);
+  };
+
+  // Helper function to get the next date by day number
+  const getNextDateByDay = (startDate: Date, dayNumber: number) => {
+    const currentDay = startDate.getDay();
+    const difference = (dayNumber + 7 - currentDay) % 7;
+    return addDays(startDate, difference);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-teal-500 to-teal-100 py-6 px-4">
@@ -203,7 +283,8 @@ export default function ManageWeeklyRide({
         </h2>
 
         {error && (
-          <div className="bg-red-100 text-red-700 px-4 py-3 rounded mb-4 text-sm md:text-base">
+          <div className="bg-red-100 text-red-700 px-4 py-3 rounded mb-4 text-sm md:text-base flex items-center">
+            <Info size={20} className="mr-2" />
             {error}
           </div>
         )}
@@ -235,7 +316,7 @@ export default function ManageWeeklyRide({
             <p className="text-gray-700 text-sm md:text-base">
               <span className="font-semibold">Rider(s):</span>{" "}
               {weeklyRide.riders && weeklyRide.riders.length > 0
-                ? weeklyRide.riders.map((rider: any, index: number) => (
+                ? weeklyRide.riders.map((rider, index) => (
                     <span key={index}>
                       {rider.name}
                       {index < weeklyRide.riders.length - 1 && ", "}
@@ -246,17 +327,19 @@ export default function ManageWeeklyRide({
           </div>
         </div>
 
-        {/* Last Ride Date Information */}
+        {/* Renewal Date Information */}
         <div className="mb-4 md:mb-6 text-center">
           <p className="text-gray-700 text-sm md:text-base">
-            Last Ride Date:{" "}
+            Renewal Date:{" "}
             <span className="font-semibold text-gray-900">
-              {lastRideDate ? format(lastRideDate, "MMMM dd, yyyy") : "N/A"}
+              {format(parseISO(weeklyRide.renewal_date), "MMMM dd, yyyy")}
             </span>
           </p>
-          <p className="text-gray-700 mt-1 text-sm md:text-base">
-            After this date, you can renew your weekly ride plan.
-          </p>
+          {isRenewButtonVisible && (
+            <p className="text-gray-700 mt-1 text-sm md:text-base">
+              You can renew your weekly ride subscription now.
+            </p>
+          )}
         </div>
 
         {/* Scheduled Rides Ordered by Date */}
@@ -268,7 +351,11 @@ export default function ManageWeeklyRide({
             {rideSessions.map((session) => (
               <div
                 key={session.id}
-                className="bg-white border border-gray-200 rounded-lg p-4 flex flex-col md:flex-row md:items-center md:justify-between shadow-sm"
+                className={`bg-white border border-gray-200 rounded-lg p-4 flex flex-col md:flex-row md:items-center md:justify-between shadow-sm ${
+                  session.status.toLowerCase() === "completed"
+                    ? "opacity-50"
+                    : ""
+                }`}
               >
                 <div>
                   <p className="font-semibold text-base md:text-lg text-gray-800">
@@ -281,46 +368,57 @@ export default function ManageWeeklyRide({
                       "hh:mm a"
                     )}
                   </p>
+                  {session.status.toLowerCase() === "pending" && (
+                    <p className="text-yellow-600 text-sm md:text-base mt-1">
+                      This ride is awaiting driver confirmation.
+                    </p>
+                  )}
                 </div>
                 <div className="flex items-center mt-2 md:mt-0">
-                  {session.status === "completed" ? (
-                    <>
-                      <CheckCircle
-                        size={20}
-                        className="text-green-500 mr-1 md:mr-2"
-                      />
-                      <span className="text-green-600 font-medium text-sm md:text-base">
-                        Completed
-                      </span>
-                    </>
-                  ) : session.status === "ongoing" ? (
-                    <>
-                      <MapPin
-                        size={20}
-                        className="text-blue-500 mr-1 md:mr-2"
-                      />
-                      <span className="text-blue-600 font-medium text-sm md:text-base">
-                        Ongoing
-                      </span>
-                    </>
-                  ) : session.status === "available" ? (
-                    <>
-                      <Clock
-                        size={20}
-                        className="text-yellow-500 mr-1 md:mr-2"
-                      />
-                      <span className="text-yellow-600 font-medium text-sm md:text-base">
-                        Pending
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <Clock size={20} className="text-gray-500 mr-1 md:mr-2" />
-                      <span className="text-gray-600 font-medium text-sm md:text-base">
-                        {session.status}
-                      </span>
-                    </>
-                  )}
+                  {/* Status Indicator */}
+                  <div className="flex items-center">
+                    {session.status.toLowerCase() === "completed" ? (
+                      <>
+                        <CheckCircle
+                          size={20}
+                          className="text-green-500 mr-1 md:mr-2"
+                        />
+                        <span className="text-green-600 font-medium text-sm md:text-base">
+                          Completed
+                        </span>
+                      </>
+                    ) : session.status.toLowerCase() === "ongoing" ? (
+                      <>
+                        <MapPin
+                          size={20}
+                          className="text-blue-500 mr-1 md:mr-2"
+                        />
+                        <span className="text-blue-600 font-medium text-sm md:text-base">
+                          Ongoing
+                        </span>
+                      </>
+                    ) : session.status.toLowerCase() === "available" ? (
+                      <>
+                        <Clock
+                          size={20}
+                          className="text-yellow-500 mr-1 md:mr-2"
+                        />
+                        <span className="text-yellow-600 font-medium text-sm md:text-base">
+                          Available
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <Clock
+                          size={20}
+                          className="text-gray-500 mr-1 md:mr-2"
+                        />
+                        <span className="text-gray-600 font-medium text-sm md:text-base">
+                          {session.status}
+                        </span>
+                      </>
+                    )}
+                  </div>
                   {/* Add the "View Ride" button */}
                   <Link href={`/my-rides/session/${session.id}`}>
                     <button className="ml-2 md:ml-4 bg-teal-600 text-white px-3 py-1 md:px-4 md:py-2 rounded-md text-sm md:text-base hover:bg-teal-700 transition duration-200">

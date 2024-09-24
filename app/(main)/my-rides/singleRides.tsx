@@ -9,18 +9,22 @@ import {
 } from "@/utils/supabase/supabaseQueries";
 import ConfirmationModal from "./Modal";
 
+interface SingleRidesProps {
+  initialRides: any[];
+  user_id: string;
+}
+
 export default function SingleRides({
   initialRides,
   user_id,
-}: {
-  initialRides: any;
-  user_id: any;
-}) {
+}: SingleRidesProps) {
   const [rides, setRides] = useState(initialRides);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [rideToCancel, setRideToCancel] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleCancel = async (id: string) => {
+    setIsLoading(true);
     try {
       await cancelRideById(id);
       const updatedRides = await getRidesForUser(user_id);
@@ -30,6 +34,8 @@ export default function SingleRides({
     } catch (error) {
       console.error("Failed to cancel the ride:", error);
       alert("Failed to cancel the ride. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -49,8 +55,7 @@ export default function SingleRides({
       month: "short",
       day: "numeric",
     };
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat("en-US", options).format(date);
+    return new Date(dateString).toLocaleDateString("en-US", options);
   };
 
   const formatTime = (timeString: string) => {
@@ -81,31 +86,23 @@ export default function SingleRides({
   };
 
   return (
-    <div className="bg-white shadow rounded-lg p-6">
-      <h3 className="font-semibold text-2xl text-gray-800 mb-6">
-        Single Rides
-      </h3>
+    <section className="bg-white shadow rounded-lg p-6">
+      <header className="mb-6">
+        <h2 className="text-2xl font-semibold text-gray-800">Single Rides</h2>
+      </header>
       {rides.length > 0 ? (
         <ul className="space-y-6">
           {rides.map((ride: any) => (
             <li
               key={ride.id}
-              className="border border-gray-200 rounded-lg p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center hover:shadow-md transition-shadow duration-300"
+              className="border border-gray-200 rounded-lg p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center hover:shadow-md transition-shadow duration-300"
             >
-              <div className="mb-4 sm:mb-0">
-                <p className="text-lg font-medium text-gray-900">
-                  {formatDate(ride.pickupDate)} at {formatTime(ride.pickupTime)}
-                </p>
-                <p className="text-sm text-gray-600">
-                  <span className="font-semibold">From:</span>{" "}
-                  {ride.pickupAddress}
-                </p>
-                <p className="text-sm text-gray-600">
-                  <span className="font-semibold">To:</span>{" "}
-                  {ride.dropoffAddress}
-                </p>
-                <p className="text-sm mt-2">
-                  <span className="font-semibold">Status:</span>{" "}
+              <div className="mb-4 sm:mb-0 flex-1">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
+                  <p className="text-lg font-medium text-gray-900">
+                    {formatDate(ride.pickupDate)} at{" "}
+                    {formatTime(ride.pickupTime)}
+                  </p>
                   <span
                     className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${getStatusBadge(
                       ride.status
@@ -113,21 +110,31 @@ export default function SingleRides({
                   >
                     {ride.status.charAt(0).toUpperCase() + ride.status.slice(1)}
                   </span>
-                </p>
+                </div>
+                <div className="mt-2">
+                  <p className="text-sm text-gray-600">
+                    <span className="font-semibold">From:</span>{" "}
+                    {ride.pickupAddress}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    <span className="font-semibold">To:</span>{" "}
+                    {ride.dropoffAddress}
+                  </p>
+                </div>
               </div>
               <div className="flex space-x-4">
-                <Link href={`/my-rides/ride?id=${ride.id}`}>
-                  <button className="flex items-center text-sm font-medium text-teal-600 hover:text-teal-800 transition-colors duration-200">
-                    <Eye size={20} className="mr-1" />
-                    View
-                  </button>
+                <Link href={`/my-rides/session/${ride.id}`}>
+                  <div className="flex items-center text-sm font-medium text-teal-600 hover:text-teal-800 transition-colors duration-200">
+                    <Eye size={20} className="mr-1" aria-hidden="true" />
+                    <span>View</span>
+                  </div>
                 </Link>
                 <button
                   onClick={() => openModal(ride.id)}
                   className="flex items-center text-sm font-medium text-red-600 hover:text-red-800 transition-colors duration-200"
                 >
-                  <Trash size={20} className="mr-1" />
-                  Cancel
+                  <Trash size={20} className="mr-1" aria-hidden="true" />
+                  <span>Cancel</span>
                 </button>
               </div>
             </li>
@@ -137,9 +144,9 @@ export default function SingleRides({
         <div className="text-center">
           <p className="text-gray-600">No single rides booked.</p>
           <Link href={"/schedule-ride/single-ride"}>
-            <button className="mt-4 bg-teal-600 text-white px-5 py-2 rounded-md hover:bg-teal-700 transition-colors duration-200">
+            <div className="mt-4 inline-block bg-teal-600 text-white px-5 py-2 rounded-md hover:bg-teal-700 transition-colors duration-200">
               Book a Single Ride
-            </button>
+            </div>
           </Link>
         </div>
       )}
@@ -148,7 +155,8 @@ export default function SingleRides({
         isOpen={isModalOpen}
         onConfirm={() => rideToCancel && handleCancel(rideToCancel)}
         onCancel={closeModal}
+        isLoading={isLoading}
       />
-    </div>
+    </section>
   );
 }

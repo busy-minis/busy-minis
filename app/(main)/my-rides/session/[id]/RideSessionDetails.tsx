@@ -13,7 +13,12 @@ import {
   MapPin,
   XCircle,
   UserCheck,
+  ArrowCounterClockwise,
+  ArrowRight, // Imported ArrowRight icon
 } from "@phosphor-icons/react";
+import Link from "next/link";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface Driver {
   id: string;
@@ -31,7 +36,18 @@ interface Driver {
 }
 
 interface RideSessionDetailsProps {
-  rideSession: any;
+  rideSession: {
+    id: string;
+    pickupDate: string;
+    pickupTime: string;
+    pickupAddress: string;
+    dropoffAddress: string;
+    riders: { name: string }[];
+    status: string;
+    ride_link: string;
+    driver_id?: string | null;
+    // Add other necessary fields if any
+  };
   userId: string;
   driver?: Driver | null; // Make driver optional
 }
@@ -49,45 +65,55 @@ export default function RideSessionDetails({
   const router = useRouter();
   const supabase = createClient();
 
-  // Optional: Implement polling or real-time updates to refresh status
+  // Initialize Supabase real-time listener
   useEffect(() => {
-    const interval = setInterval(async () => {
-      try {
-        const { data, error } = await supabase
-          .from("ride_sessions")
-          .select("status, driver_id")
-          .eq("id", rideSession.id)
-          .single();
+    // Define the channel name uniquely per ride session
+    const channelName = `ride_updates_${rideSession.id}`;
+    const channel = supabase
+      .channel(channelName)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "rides",
+          filter: `id=eq.${rideSession.id}`,
+        },
+        (payload) => {
+          const updatedStatus = payload.new.status;
+          setStatus(updatedStatus);
 
-        if (error) {
-          console.error("Error fetching ride status:", error);
-          return;
-        }
-
-        if (data.status !== status) {
-          setStatus(data.status);
-          // If status changed to 'accepted', fetch driver info
-          if (data.status === "accepted" && data.driver_id) {
-            const { data: updatedDriver, error: driverError } = await supabase
-              .from("drivers")
-              .select("*")
-              .eq("id", data.driver_id)
-              .single();
-
-            if (driverError) {
-              console.error("Error fetching updated driver info:", driverError);
-            } else {
-              setCurrentDriver(updatedDriver);
-            }
+          if (updatedStatus === "accepted" && payload.new.driver_id) {
+            fetchDriverInfo(payload.new.driver_id);
           }
         }
-      } catch (err) {
-        console.error("Polling error:", err);
-      }
-    }, 5000); // Poll every 5 seconds
+      )
+      .subscribe();
 
-    return () => clearInterval(interval);
-  }, [supabase, rideSession.id, status]);
+    // Function to fetch driver info
+    const fetchDriverInfo = async (driverId: string) => {
+      try {
+        const { data: updatedDriver, error: driverError } = await supabase
+          .from("drivers")
+          .select("*")
+          .eq("id", driverId)
+          .single();
+
+        if (driverError) {
+          console.error("Error fetching updated driver info:", driverError);
+        } else {
+          setCurrentDriver(updatedDriver);
+        }
+      } catch (err) {
+        console.error("Error in fetchDriverInfo:", err);
+      }
+    };
+
+    // Cleanup subscription on unmount
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [supabase, rideSession.id]);
 
   const handleCancelRide = async () => {
     setIsSubmitting(true);
@@ -95,7 +121,7 @@ export default function RideSessionDetails({
     try {
       // Update the ride_session status to 'cancelled'
       const { error } = await supabase
-        .from("ride_sessions")
+        .from("rides")
         .update({ status: "cancelled" })
         .eq("id", rideSession.id);
 
@@ -103,11 +129,11 @@ export default function RideSessionDetails({
 
       setStatus("cancelled");
       setShowCancelModal(false);
-      alert("Your ride has been cancelled.");
+      toast.success("Your ride has been cancelled.");
       router.refresh();
     } catch (error) {
       console.error(error);
-      alert("An error occurred while cancelling your ride.");
+      toast.error("An error occurred while cancelling your ride.");
     } finally {
       setIsSubmitting(false);
     }
@@ -115,7 +141,7 @@ export default function RideSessionDetails({
 
   // Map the status to display text and icon
   const getStatusInfo = (status: string) => {
-    switch (status) {
+    switch (status.toLowerCase()) {
       case "completed":
         return {
           text: "Completed",
@@ -128,9 +154,10 @@ export default function RideSessionDetails({
           text: "Ongoing",
           icon: <MapPin size={24} className="text-blue-500 mr-2" />,
           color: "text-blue-600",
-          description: "Your ride is currently in progress.",
+          description:
+            "Your ride is currently in progress. Track it in real-time.",
         };
-      case "available":
+      case "pending":
         return {
           text: "Pending",
           icon: <Hourglass size={24} className="text-orange-500 mr-2" />,
@@ -164,38 +191,64 @@ export default function RideSessionDetails({
   const statusInfo = getStatusInfo(status);
 
   return (
-    <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-2xl p-8 mt-8">
+    <div className="min-h-screen bg-gradient-to-b from-teal-500 to-teal-100 py-6 px-4">
+      {/* Toast Notifications */}
+      <ToastContainer position="top-right" autoClose={5000} hideProgressBar />
+
+      {/* Refresh Button */}
+      <div className="flex justify-end mb-4">
+        <button
+          onClick={() => router.refresh()}
+          className="flex items-center bg-teal-600 text-white px-4 py-2 rounded-md hover:bg-teal-700 transition duration-200"
+        >
+          <ArrowCounterClockwise size={20} className="mr-2" />
+          Refresh
+        </button>
+      </div>
+
       {/* Cancel Confirmation Modal */}
       {showCancelModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
           aria-modal="true"
           role="dialog"
+          aria-labelledby="cancel-modal-title"
+          aria-describedby="cancel-modal-description"
         >
-          <div className="bg-white rounded-lg shadow-xl p-6 max-w-sm mx-auto">
+          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm mx-auto animate-fadeIn">
             <div className="flex items-center mb-4">
-              <XCircle size={32} className="text-red-600 mr-2" />
-              <h3 className="text-xl font-semibold text-gray-800">
+              <XCircle
+                size={28}
+                className="text-red-600 mr-2"
+                aria-hidden="true"
+              />
+              <h3
+                id="cancel-modal-title"
+                className="text-lg md:text-xl font-semibold text-gray-800"
+              >
                 Confirm Cancellation
               </h3>
             </div>
-            <p className="text-gray-700 mb-6">
+            <p
+              id="cancel-modal-description"
+              className="text-gray-700 mb-6 text-sm md:text-base"
+            >
               Are you sure you want to cancel this ride?{" "}
               <span className="font-semibold text-red-600">
                 You may not be refunded.
               </span>
             </p>
-            <div className="flex justify-end space-x-4">
+            <div className="flex justify-end space-x-2">
               <button
                 onClick={() => setShowCancelModal(false)}
-                className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition duration-200"
+                className="bg-gray-200 text-gray-700 px-3 py-2 rounded-md text-sm md:text-base hover:bg-gray-300 transition duration-200"
               >
                 No, Keep Ride
               </button>
               <button
                 onClick={handleCancelRide}
                 disabled={isSubmitting}
-                className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition duration-200 disabled:opacity-50"
+                className="bg-red-600 text-white px-3 py-2 rounded-md text-sm md:text-base hover:bg-red-700 transition duration-200 disabled:opacity-50"
               >
                 {isSubmitting ? "Cancelling..." : "Yes, Cancel Ride"}
               </button>
@@ -204,153 +257,167 @@ export default function RideSessionDetails({
         </div>
       )}
 
-      <h2 className="text-3xl font-extrabold text-gray-900 mb-6 text-center">
-        Ride Details
-      </h2>
+      <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-2xl p-6 md:p-8">
+        <h2 className="text-3xl font-extrabold text-gray-900 mb-6 text-center">
+          Ride Details
+        </h2>
 
-      {/* Ride Information */}
-      <div className="mb-8">
-        <div className="bg-gray-100 p-6 rounded-lg shadow-inner">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <p className="text-gray-700 mb-2">
-                <span className="font-semibold">Ride ID:</span> {rideSession.id}
-              </p>
-              <p className="text-gray-700 mb-2">
-                <span className="font-semibold">Date:</span>{" "}
-                {format(
-                  new Date(rideSession.pickupDate),
-                  "EEEE, MMMM dd, yyyy"
-                )}
-              </p>
-              <p className="text-gray-700 mb-2">
-                <span className="font-semibold">Pickup Time:</span>{" "}
-                {format(
-                  parseISO(`2021-01-01T${rideSession.pickupTime}`),
-                  "hh:mm a"
-                )}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-700 mb-2">
-                <span className="font-semibold">Pickup Address:</span>{" "}
-                {rideSession.pickupAddress}
-              </p>
-              <p className="text-gray-700 mb-2">
-                <span className="font-semibold">Drop-off Address:</span>{" "}
-                {rideSession.dropoffAddress}
-              </p>
-            </div>
-          </div>
-          <div className="mt-4">
-            <p className="text-gray-700">
-              <span className="font-semibold">Rider(s):</span>{" "}
-              {rideSession.riders && rideSession.riders.length > 0
-                ? rideSession.riders.map((rider: any, index: number) => (
-                    <span key={index}>
-                      {rider.name}
-                      {index < rideSession.riders.length - 1 && ", "}
-                    </span>
-                  ))
-                : "No riders added."}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Ride Status */}
-      <div className="mb-6 flex items-center justify-center">
-        {statusInfo.icon}
-        <span className={`${statusInfo.color} font-semibold text-xl`}>
-          {statusInfo.text}
-        </span>
-      </div>
-
-      {/* Status Description */}
-      {statusInfo.description && (
-        <div className="mb-6 text-center">
-          <p className="text-gray-600">{statusInfo.description}</p>
-        </div>
-      )}
-
-      {/* Driver Information */}
-      {currentDriver && (
+        {/* Ride Information */}
         <div className="mb-8">
-          <h3 className="text-2xl font-semibold text-gray-800 mb-4">
-            Driver Information
-          </h3>
-          <div className="bg-gray-100 p-6 rounded-lg shadow-inner flex flex-col sm:flex-row items-center">
-            {currentDriver.photo_url && (
-              <img
-                src={currentDriver.photo_url}
-                alt={`${currentDriver.first_name} ${currentDriver.last_name}`}
-                className="w-24 h-24 rounded-full mr-6 object-cover mb-4 sm:mb-0"
-              />
-            )}
-            <div>
-              <p className="text-gray-700 mb-2">
-                <span className="font-semibold">Name:</span>{" "}
-                {currentDriver.first_name} {currentDriver.last_name}
-              </p>
-              <p className="text-gray-700 mb-2">
-                <span className="font-semibold">Email:</span>{" "}
-                {currentDriver.email}
-              </p>
-              <p className="text-gray-700 mb-2">
-                <span className="font-semibold">Phone:</span>{" "}
-                {currentDriver.phone_number}
-              </p>
+          <div className="bg-gray-100 p-6 rounded-lg shadow-inner">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <p className="text-gray-700 mb-2">
+                  <span className="font-semibold">Ride ID:</span>{" "}
+                  {rideSession.id}
+                </p>
+                <p className="text-gray-700 mb-2">
+                  <span className="font-semibold">Date:</span>{" "}
+                  {format(
+                    new Date(rideSession.pickupDate),
+                    "EEEE, MMMM dd, yyyy"
+                  )}
+                </p>
+                <p className="text-gray-700 mb-2">
+                  <span className="font-semibold">Pickup Time:</span>{" "}
+                  {format(
+                    parseISO(`2021-01-01T${rideSession.pickupTime}`),
+                    "hh:mm a"
+                  )}
+                </p>
+              </div>
+              <div>
+                <p className="text-gray-700 mb-2">
+                  <span className="font-semibold">Pickup Address:</span>{" "}
+                  {rideSession.pickupAddress}
+                </p>
+                <p className="text-gray-700 mb-2">
+                  <span className="font-semibold">Drop-off Address:</span>{" "}
+                  {rideSession.dropoffAddress}
+                </p>
+                {/* Removed Distance Field */}
+              </div>
+            </div>
+            <div className="mt-4">
               <p className="text-gray-700">
-                <span className="font-semibold">Vehicle:</span>{" "}
-                {currentDriver.vehicle_year} {currentDriver.vehicle_brand} (
-                {currentDriver.vehicle_color}) - {currentDriver.license_plate}
+                <span className="font-semibold">Rider(s):</span>{" "}
+                {rideSession.riders && rideSession.riders.length > 0
+                  ? rideSession.riders.map((rider: any, index: number) => (
+                      <span key={index}>
+                        {rider.name}
+                        {index < rideSession.riders.length - 1 && ", "}
+                      </span>
+                    ))
+                  : "No riders added."}
               </p>
             </div>
+            {/* Removed Real-Time Ride Link */}
           </div>
         </div>
-      )}
 
-      {/* Location Tracking Placeholder */}
-      <div className="mb-8">
-        <h3 className="text-xl font-semibold text-gray-800 mb-4">
-          Location Tracking
-        </h3>
-        <div className="bg-gray-100 p-6 rounded-lg shadow-inner">
-          {/* Placeholder for the map or tracking information */}
-          <p className="text-gray-700">
-            Tracking information will be displayed here.
-          </p>
+        {/* Ride Status */}
+        <div className="mb-6 flex items-center justify-center">
+          {statusInfo.icon}
+          <span className={`${statusInfo.color} font-semibold text-xl`}>
+            {statusInfo.text}
+          </span>
         </div>
+
+        {/* Status Description */}
+        {statusInfo.description && (
+          <div className="mb-6 text-center">
+            <p className="text-gray-600">{statusInfo.description}</p>
+          </div>
+        )}
+
+        {/* Driver Information */}
+        {currentDriver && status.toLowerCase() === "accepted" && (
+          <div className="mb-8">
+            <h3 className="text-2xl font-semibold text-gray-800 mb-4">
+              Driver Information
+            </h3>
+            <div className="bg-gray-100 p-6 rounded-lg shadow-inner flex flex-col sm:flex-row items-center">
+              {currentDriver.photo_url && (
+                <img
+                  src={currentDriver.photo_url}
+                  alt={`${currentDriver.first_name} ${currentDriver.last_name}`}
+                  className="w-24 h-24 rounded-full mr-6 object-cover mb-4 sm:mb-0"
+                />
+              )}
+              <div>
+                <p className="text-gray-700 mb-2">
+                  <span className="font-semibold">Name:</span>{" "}
+                  {currentDriver.first_name} {currentDriver.last_name}
+                </p>
+                <p className="text-gray-700 mb-2">
+                  <span className="font-semibold">Email:</span>{" "}
+                  {currentDriver.email}
+                </p>
+                <p className="text-gray-700 mb-2">
+                  <span className="font-semibold">Phone:</span>{" "}
+                  {currentDriver.phone_number}
+                </p>
+                <p className="text-gray-700">
+                  <span className="font-semibold">Vehicle:</span>{" "}
+                  {currentDriver.vehicle_year} {currentDriver.vehicle_brand} (
+                  {currentDriver.vehicle_color}) - {currentDriver.license_plate}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Real-Time Tracking Information for Ongoing Rides */}
+        {status.toLowerCase() === "ongoing" && (
+          <div className="mb-8">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">
+              Real-Time Tracking
+            </h3>
+            <div className="bg-gray-100 p-6 rounded-lg shadow-inner">
+              <p className="text-gray-700 mb-4">
+                You can track your ride in real-time using the button below.
+              </p>
+              <a
+                href={rideSession.ride_link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block bg-teal-600 text-white px-6 py-3 rounded-md font-semibold hover:bg-teal-700 transition duration-200"
+              >
+                Open in Google Maps
+              </a>
+            </div>
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        {status.toLowerCase() !== "cancelled" &&
+          status.toLowerCase() !== "completed" && (
+            <div className="flex flex-col sm:flex-row gap-4">
+              {/* Cancel Ride Button */}
+              <button
+                onClick={() => setShowCancelModal(true)}
+                disabled={isSubmitting}
+                className="w-full sm:w-auto bg-red-600 text-white py-3 px-6 rounded-md font-semibold text-lg hover:bg-red-700 transition duration-200 disabled:opacity-50"
+              >
+                Cancel Ride
+              </button>
+
+              {/* Conditional View Ride Button or Message */}
+              {status.toLowerCase() === "ongoing" ? (
+                <Link href={`/my-rides/session/${rideSession.id}`}>
+                  <button className="w-full sm:w-auto bg-teal-600 text-white py-3 px-6 rounded-md font-semibold text-lg hover:bg-teal-700 transition duration-200 flex items-center justify-center">
+                    View Ongoing Ride <ArrowRight size={20} className="ml-2" />
+                  </button>
+                </Link>
+              ) : (
+                <div className="w-full sm:w-auto bg-gray-100 text-gray-700 py-3 px-6 rounded-md text-lg flex items-center justify-center">
+                  The link to location tracking will be available when the
+                  driver has picked up the passenger.
+                </div>
+              )}
+            </div>
+          )}
       </div>
-
-      {/* Action Buttons */}
-      {status !== "cancelled" && status !== "completed" && (
-        <div className="flex flex-col sm:flex-row gap-4">
-          {/* Only allow cancellation if status is not 'accepted' */}
-          {status !== "accepted" && (
-            <button
-              onClick={() => setShowCancelModal(true)}
-              disabled={isSubmitting}
-              className="w-full bg-red-600 text-white py-3 px-6 rounded-md font-semibold text-lg hover:bg-red-700 transition duration-200 disabled:opacity-50"
-            >
-              Cancel Ride
-            </button>
-          )}
-          {/* Additional actions can be added here */}
-          {/* Example: View driver details if accepted */}
-          {status === "accepted" && currentDriver && (
-            <button
-              onClick={() => {
-                // Implement action, e.g., call driver or view more details
-                alert("Driver details already displayed.");
-              }}
-              className="w-full bg-blue-600 text-white py-3 px-6 rounded-md font-semibold text-lg hover:bg-blue-700 transition duration-200"
-            >
-              Contact Driver
-            </button>
-          )}
-        </div>
-      )}
     </div>
   );
 }

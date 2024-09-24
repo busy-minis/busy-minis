@@ -9,9 +9,11 @@ interface Stop {
 }
 
 interface FormData {
+  renewal_date: string; // Add this line
   user_id: string;
   status: string;
   end_date: string;
+  total_price: number;
   pickupDate: string;
   pickupAddress: string;
   pickupLat?: number;

@@ -1,9 +1,13 @@
 import React from "react";
 import RidePage from "./RidePage";
 import { Suspense } from "react";
+import { revalidatePath } from "next/cache";
+
 import { createClient } from "@/utils/supabase/server";
 
 export default async function page() {
+  revalidatePath("/accepted-rides");
+
   const supabase = createClient();
 
   const {

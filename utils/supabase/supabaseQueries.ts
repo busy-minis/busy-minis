@@ -153,6 +153,8 @@ interface FormData {
   dropoffAddress: string;
   dropoffLat?: number;
   dropoffLng?: number;
+  total_price: number;
+  renewal_date: string;
   riders: Rider[];
 }
 
@@ -184,6 +186,8 @@ export async function createWeeklyRide({ formData }: { formData: FormData }) {
     pickupLng,
     dropoffLat,
     end_date,
+    total_price,
+    renewal_date,
     dropoffLng,
     pickupDate,
   } = formData;
@@ -194,14 +198,16 @@ export async function createWeeklyRide({ formData }: { formData: FormData }) {
     .insert({
       user_id,
       status: "active",
+      renewal_date,
       pickupAddress,
       dropoffAddress,
       selectedDays,
       riders,
       start_date: pickupDate,
       end_date,
+      weekly: true,
       pickupTime: selectedTime,
-      total_price: "0", // Initially 0, will be updated later
+      total_price,
     })
     .select()
     .single();
@@ -241,13 +247,13 @@ export async function createWeeklyRide({ formData }: { formData: FormData }) {
       dropoffLat,
       dropoffLng,
       riders,
-      status: "available", // Session starts as 'available'
+      status: "pending", // Session starts as 'available'
     });
   });
 
   // Step 3: Insert all ride sessions into the ride_sessions table
   const { error: rideSessionsError } = await supabase
-    .from("ride_sessions")
+    .from("rides")
     .insert(rideSessions);
 
   if (rideSessionsError) {
@@ -313,22 +319,28 @@ export const getRidesByStatus = async (status: string) => {
 
 export const getRidesForUser = async (userId: string) => {
   try {
+    // Get today's date in 'YYYY-MM-DD' format
+    const today = new Date().toISOString().split("T")[0];
+
     const { data, error } = await supabase
       .from("rides") // querying from rides table
       .select("*")
       .in("status", ["pending", "accepted", "ongoing"]) // filter by 'pending', 'accepted', or 'ongoing' statuses
-      .eq("user_id", userId); // filter by user ID
+      .eq("user_id", userId) // filter by user ID
+      .eq("weekly", false) // filter rides where weekly is false
+      .gte("pickupDate", today); // only rides where pickupDate is today or in the future
 
     if (error) {
       throw error;
     }
 
-    return data; // Return the rides with the specified statuses
+    return data; // Return the rides with the specified statuses and future dates
   } catch (error) {
     console.error("Error fetching rides:", error);
     throw error;
   }
 };
+
 export const getWeeklyRidesForUser = async (userId: string) => {
   try {
     const { data, error } = await supabase
@@ -403,6 +415,20 @@ export const startRide = async (rideId: string) => {
     console.error("Error starting the ride:", error);
     throw error;
   }
+};
+
+export const updateRideLink = async (rideId: string, link: string) => {
+  const { data, error } = await supabase
+    .from("rides")
+    .update({ ride_link: link })
+    .eq("id", rideId);
+
+  if (error) {
+    console.error("Error updating ride link:", error);
+    throw error;
+  }
+
+  console.log("Ride link updated successfully:", data);
 };
 
 export async function updateDriverLocation(

@@ -13,6 +13,7 @@ interface FormData {
   status: string;
   end_date: string;
   pickupDate: string;
+  total_price: number;
   pickupAddress: string;
   pickupLat?: number;
   pickupLng?: number;
@@ -23,6 +24,7 @@ interface FormData {
   riders: Rider[];
   selectedTime: string;
   selectedDays: string[];
+  renewal_date: string; // Add this line
 }
 
 interface Rider {

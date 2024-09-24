@@ -1,13 +1,15 @@
-// components/Modal.tsx
 "use client";
 
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface ModalProps {
   setShowModal: (show: boolean) => void;
-  onConfirm: () => void; // Function to call on confirm
+  onConfirm: (inputValue?: string) => void;
   title?: string;
   message?: string;
+  requireInput?: boolean;
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -15,34 +17,115 @@ const Modal: React.FC<ModalProps> = ({
   onConfirm,
   title = "Confirm Action",
   message = "Are you sure you want to proceed?",
+  requireInput = false,
 }) => {
+  const [inputValue, setInputValue] = useState("");
+  const [inputError, setInputError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (requireInput && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [requireInput]);
+
+  const validateURL = (url: string): boolean => {
+    try {
+      const parsedUrl = new URL(url);
+      // Optionally, check if it's a Google Maps URL
+      return (
+        parsedUrl.hostname.includes("google.com") ||
+        parsedUrl.hostname.includes("googlemaps.com")
+      );
+    } catch {
+      return false;
+    }
+  };
+
   const handleConfirm = () => {
-    onConfirm(); // Call the confirm handler
-    setShowModal(false); // Close the modal
+    if (requireInput) {
+      if (!validateURL(inputValue)) {
+        setInputError("Please enter a valid Google Maps link.");
+        return;
+      }
+      onConfirm(inputValue);
+    } else {
+      onConfirm();
+    }
+    setShowModal(false);
   };
 
   const handleCancel = () => {
-    setShowModal(false); // Close the modal without doing anything
+    setShowModal(false);
+  };
+
+  const handlePaste = () => {
+    navigator.clipboard.readText().then((text) => {
+      setInputValue(text);
+      if (requireInput) {
+        if (!validateURL(text)) {
+          setInputError("Pasted link is not a valid Google Maps URL.");
+        } else {
+          setInputError(null);
+        }
+      }
+    });
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-80">
-        <h2 className="text-xl font-bold mb-4">{title}</h2>
-        <p className="mb-6">{message}</p>
-        <div className="flex justify-end space-x-4">
-          <button
-            onClick={handleCancel}
-            className="px-4 py-2 bg-gray-300 text-gray-700 rounded"
-          >
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+      aria-describedby="modal-description"
+    >
+      <div className="bg-white p-6 sm:p-8 rounded-lg shadow-lg w-full max-w-md">
+        <h2
+          id="modal-title"
+          className="text-2xl font-semibold mb-4 text-gray-800"
+        >
+          {title}
+        </h2>
+        <p id="modal-description" className="mb-6 text-gray-600">
+          {message}
+        </p>
+        {requireInput && (
+          <div className="mb-4">
+            <Input
+              ref={inputRef}
+              type="url"
+              placeholder="Paste Google Maps link here..."
+              value={inputValue}
+              onChange={(e) => {
+                setInputValue(e.target.value);
+                if (inputError) setInputError(null);
+              }}
+              className={`mb-2 ${inputError ? "border-red-500" : ""}`}
+              aria-invalid={inputError ? "true" : "false"}
+            />
+            {inputError && (
+              <p className="text-red-500 text-sm mb-2">{inputError}</p>
+            )}
+            <Button
+              onClick={handlePaste}
+              variant="secondary"
+              className="w-full"
+            >
+              Paste from Clipboard
+            </Button>
+          </div>
+        )}
+        <div className="flex justify-end space-x-3">
+          <Button onClick={handleCancel} variant="secondary">
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={handleConfirm}
-            className="px-4 py-2 bg-blue-600 text-white rounded"
+            disabled={requireInput && !inputValue}
           >
             Accept
-          </button>
+          </Button>
         </div>
       </div>
     </div>
