@@ -31,12 +31,8 @@ const Modal: React.FC<ModalProps> = ({
 
   const validateURL = (url: string): boolean => {
     try {
-      const parsedUrl = new URL(url);
-      // Optionally, check if it's a Google Maps URL
-      return (
-        parsedUrl.hostname.includes("google.com") ||
-        parsedUrl.hostname.includes("googlemaps.com")
-      );
+      new URL(url);
+      return true;
     } catch {
       return false;
     }
@@ -45,7 +41,7 @@ const Modal: React.FC<ModalProps> = ({
   const handleConfirm = () => {
     if (requireInput) {
       if (!validateURL(inputValue)) {
-        setInputError("Please enter a valid Google Maps link.");
+        setInputError("Please enter a valid website URL.");
         return;
       }
       onConfirm(inputValue);
@@ -64,7 +60,7 @@ const Modal: React.FC<ModalProps> = ({
       setInputValue(text);
       if (requireInput) {
         if (!validateURL(text)) {
-          setInputError("Pasted link is not a valid Google Maps URL.");
+          setInputError("Pasted text is not a valid website URL.");
         } else {
           setInputError(null);
         }
@@ -95,7 +91,7 @@ const Modal: React.FC<ModalProps> = ({
             <Input
               ref={inputRef}
               type="url"
-              placeholder="Paste Google Maps link here..."
+              placeholder="Enter website URL here..."
               value={inputValue}
               onChange={(e) => {
                 setInputValue(e.target.value);

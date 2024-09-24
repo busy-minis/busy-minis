@@ -50,12 +50,14 @@ export default function SingleRides({
   };
 
   const formatDate = (dateString: string) => {
+    const [year, month, day] = dateString.split("-").map(Number);
+    const date = new Date(year, month - 1, day);
     const options: Intl.DateTimeFormatOptions = {
       weekday: "short",
       month: "short",
       day: "numeric",
     };
-    return new Date(dateString).toLocaleDateString("en-US", options);
+    return date.toLocaleDateString("en-US", options);
   };
 
   const formatTime = (timeString: string) => {
