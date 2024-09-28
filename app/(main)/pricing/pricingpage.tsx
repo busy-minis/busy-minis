@@ -156,7 +156,7 @@ const RidePricingCalculator = ({
         <h3 className="text-md sm:text-lg font-medium text-teal-900">
           Passengers
         </h3>
-        <div className="flex flex-wrap sm:flex-nowrap space-x-0 sm:space-x-4 space-y-4 sm:space-y-0 mt-4">
+        <div className="flex flex-wrap gap-2  sm:flex-nowrap  mt-4">
           {["1", "2", "3", "4"].map((num) => (
             <PassengerButton
               key={num}

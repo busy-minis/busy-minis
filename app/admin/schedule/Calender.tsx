@@ -147,7 +147,7 @@ const Calender = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 min-h-screen">
       <h1 className="text-2xl font-bold text-gray-800">
         Admin: Manage Time Blocks
       </h1>
@@ -228,7 +228,7 @@ const Calender = () => {
                       ? "bg-red-300 text-red-800 cursor-not-allowed"
                       : isSlotTaken
                       ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                      : "bg-theme-orange text-white hover:bg-orange-600"
+                      : "bg-zinc-700 text-white hover:bg-zinc-950"
                   }`}
                 >
                   {slot}

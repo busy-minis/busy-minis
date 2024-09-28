@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@/components/ui/button";
 import { updateDriver } from "@/utils/supabase/supabaseQueries";
 import React, { useState } from "react";
 
@@ -51,10 +52,8 @@ const DriversPage: React.FC<DriversPageProps> = ({ drivers }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
-      <h1 className="text-4xl font-bold text-center text-gray-800 mb-12">
-        Drivers
-      </h1>
+    <div className="min-h-screen container bg-gray-50 py-12 px-4">
+      <h1 className="text-4xl font-bold  text-zinc-800 mb-12">Drivers</h1>
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white shadow-md rounded-lg">
           <thead className="bg-gray-200 text-gray-600 text-sm uppercase font-semibold">
@@ -77,15 +76,15 @@ const DriversPage: React.FC<DriversPageProps> = ({ drivers }) => {
                   {driver.vehicle_color}
                 </td>
                 <td className="py-4 px-6">
-                  <button
+                  <Button
                     onClick={() => {
                       setSelectedDriver(driver);
                       setIsEditing(true);
                     }}
-                    className="bg-indigo-500 text-white px-4 py-2 rounded-lg hover:bg-indigo-600 transition-all duration-200 shadow-md"
+                    className=" text-white px-4 py-2 rounded-lg hover:bg-indigo-600 transition-all duration-200 shadow-md"
                   >
                     Edit
-                  </button>
+                  </Button>
                 </td>
               </tr>
             ))}

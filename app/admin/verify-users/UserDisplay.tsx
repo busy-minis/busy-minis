@@ -63,11 +63,11 @@ const VerifyUsersPage = ({ users }: { users: any[] }) => {
   };
 
   return (
-    <div className="p-4 sm:p-6 space-y-4">
+    <div className="p-4 sm:p-6 min-h-screen  container bg-zinc-100 space-y-4">
       <h1 className="text-2xl sm:text-3xl font-semibold text-gray-700">
         Verify Users
       </h1>
-      <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
+      <div className="bg-zinc-50 p-4 sm:p-6 rounded-sm border">
         {sortedUsers.length > 0 ? (
           <ul className="space-y-4">
             {sortedUsers.map((user, index) => (

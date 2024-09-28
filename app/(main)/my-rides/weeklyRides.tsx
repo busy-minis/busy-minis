@@ -4,6 +4,7 @@ import { PencilSimple } from "@phosphor-icons/react";
 import Link from "next/link";
 import React from "react";
 import { isAfter } from "date-fns";
+import { Button } from "@/components/ui/button";
 
 interface WeeklyRide {
   id: string;
@@ -74,111 +75,114 @@ export default function WeeklyRides({
   };
 
   return (
-    <section className="bg-white shadow rounded-lg p-6">
+    <div className="w-full ">
       <header className="mb-6">
         <h2 className="text-2xl font-semibold text-gray-800">Weekly Rides</h2>
       </header>
-      {weekly_rides.length > 0 ? (
-        <ul className="space-y-6">
-          {weekly_rides.map((weeklyRide) => {
-            const rideEndDate = weeklyRide.end_date || null;
-            const isRideDiscontinued = rideEndDate
-              ? isAfter(currentDate, new Date(rideEndDate))
-              : false;
+      <section className="">
+        {weekly_rides.length > 0 ? (
+          <ul className="space-y-6">
+            {weekly_rides.map((weeklyRide) => {
+              const rideEndDate = weeklyRide.end_date || null;
+              const isRideDiscontinued = rideEndDate
+                ? isAfter(currentDate, new Date(rideEndDate))
+                : false;
 
-            return (
-              <li
-                key={weeklyRide.id}
-                className="border border-gray-200 rounded-lg p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center hover:shadow-md transition-shadow duration-300"
-              >
-                <div className="mb-4 sm:mb-0 flex-1">
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
-                    <div>
-                      <p className="text-lg font-medium text-gray-900">
+              return (
+                <li
+                  key={weeklyRide.id}
+                  className="border bg-zinc-900 text-zinc-400 rounded-lg p-4   transition-shadow duration-300"
+                >
+                  <div className="">
+                    <main className="flex justify-between">
+                      <div className="text-base font-medium text-teal-200">
                         Renewal Date : {weeklyRide.renewal_date}
-                      </p>
-                      <span
-                        className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${getStatusBadge(
+                      </div>
+                      <p
+                        className={`inline-block pointer-events-none px-2 py-1 rounded-full text-xs font-semibold ${getStatusBadge(
                           weeklyRide.status
                         )}`}
                       >
                         {weeklyRide.status.charAt(0).toUpperCase() +
                           weeklyRide.status.slice(1)}
-                      </span>
-                    </div>
-                    <div className="mt-2 sm:mt-0 flex flex-wrap gap-2">
-                      {weeklyRide.selectedDays.map(
-                        (day: string, index: number) => (
-                          <span
-                            key={index}
-                            className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getDaysBadge(
-                              day
-                            )}`}
-                          >
-                            {day}
-                          </span>
-                        )
+                      </p>
+                    </main>
+
+                    <section className="flex flex-col sm:flex-row sm:justify-between items-center mt-4  w-full ">
+                      <div className="flex gap-1 w-fit">
+                        {weeklyRide.selectedDays.map(
+                          (day: string, index: number) => (
+                            <span
+                              key={index}
+                              className={`text-zinc-100 px-3 py-1 w-full border border-zinc-700 p-1 rounded-xl text-xs  ${getDaysBadge(
+                                day
+                              )}`}
+                            >
+                              {day}
+                            </span>
+                          )
+                        )}
+                      </div>
+                    </section>
+
+                    <div className="mt-4">
+                      <div className="flex flex-col sm:flex-row sm:space-x-8 text-xs">
+                        <div className="mb-4 sm:mb-0">
+                          <p className="text-sm border-b border-b-zinc-600 pb-1 font-semibold text-zinc-100">
+                            Pickup Location
+                          </p>
+                          <p className=" mt-2">{weeklyRide.pickupAddress}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm  border-b border-b-zinc-600 pb-1 font-semibold text-zinc-100">
+                            Drop-off Location
+                          </p>
+                          <p className="mt-2 ">{weeklyRide.dropoffAddress}</p>
+                        </div>
+                      </div>
+                      <section className="flex mt-16 justify-between items-center">
+                        <p className="text-sm  ">
+                          <span className="font-semibold text-zinc-100 ">
+                            Pickup Time:
+                          </span>{" "}
+                          {formatTime(weeklyRide.pickupTime)}
+                        </p>
+                        <Link
+                          href={`/my-rides/weekly-ride/manage?id=${weeklyRide.id}`}
+                        >
+                          <Button className="flex items-center text-sm font-medium bg-teal-100 text-teal-600 hover:bg-teal-200 px-4 py-2 rounded-md transition-colors duration-200">
+                            <PencilSimple
+                              size={20}
+                              className="mr-1"
+                              aria-hidden="true"
+                            />
+                            <span>Manage</span>
+                          </Button>
+                        </Link>
+                      </section>
+
+                      {isRideDiscontinued && (
+                        <p className="text-sm text-yellow-600 mt-2">
+                          Ride discontinued. Payment required to continue.
+                        </p>
                       )}
                     </div>
                   </div>
-                  <div className="mt-4">
-                    <div className="flex flex-col sm:flex-row sm:space-x-8">
-                      <div className="mb-4 sm:mb-0">
-                        <p className="text-sm font-semibold text-gray-700">
-                          Pickup Location
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          {weeklyRide.pickupAddress}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold text-gray-700">
-                          Drop-off Location
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          {weeklyRide.dropoffAddress}
-                        </p>
-                      </div>
-                    </div>
-                    <p className="text-sm text-gray-600 mt-4">
-                      <span className="font-semibold">Pickup Time:</span>{" "}
-                      {formatTime(weeklyRide.pickupTime)}
-                    </p>
-                    {isRideDiscontinued && (
-                      <p className="text-sm text-yellow-600 mt-2">
-                        Ride discontinued. Payment required to continue.
-                      </p>
-                    )}
-                  </div>
-                </div>
-                <div className="flex space-x-4 w-full sm:w-auto">
-                  <Link
-                    href={`/my-rides/weekly-ride/manage?id=${weeklyRide.id}`}
-                  >
-                    <div className="flex items-center text-sm font-medium bg-teal-100 text-teal-600 hover:bg-teal-200 px-4 py-2 rounded-md transition-colors duration-200">
-                      <PencilSimple
-                        size={20}
-                        className="mr-1"
-                        aria-hidden="true"
-                      />
-                      <span>Manage</span>
-                    </div>
-                  </Link>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      ) : (
-        <div className="text-center">
-          <p className="text-gray-600">No weekly rides booked.</p>
-          <Link href={"/schedule-ride/weekly-ride"}>
-            <div className="mt-4 inline-block bg-teal-600 text-white px-5 py-2 rounded-md hover:bg-teal-700 transition-colors duration-200">
-              Book a Weekly Ride
-            </div>
-          </Link>
-        </div>
-      )}
-    </section>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <div className="text-center">
+            <p className="text-gray-600">No weekly rides booked.</p>
+            <Link href={"/schedule-ride/weekly-ride"}>
+              <div className="mt-4 inline-block bg-teal-600 text-white px-5 py-2 rounded-md hover:bg-teal-700 transition-colors duration-200">
+                Book a Weekly Ride
+              </div>
+            </Link>
+          </div>
+        )}
+      </section>
+    </div>
   );
 }

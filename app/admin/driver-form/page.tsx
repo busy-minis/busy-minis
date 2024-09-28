@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { generateExpiringLink } from "./actions"; // Import your function to generate the link
+import { Button } from "@/components/ui/button";
 
 export default function SpecialDriverFormLinkGenerator() {
   const [generatedLink, setGeneratedLink] = useState<string | null>(null);
@@ -16,23 +17,23 @@ export default function SpecialDriverFormLinkGenerator() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 flex flex-col items-center">
+    <div className="min-h-screen container bg-zinc-50 py-12 px-4 flex flex-col items-center">
       <h1 className="text-4xl font-bold text-center text-gray-800 mb-12">
         Generate Special Driver Form Links
       </h1>
 
       <p className="text-lg text-gray-700 mb-8 text-center max-w-lg">
-        Click the button below to generate a unique link for the special driver
-        form. This link can be shared with drivers to sign up. Each link will
-        expire after one hour.
+        Click the button below to generate a unique link for the driver form.
+        This link can be shared with drivers to sign up. Each link will expire
+        after one hour.
       </p>
 
-      <button
+      <Button
         onClick={handleGenerateLink}
-        className="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-all duration-200 shadow-md"
+        className=" text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-all duration-200 shadow-md"
       >
         Generate Link
-      </button>
+      </Button>
 
       {generatedLink && (
         <div className="mt-8 text-center">

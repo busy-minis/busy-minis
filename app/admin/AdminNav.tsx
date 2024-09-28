@@ -29,44 +29,44 @@ const AdminNavBar = async () => {
   }
 
   return (
-    <div>
-      <nav className="bg-stone-800 p-4 lg:px-24 shadow-md">
+    <div className="bg-zinc-950">
+      <nav className=" py-2 container ">
         <div className="flex justify-between items-center">
           {/* Brand Name */}
-          <div className="text-white text-lg font-semibold">
+          <div className="text-zinc-100 text-2xl bebes">
             <Link href="/admin">BusyMinis Admin</Link>
           </div>
 
           {/* Desktop Menu */}
           <div className="hidden lg:flex w-full lg:w-auto">
-            <div className="flex space-x-6">
+            <div className="flex text-zinc-400 space-x-6 font-semibold text-sm">
               <Link
                 href="/admin/driver-form"
-                className="text-white hover:bg-stone-600 rounded-lg px-4 py-2 transition-colors"
+                className=" hover:text-white rounded-lg px-4 py-2 transition-colors"
               >
                 Driver Form
               </Link>
               <Link
                 href="/admin/drivers"
-                className="text-white hover:bg-stone-600 rounded-lg px-4 py-2 transition-colors"
+                className=" hover:text-white rounded-lg px-4 py-2 transition-colors"
               >
                 Drivers
               </Link>
               <Link
                 href="/admin/verify-users"
-                className="text-white hover:bg-stone-600 rounded-lg px-4 py-2 transition-colors"
+                className=" hover:text-white rounded-lg px-4 py-2 transition-colors"
               >
                 Verify Users
               </Link>
               <Link
                 href="/admin/schedule"
-                className="text-white hover:bg-stone-600 rounded-lg px-4 py-2 transition-colors"
+                className=" hover:text-white rounded-lg px-4 py-2 transition-colors"
               >
                 Schedule
               </Link>
               <Link
                 href="/"
-                className="text-white hover:bg-stone-600 rounded-lg px-4 py-2 transition-colors"
+                className=" hover:text-white rounded-lg px-4 py-2 transition-colors"
               >
                 Sign Out
               </Link>

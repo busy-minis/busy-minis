@@ -19,6 +19,7 @@ import {
 import Link from "next/link";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Image from "next/image";
 
 interface Driver {
   id: string;
@@ -181,8 +182,8 @@ export default function RideSessionDetails({
       default:
         return {
           text: status,
-          icon: <Clock size={24} className="text-gray-500 mr-2" />,
-          color: "text-gray-600",
+          icon: <Clock size={24} className="text-zinc-500 mr-2" />,
+          color: "text-zinc-600",
           description: "Unknown status.",
         };
     }
@@ -191,7 +192,7 @@ export default function RideSessionDetails({
   const statusInfo = getStatusInfo(status);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-teal-500 to-teal-100 py-6 px-4">
+    <div className="min-h-screen py-6 px-4 container">
       {/* Toast Notifications */}
       <ToastContainer position="top-right" autoClose={5000} hideProgressBar />
 
@@ -224,14 +225,14 @@ export default function RideSessionDetails({
               />
               <h3
                 id="cancel-modal-title"
-                className="text-lg md:text-xl font-semibold text-gray-800"
+                className="text-lg md:text-xl font-semibold text-zinc-800"
               >
                 Confirm Cancellation
               </h3>
             </div>
             <p
               id="cancel-modal-description"
-              className="text-gray-700 mb-6 text-sm md:text-base"
+              className="text-zinc-700 mb-6 text-sm md:text-base"
             >
               Are you sure you want to cancel this ride?{" "}
               <span className="font-semibold text-red-600">
@@ -241,7 +242,7 @@ export default function RideSessionDetails({
             <div className="flex justify-end space-x-2">
               <button
                 onClick={() => setShowCancelModal(false)}
-                className="bg-gray-200 text-gray-700 px-3 py-2 rounded-md text-sm md:text-base hover:bg-gray-300 transition duration-200"
+                className="bg-zinc-200 text-zinc-700 px-3 py-2 rounded-md text-sm md:text-base hover:bg-zinc-300 transition duration-200"
               >
                 No, Keep Ride
               </button>
@@ -257,41 +258,42 @@ export default function RideSessionDetails({
         </div>
       )}
 
-      <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-2xl p-6 md:p-8">
-        <h2 className="text-3xl font-extrabold text-gray-900 mb-6 text-center">
-          Ride Details
-        </h2>
+      <div className="max-w-4xl mx-auto border bg-white  rounded-xl p-6 md:p-8">
+        <header className="flex justify-between">
+          <h2 className="text-3xl font-semibold tracking-tighter text-zinc-900 mb-6 text-center">
+            Ride Details
+          </h2>
+          <p className="text-zinc-700 mb-2  text-xl  lg:text-3xl">
+            {format(
+              parseISO(`2021-01-01T${rideSession.pickupTime}`),
+              "hh:mm a"
+            )}
+          </p>
+        </header>
 
         {/* Ride Information */}
         <div className="mb-8">
-          <div className="bg-gray-100 p-6 rounded-lg shadow-inner">
+          <div className="bg-zinc-100 p-6 rounded-lg shadow-inner">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <p className="text-gray-700 mb-2">
+                <p className="text-zinc-700 mb-2">
                   <span className="font-semibold">Ride ID:</span>{" "}
                   {rideSession.id}
                 </p>
-                <p className="text-gray-700 mb-2">
+                <p className="text-zinc-700 mb-2">
                   <span className="font-semibold">Date:</span>{" "}
                   {format(
                     new Date(rideSession.pickupDate),
                     "EEEE, MMMM dd, yyyy"
                   )}
                 </p>
-                <p className="text-gray-700 mb-2">
-                  <span className="font-semibold">Pickup Time:</span>{" "}
-                  {format(
-                    parseISO(`2021-01-01T${rideSession.pickupTime}`),
-                    "hh:mm a"
-                  )}
-                </p>
               </div>
               <div>
-                <p className="text-gray-700 mb-2">
+                <p className="text-zinc-700 mb-2">
                   <span className="font-semibold">Pickup Address:</span>{" "}
                   {rideSession.pickupAddress}
                 </p>
-                <p className="text-gray-700 mb-2">
+                <p className="text-zinc-700 mb-2">
                   <span className="font-semibold">Drop-off Address:</span>{" "}
                   {rideSession.dropoffAddress}
                 </p>
@@ -299,7 +301,7 @@ export default function RideSessionDetails({
               </div>
             </div>
             <div className="mt-4">
-              <p className="text-gray-700">
+              <p className="text-zinc-700">
                 <span className="font-semibold">Rider(s):</span>{" "}
                 {rideSession.riders && rideSession.riders.length > 0
                   ? rideSession.riders.map((rider: any, index: number) => (
@@ -326,38 +328,38 @@ export default function RideSessionDetails({
         {/* Status Description */}
         {statusInfo.description && (
           <div className="mb-6 text-center">
-            <p className="text-gray-600">{statusInfo.description}</p>
+            <p className="text-zinc-600">{statusInfo.description}</p>
           </div>
         )}
 
         {/* Driver Information */}
         {currentDriver && status.toLowerCase() === "accepted" && (
           <div className="mb-8">
-            <h3 className="text-2xl font-semibold text-gray-800 mb-4">
+            <h3 className="text-2xl font-semibold text-zinc-800 mb-4">
               Driver Information
             </h3>
-            <div className="bg-gray-100 p-6 rounded-lg shadow-inner flex flex-col sm:flex-row items-center">
+            <div className="bg-zinc-100 p-6 rounded-lg shadow-inner flex flex-col sm:flex-row items-center">
               {currentDriver.photo_url && (
-                <img
+                <Image
                   src={currentDriver.photo_url}
                   alt={`${currentDriver.first_name} ${currentDriver.last_name}`}
                   className="w-24 h-24 rounded-full mr-6 object-cover mb-4 sm:mb-0"
                 />
               )}
               <div>
-                <p className="text-gray-700 mb-2">
+                <p className="text-zinc-700 mb-2">
                   <span className="font-semibold">Name:</span>{" "}
                   {currentDriver.first_name} {currentDriver.last_name}
                 </p>
-                <p className="text-gray-700 mb-2">
+                <p className="text-zinc-700 mb-2">
                   <span className="font-semibold">Email:</span>{" "}
                   {currentDriver.email}
                 </p>
-                <p className="text-gray-700 mb-2">
+                <p className="text-zinc-700 mb-2">
                   <span className="font-semibold">Phone:</span>{" "}
                   {currentDriver.phone_number}
                 </p>
-                <p className="text-gray-700">
+                <p className="text-zinc-700">
                   <span className="font-semibold">Vehicle:</span>{" "}
                   {currentDriver.vehicle_year} {currentDriver.vehicle_brand} (
                   {currentDriver.vehicle_color}) - {currentDriver.license_plate}
@@ -370,11 +372,11 @@ export default function RideSessionDetails({
         {/* Real-Time Tracking Information for Ongoing Rides */}
         {status.toLowerCase() === "ongoing" && (
           <div className="mb-8">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">
+            <h3 className="text-xl font-semibold text-zinc-800 mb-4">
               Real-Time Tracking
             </h3>
-            <div className="bg-gray-100 p-6 rounded-lg shadow-inner">
-              <p className="text-gray-700 mb-4">
+            <div className="bg-zinc-100 p-6 rounded-lg shadow-inner">
+              <p className="text-zinc-700 mb-4">
                 You can track your ride in real-time using the button below.
               </p>
               <a
@@ -394,13 +396,6 @@ export default function RideSessionDetails({
           status.toLowerCase() !== "completed" && (
             <div className="flex flex-col sm:flex-row gap-4">
               {/* Cancel Ride Button */}
-              <button
-                onClick={() => setShowCancelModal(true)}
-                disabled={isSubmitting}
-                className="w-full sm:w-auto bg-red-600 text-white py-3 px-6 rounded-md font-semibold text-lg hover:bg-red-700 transition duration-200 disabled:opacity-50"
-              >
-                Cancel Ride
-              </button>
 
               {/* Conditional View Ride Button or Message */}
               {status.toLowerCase() === "ongoing" ? (
@@ -410,13 +405,21 @@ export default function RideSessionDetails({
                   </button>
                 </Link>
               ) : (
-                <div className="w-full sm:w-auto bg-gray-100 text-gray-700 py-3 px-6 rounded-md text-lg flex items-center justify-center">
+                <div className="w-full  bg-zinc-100 text-zinc-700 py-3 px-6 rounded-md text-lg flex items-center justify-center">
                   The link to location tracking will be available when the
                   driver has picked up the passenger.
                 </div>
               )}
             </div>
           )}
+
+        <button
+          onClick={() => setShowCancelModal(true)}
+          disabled={isSubmitting}
+          className="mt-8 w-full sm:w-auto bg-red-600 text-white py-3 px-6 rounded-md font-semibold text-lg hover:bg-red-700 transition duration-200 disabled:opacity-50"
+        >
+          Cancel Ride
+        </button>
       </div>
     </div>
   );

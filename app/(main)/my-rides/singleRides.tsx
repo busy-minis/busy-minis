@@ -8,6 +8,8 @@ import {
   getRidesForUser,
 } from "@/utils/supabase/supabaseQueries";
 import ConfirmationModal from "./Modal";
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 interface SingleRidesProps {
   initialRides: any[];
@@ -88,77 +90,90 @@ export default function SingleRides({
   };
 
   return (
-    <section className="bg-white shadow rounded-lg p-6">
-      <header className="mb-6">
+    <div className="w-full">
+      <header className="mb-6 ">
         <h2 className="text-2xl font-semibold text-gray-800">Single Rides</h2>
       </header>
-      {rides.length > 0 ? (
-        <ul className="space-y-6">
-          {rides.map((ride: any) => (
-            <li
-              key={ride.id}
-              className="border border-gray-200 rounded-lg p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center hover:shadow-md transition-shadow duration-300"
-            >
-              <div className="mb-4 sm:mb-0 flex-1">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
-                  <p className="text-lg font-medium text-gray-900">
-                    {formatDate(ride.pickupDate)} at{" "}
-                    {formatTime(ride.pickupTime)}
-                  </p>
-                  <span
-                    className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${getStatusBadge(
-                      ride.status
-                    )}`}
-                  >
-                    {ride.status.charAt(0).toUpperCase() + ride.status.slice(1)}
-                  </span>
+      <section className="">
+        {rides.length > 0 ? (
+          <ul className="space-y-6">
+            {rides.map((ride: any) => (
+              <li
+                key={ride.id}
+                className="border bg-zinc-900 border-gray-200 rounded-lg p-4 flex flex-col sm:flex-row justify-between items-start  hover:shadow-md transition-shadow duration-300"
+              >
+                <div className="border mr-4 border-zinc-700 p-2 bg-zinc-950 rounded-xl">
+                  <Image
+                    src={"/car.png"}
+                    alt="car"
+                    width={50}
+                    height={50}
+                    className="  "
+                  />
                 </div>
-                <div className="mt-2">
-                  <p className="text-sm text-gray-600">
-                    <span className="font-semibold">From:</span>{" "}
-                    {ride.pickupAddress}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    <span className="font-semibold">To:</span>{" "}
-                    {ride.dropoffAddress}
-                  </p>
-                </div>
-              </div>
-              <div className="flex space-x-4">
-                <Link href={`/my-rides/session/${ride.id}`}>
-                  <div className="flex items-center text-sm font-medium text-teal-600 hover:text-teal-800 transition-colors duration-200">
-                    <Eye size={20} className="mr-1" aria-hidden="true" />
-                    <span>View</span>
-                  </div>
-                </Link>
-                <button
-                  onClick={() => openModal(ride.id)}
-                  className="flex items-center text-sm font-medium text-red-600 hover:text-red-800 transition-colors duration-200"
-                >
-                  <Trash size={20} className="mr-1" aria-hidden="true" />
-                  <span>Cancel</span>
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <div className="text-center">
-          <p className="text-gray-600">No single rides booked.</p>
-          <Link href={"/schedule-ride/single-ride"}>
-            <div className="mt-4 inline-block bg-teal-600 text-white px-5 py-2 rounded-md hover:bg-teal-700 transition-colors duration-200">
-              Book a Single Ride
-            </div>
-          </Link>
-        </div>
-      )}
 
-      <ConfirmationModal
-        isOpen={isModalOpen}
-        onConfirm={() => rideToCancel && handleCancel(rideToCancel)}
-        onCancel={closeModal}
-        isLoading={isLoading}
-      />
-    </section>
+                <div className="mb-4 sm:mb-0 flex-1">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
+                    <p className="text-lg font-medium text-zinc-50">
+                      {formatDate(ride.pickupDate)} at{" "}
+                      {formatTime(ride.pickupTime)}
+                    </p>
+                    <span
+                      className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${getStatusBadge(
+                        ride.status
+                      )}`}
+                    >
+                      {ride.status.charAt(0).toUpperCase() +
+                        ride.status.slice(1)}
+                    </span>
+                  </div>
+                  <div className="mt-4">
+                    <p className="text-sm text-zinc-300">
+                      <span className="font-semibold">From:</span>{" "}
+                      {ride.pickupAddress}
+                    </p>
+                    <p className="text-sm text-zinc-300">
+                      <span className="font-semibold">To:</span>{" "}
+                      {ride.dropoffAddress}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex space-x-4">
+                  <Link href={`/my-rides/session/${ride.id}`}>
+                    <div className="flex items-center text-sm font-medium text-teal-600 hover:text-teal-800 transition-colors duration-200">
+                      <Eye size={20} className="mr-1" aria-hidden="true" />
+                      <span>View</span>
+                    </div>
+                  </Link>
+                  <button
+                    onClick={() => openModal(ride.id)}
+                    className="flex items-center text-sm font-medium text-red-600 hover:text-red-800 transition-colors duration-200"
+                  >
+                    <Trash size={20} className="mr-1" aria-hidden="true" />
+                    <span>Cancel</span>
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="text-center">
+            <p className="text-gray-600">No single rides booked.</p>
+            <Link href={"/schedule-ride/single-ride"}>
+              <Button className="mt-4 inline-block bg-teal-600 text-white px-5 py-2 rounded-md hover:bg-teal-700 transition-colors duration-200">
+                Book a Single Ride
+              </Button>
+            </Link>
+          </div>
+        )}
+
+        <ConfirmationModal
+          isOpen={isModalOpen}
+          onConfirm={() => rideToCancel && handleCancel(rideToCancel)}
+          onCancel={closeModal}
+          isLoading={isLoading}
+        />
+      </section>
+    </div>
   );
 }

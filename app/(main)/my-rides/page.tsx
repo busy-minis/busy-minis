@@ -30,22 +30,23 @@ export default async function MyRides() {
   const weeklyRides = await getWeeklyRidesForUser(user.id);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="shadow bg-white">
-        <div className="container mx-auto px-4 py-6 flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-gray-900">My Rides</h1>
+    <div className=" px-0  min-h-screen">
+      <header className="bg-zinc-900 text-white ">
+        <div className="container  border-x-zinc-700   mx-auto px-4 py-6  ">
+          <h1 className="text-3xl font-semibold  tracking-tight text-teal-200">
+            My Rides
+          </h1>
           {/* Optional: Add a user avatar or settings button here */}
+          <p className="text-zinc-400 text-lg mt-2">
+            Manage your booked rides below.
+          </p>
         </div>
       </header>
       <main className="py-8">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-8">
-            <p className="text-gray-800 text-lg">
-              Manage your booked rides below.
-            </p>
-          </div>
+          <div className="text-center mb-8"></div>
 
-          <div className="space-y-10">
+          <div className="flex gap-4 justify-between ">
             <SingleRides initialRides={rides} user_id={user.id} />
             <WeeklyRides weekly_rides={weeklyRides} user_id={user.id} />
           </div>
