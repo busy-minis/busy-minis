@@ -1,31 +1,11 @@
-// components/Riders.tsx
+"use client";
+
 import React from "react";
-import { UserPlus, UserMinus } from "@phosphor-icons/react";
-
-interface Stop {
-  address: string;
-  lat?: number;
-  lng?: number;
-}
-
-interface FormData {
-  renewal_date: string; // Add this line
-  user_id: string;
-  status: string;
-  end_date: string;
-  total_price: number;
-  pickupDate: string;
-  pickupAddress: string;
-  pickupLat?: number;
-  pickupLng?: number;
-  stops: Stop[];
-  dropoffAddress: string;
-  dropoffLat?: number;
-  dropoffLng?: number;
-  riders: Rider[];
-  selectedTime: string;
-  selectedDays: string[];
-}
+import { User, Plus, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface Rider {
   name: string;
@@ -33,23 +13,17 @@ interface Rider {
 }
 
 interface RidersProps {
-  formData: FormData;
-  setFormData: React.Dispatch<React.SetStateAction<FormData>>;
+  riders: Rider[];
+  onRidersChange: (riders: Rider[]) => void;
 }
 
-const Riders: React.FC<RidersProps> = ({ formData, setFormData }) => {
+const Riders: React.FC<RidersProps> = ({ riders, onRidersChange }) => {
   const addPassenger = () => {
-    setFormData((prevData) => ({
-      ...prevData,
-      riders: [...prevData.riders, { name: "", age: "" }],
-    }));
+    onRidersChange([...riders, { name: "", age: "" }]);
   };
 
   const removePassenger = (index: number) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      riders: prevData.riders.filter((_, i) => i !== index),
-    }));
+    onRidersChange(riders.filter((_, i) => i !== index));
   };
 
   const handleRiderChange = (
@@ -57,75 +31,69 @@ const Riders: React.FC<RidersProps> = ({ formData, setFormData }) => {
     field: keyof Rider,
     value: string
   ) => {
-    const newRiders = [...formData.riders];
+    const newRiders = [...riders];
     newRiders[index][field] = value;
-    setFormData({ ...formData, riders: newRiders });
+    onRidersChange(newRiders);
   };
 
   return (
-    <div className="bg-gray-50  p-2  md:p-6 rounded-xl shadow-md">
-      <h4 className="text-2xl font-semibold text-teal-900 mb-6 flex items-center">
-        <UserPlus size={28} className="mr-2 text-teal-600" /> Add Riders
-      </h4>
-      {formData.riders.map((rider, index) => (
-        <div key={index} className="grid grid-cols-5 gap-2 md:gap-4 mb-4">
-          <div className="col-span-3">
-            <label
-              htmlFor={`rider-name-${index}`}
-              className="block text-gray-700"
-            >
-              Rider {index + 1} Name
-            </label>
-            <input
-              id={`rider-name-${index}`}
-              type="text"
-              placeholder={`Rider ${index + 1} Name`}
-              value={rider.name}
-              onChange={(e) => handleRiderChange(index, "name", e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-teal-600 focus:border-teal-600"
-              required
-            />
-          </div>
-          <div className="col-span-1">
-            <label
-              htmlFor={`rider-age-${index}`}
-              className="block text-gray-700"
-            >
-              Age
-            </label>
-            <input
-              id={`rider-age-${index}`}
-              type="number"
-              min="1"
-              placeholder="Age"
-              value={rider.age}
-              onChange={(e) => handleRiderChange(index, "age", e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-teal-600 focus:border-teal-600"
-              required
-            />
-          </div>
-          {formData.riders.length > 1 && (
-            <div className="col-span-1 flex items-end">
-              <button
-                type="button"
-                onClick={() => removePassenger(index)}
-                className="w-full bg-red-500 text-white p-2 rounded-lg shadow hover:bg-red-600 transition"
-                aria-label={`Remove Rider ${index + 1}`}
-              >
-                <UserMinus size={24} />
-              </button>
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-xl flex items-center">
+          <User className="mr-2" />
+          Add Riders
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {riders.map((rider, index) => (
+          <div key={index} className="grid grid-cols-5 gap-4 mb-4">
+            <div className="col-span-3">
+              <Label htmlFor={`rider-name-${index}`}>
+                Rider {index + 1} Name
+              </Label>
+              <Input
+                id={`rider-name-${index}`}
+                value={rider.name}
+                onChange={(e) =>
+                  handleRiderChange(index, "name", e.target.value)
+                }
+                required
+              />
             </div>
-          )}
-        </div>
-      ))}
-      <button
-        type="button"
-        onClick={addPassenger}
-        className="mt-4 bg-teal-600 text-white px-4 py-2 rounded-lg shadow hover:bg-teal-700 transition inline-flex items-center"
-      >
-        <UserPlus size={20} className="mr-2" /> Add Rider
-      </button>
-    </div>
+            <div className="col-span-1">
+              <Label htmlFor={`rider-age-${index}`}>Age</Label>
+              <Input
+                id={`rider-age-${index}`}
+                type="number"
+                min="1"
+                value={rider.age}
+                onChange={(e) =>
+                  handleRiderChange(index, "age", e.target.value)
+                }
+                required
+              />
+            </div>
+            {riders.length > 1 && (
+              <div className="col-span-1 flex items-end">
+                <Button
+                  type="button"
+                  onClick={() => removePassenger(index)}
+                  variant="destructive"
+                  className="w-full"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Remove
+                </Button>
+              </div>
+            )}
+          </div>
+        ))}
+        <Button type="button" onClick={addPassenger} className="mt-4">
+          <Plus className="mr-2 h-4 w-4" />
+          Add Rider
+        </Button>
+      </CardContent>
+    </Card>
   );
 };
 

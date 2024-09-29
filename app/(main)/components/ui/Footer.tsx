@@ -1,14 +1,24 @@
 "use client";
+
 import Image from "next/image";
+import Link from "next/link";
 import { FacebookLogo } from "@phosphor-icons/react";
 
 const Footer = () => {
+  const navigationLinks = [
+    { name: "Home", href: "/" },
+    { name: "Pricing", href: "/pricing" },
+    { name: "About", href: "/about" },
+    { name: "Services", href: "/services" },
+    { name: "Contact", href: "/contact" },
+  ];
+
   return (
-    <footer className="bg-neutral-900 text-gray-200 py-12">
-      <div className="max-w-screen-2xl mx-auto px-6 md:px-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 items-center">
+    <footer className="bg-zinc-900 text-gray-200">
+      <div className="container mx-auto px-4 py-12 md:py-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
           {/* Logo and Social Links */}
-          <div className="flex flex-col items-center lg:items-start">
+          <div className="flex flex-col items-center md:items-start">
             <Image
               src="/logo.png"
               alt="Busy Minis Logo"
@@ -16,68 +26,59 @@ const Footer = () => {
               height={120}
               className="mb-6"
             />
-            <div className="flex space-x-6">
-              <a
-                href="https://www.facebook.com/BusyMinis"
-                aria-label="Facebook"
-                className="text-gray-400 hover:text-white transition-colors duration-300"
-              >
-                <FacebookLogo size={28} weight="fill" />
-              </a>
-            </div>
+            <a
+              href="https://www.facebook.com/BusyMinis"
+              aria-label="Follow us on Facebook"
+              className="text-gray-400 hover:text-white transition-colors duration-300"
+            >
+              <FacebookLogo className="h-6 w-6" />
+            </a>
           </div>
 
           {/* Navigation Links */}
-          <div className="flex justify-center lg:justify-start">
-            <ul className="space-y-4 text-center lg:text-left">
-              {["Home", "Pricing", "About", "Services", "Contact"].map(
-                (item) => (
-                  <li key={item}>
-                    <a
-                      href="#"
-                      className="text-gray-400 hover:text-white transition-colors duration-300"
-                    >
-                      {item}
-                    </a>
-                  </li>
-                )
-              )}
+          <nav className="flex justify-center md:justify-start">
+            <ul className="space-y-4 text-center md:text-left">
+              {navigationLinks.map((link) => (
+                <li key={link.name}>
+                  <Link
+                    href={link.href}
+                    className="text-gray-400 hover:text-white transition-colors duration-300"
+                  >
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
-          </div>
+          </nav>
 
           {/* Contact Info */}
-          <div className="text-center lg:text-right">
+          <div className="text-center md:text-right">
             <p className="text-sm text-gray-400">
               Have questions? Reach us at:
             </p>
-            <p className="text-lg font-semibold text-white mt-2">
+            <a
+              href="mailto:lia@busyminis.com"
+              className="text-lg font-semibold text-white mt-2 hover:underline"
+            >
               lia@busyminis.com
-            </p>
-            <p className="text-sm text-gray-400 mt-1">+1 404-981-8020</p>
+            </a>
+            <a
+              href="tel:+14049818020"
+              className="block text-sm text-gray-400 mt-1 hover:underline"
+            >
+              +1 404-981-8020
+            </a>
           </div>
         </div>
 
-        <hr className="my-10 border-gray-700" />
+        <hr className="my-8 border-gray-700" />
 
-        {/* Bottom Text */}
-        <div className="flex flex-col lg:flex-row justify-between items-center text-center text-xs text-gray-400">
+        {/* Copyright */}
+        <div className="text-center text-xs text-gray-400">
           <span>
-            &copy; 2024 Busy Minis Transportation Company. All rights reserved.
+            &copy; {new Date().getFullYear()} Busy Minis Transportation Company.
+            All rights reserved.
           </span>
-          <div className="space-x-4 mt-4 lg:mt-0">
-            <a
-              href="#"
-              className="hover:text-white transition-colors duration-300"
-            >
-              Privacy Policy
-            </a>
-            <a
-              href="#"
-              className="hover:text-white transition-colors duration-300"
-            >
-              Terms of Service
-            </a>
-          </div>
         </div>
       </div>
     </footer>

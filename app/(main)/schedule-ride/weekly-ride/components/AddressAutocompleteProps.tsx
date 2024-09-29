@@ -1,5 +1,8 @@
-// components/AddressAutocompleteProps.tsx
-import React, { useEffect, useRef, useState } from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface AddressAutocompleteProps {
   label: string;
@@ -12,44 +15,17 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
   value,
   onAddressSelect,
 }) => {
-  const autocompleteRef = useRef<HTMLInputElement>(null);
-  const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState(false);
   const [inputValue, setInputValue] = useState(value || "");
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setInputValue(value || "");
   }, [value]);
 
   useEffect(() => {
-    const checkGoogleMaps = () => {
-      if (
-        typeof window !== "undefined" &&
-        window.google &&
-        window.google.maps
-      ) {
-        setIsGoogleMapsLoaded(true);
-      } else {
-        const interval = setInterval(() => {
-          if (window.google && window.google.maps) {
-            setIsGoogleMapsLoaded(true);
-            clearInterval(interval);
-          }
-        }, 100);
-
-        // Cleanup
-        return () => clearInterval(interval);
-      }
-    };
-
-    checkGoogleMaps();
-  }, []);
-
-  useEffect(() => {
-    if (!autocompleteRef.current || !isGoogleMapsLoaded) return;
+    if (!window.google) return;
 
     const autocomplete = new window.google.maps.places.Autocomplete(
-      autocompleteRef.current,
+      document.getElementById(`autocomplete-${label}`) as HTMLInputElement,
       { types: ["geocode"] }
     );
 
@@ -62,7 +38,6 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
 
         setInputValue(address);
         onAddressSelect(address, lat, lng);
-        setError(null);
       } else {
         const address = place.formatted_address || "";
         setInputValue(address);
@@ -70,38 +45,27 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
       }
     });
 
-    // Cleanup the listener on unmount
     return () => {
       window.google.maps.event.clearInstanceListeners(autocomplete);
     };
-  }, [isGoogleMapsLoaded, onAddressSelect]);
+  }, [label, onAddressSelect]);
 
   return (
-    <div className="mb-6">
-      <label
+    <div className="mb-4">
+      <Label
         htmlFor={`autocomplete-${label}`}
-        className="block text-gray-700 font-semibold mb-2"
+        className="block text-sm font-medium text-gray-700 mb-1"
       >
         {label}
-      </label>
-      <input
+      </Label>
+      <Input
         id={`autocomplete-${label}`}
-        ref={autocompleteRef}
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
-        className={`block w-full px-4 py-2 text-gray-700 bg-gray-200 rounded-lg focus:outline-none focus:ring-2 ${
-          error ? "focus:ring-red-500" : "focus:ring-teal-600"
-        }`}
+        className="w-full"
         placeholder={`Enter ${label.toLowerCase()}`}
         required
-        aria-invalid={error ? "true" : "false"}
-        aria-describedby={error ? `error-${label}` : undefined}
       />
-      {error && (
-        <p id={`error-${label}`} className="mt-2 text-sm text-red-600">
-          {error}
-        </p>
-      )}
     </div>
   );
 };

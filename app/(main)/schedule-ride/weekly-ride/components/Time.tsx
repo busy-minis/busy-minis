@@ -1,14 +1,26 @@
 "use client";
-import React from "react";
-import { Clock, Info } from "@phosphor-icons/react";
 
-export default function Time({
+import React from "react";
+import { Clock, Info } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+
+interface TimeProps {
+  selectedTime: string;
+  onTimeChange: (time: string) => void;
+  timeWarning: string;
+  setTimeWarning: (warning: string) => void;
+  dateError: string;
+}
+
+const Time: React.FC<TimeProps> = ({
+  selectedTime,
+  onTimeChange,
   timeWarning,
-  formData,
-  dateError,
   setTimeWarning,
-  setFormData,
-}: any) {
+  dateError,
+}) => {
   const handleTimeChange = (time: string) => {
     const [hours] = time.split(":").map(Number);
 
@@ -20,31 +32,38 @@ export default function Time({
       setTimeWarning("");
     }
 
-    setFormData((prevData: any) => ({
-      ...prevData,
-      selectedTime: time,
-    }));
+    onTimeChange(time);
   };
 
   return (
-    <div className="bg-gray-50 p-6 rounded-xl shadow-md">
-      <h4 className="text-2xl font-semibold text-teal-900 mb-6 flex items-center">
-        <Clock size={28} className="mr-2 text-teal-600" /> Select Time
-      </h4>
-
-      {dateError && <p className="text-red-500 text-sm mb-4">{dateError}</p>}
-      <input
-        type="time"
-        value={formData.selectedTime}
-        onChange={(e) => handleTimeChange(e.target.value)}
-        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-teal-600 focus:border-teal-600"
-        required
-      />
-      {timeWarning && (
-        <p className="mt-4 text-sm text-yellow-600">
-          <Info size={16} className="inline" /> {timeWarning}
-        </p>
-      )}
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-xl flex items-center">
+          <Clock className="mr-2" />
+          Select Time
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {dateError && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>{dateError}</AlertDescription>
+          </Alert>
+        )}
+        <Input
+          type="time"
+          value={selectedTime}
+          onChange={(e) => handleTimeChange(e.target.value)}
+          required
+        />
+        {timeWarning && (
+          <Alert className="mt-4">
+            <Info className="h-4 w-4" />
+            <AlertDescription>{timeWarning}</AlertDescription>
+          </Alert>
+        )}
+      </CardContent>
+    </Card>
   );
-}
+};
+
+export default Time;
