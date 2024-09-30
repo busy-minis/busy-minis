@@ -1,16 +1,14 @@
-// components/AvailableRidesFeed.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { acceptRide } from "@/utils/supabase/supabaseQueries";
-import { MapPin, SpinnerGap } from "@phosphor-icons/react";
+import { MapPin, SpinnerGap, Calendar, Recycle } from "@phosphor-icons/react";
 import RideCard from "./RideCard";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import dayjs from "dayjs";
 
-// Define TypeScript interfaces for better type safety
 interface Rider {
   id: string;
   name: string;
@@ -19,12 +17,12 @@ interface Rider {
 
 interface Ride {
   id: string;
-  pickupDate: string; // Format: YYYY-MM-DD
-  pickupTime: string; // Format: HH:mm
+  pickupDate: string;
+  pickupTime: string;
   pickupAddress: string;
   dropoffAddress: string;
   riders: Rider[];
-  distance: number; // Distance in miles
+  distance: number;
 }
 
 interface AvailableRidesFeedProps {
@@ -32,7 +30,6 @@ interface AvailableRidesFeedProps {
   user_id: string;
 }
 
-// Utility function to group rides by formatted date
 const groupRidesByDate = (rides: Ride[]) => {
   return rides.reduce((groups: { [key: string]: Ride[] }, ride) => {
     const formattedDate = dayjs(`${ride.pickupDate}T${ride.pickupTime}`).format(
@@ -46,7 +43,6 @@ const groupRidesByDate = (rides: Ride[]) => {
   }, {});
 };
 
-// Utility function to filter out past rides
 const filterUpcomingRides = (rides: Ride[]) => {
   const now = dayjs();
   return rides.filter((ride) => {
@@ -66,25 +62,20 @@ export default function AvailableRidesFeed({
   const router = useRouter();
 
   useEffect(() => {
-    const processRides = () => {
-      // Filter out past rides
-      const upcomingRides = filterUpcomingRides(rides);
-
-      // Sort rides by pickup date and time
-      const sortedRides = [...upcomingRides].sort((a, b) => {
-        const dateA = dayjs(`${a.pickupDate}T${a.pickupTime}`).toDate();
-        const dateB = dayjs(`${b.pickupDate}T${b.pickupTime}`).toDate();
-        return dateA.getTime() - dateB.getTime();
-      });
-
-      // Group rides by formatted date
-      const grouped = groupRidesByDate(sortedRides);
-      setGroupedRides(grouped);
-      setIsLoading(false);
-    };
-
     processRides();
   }, [rides]);
+
+  const processRides = () => {
+    const upcomingRides = filterUpcomingRides(rides);
+    const sortedRides = [...upcomingRides].sort((a, b) => {
+      const dateA = dayjs(`${a.pickupDate}T${a.pickupTime}`).toDate();
+      const dateB = dayjs(`${b.pickupDate}T${b.pickupTime}`).toDate();
+      return dateA.getTime() - dateB.getTime();
+    });
+    const grouped = groupRidesByDate(sortedRides);
+    setGroupedRides(grouped);
+    setIsLoading(false);
+  };
 
   const handleAcceptRide = async (rideId: string) => {
     try {
@@ -97,13 +88,12 @@ export default function AvailableRidesFeed({
     }
   };
 
-  // Check if there are any upcoming rides
   const hasRides = rides && filterUpcomingRides(rides).length > 0;
 
   return (
-    <div className="px-2 sm:px-4 space-y-6">
+    <div className="space-y-8">
       {isLoading ? (
-        <div className="flex flex-col items-center justify-center bg-gray-100 p-4">
+        <div className="flex flex-col items-center justify-center bg-white rounded-lg shadow-md p-8">
           <SpinnerGap
             size={48}
             className="animate-spin text-teal-600 mb-4"
@@ -112,29 +102,31 @@ export default function AvailableRidesFeed({
           <p className="text-lg text-gray-700">Loading available rides...</p>
         </div>
       ) : !hasRides ? (
-        <div className="flex flex-col items-center justify-center bg-gray-100 p-4">
+        <div className="flex flex-col items-center justify-center bg-white rounded-lg shadow-md p-8">
           <MapPin size={48} className="text-gray-400 mb-4" />
-          <p className="text-lg text-gray-700">
+          <p className="text-lg text-gray-700 mb-4">
             No upcoming rides available at the moment.
           </p>
-          {/* Optional: Link to request a ride or refresh */}
           <button
-            onClick={() => router.refresh()}
-            className="mt-4 px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500"
+            onClick={() => {
+              setIsLoading(true);
+              router.refresh();
+              setTimeout(() => processRides(), 1000);
+            }}
+            className="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500 flex items-center"
           >
+            <Recycle size={20} className="mr-2" />
             Refresh
           </button>
         </div>
       ) : (
         Object.keys(groupedRides).map((date) => (
           <div key={date} className="space-y-4">
-            {/* Date Header */}
-            <h2 className="text-2xl font-semibold text-teal-600 border-b pb-2">
+            <h2 className="text-2xl font-semibold text-teal-600 border-b pb-2 flex items-center">
+              <Calendar size={24} className="mr-2" />
               {date}
             </h2>
-
-            {/* Rides for the Date */}
-            <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
               {groupedRides[date].map((ride) => (
                 <RideCard
                   key={ride.id}

@@ -1,28 +1,25 @@
-// app/components/DriverBarClient.tsx
 "use client";
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation"; // Client-side hook for active state
+import { usePathname } from "next/navigation";
 import {
   Car,
   List,
   UserCircle,
   UserGear,
   SignOut,
-} from "@phosphor-icons/react/dist/ssr"; // Phosphor icons for nav items
-
+} from "@phosphor-icons/react/dist/ssr";
 import Logout from "./Logout";
 import DriverMobile from "./DriverMobile";
 
 const DriverBarClient = () => {
-  const pathname = usePathname(); // Detect the current path
+  const pathname = usePathname();
 
-  // Helper function to check if a link is active
   const isActive = (path: string) => pathname === path;
 
   return (
-    <nav className="flex z-40 sticky top-0 bg-white/90 backdrop-blur-lg justify-between items-center px-6 py-4 shadow-md">
+    <nav className="flex z-40 sticky top-0 bg-white/90 justify-between items-center px-6 py-4 shadow-md">
       <div className="flex items-center space-x-4">
         <Logo />
         <span className="text-xl font-semibold text-gray-800 hidden md:inline">
@@ -55,7 +52,6 @@ const DriverBarClient = () => {
   );
 };
 
-// Reusable NavItem Component with active state
 interface NavItemProps {
   href: string;
   label: string;
@@ -69,7 +65,7 @@ const NavItem = ({ href, label, icon, isActive }: NavItemProps) => {
       <div
         className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-all duration-300 ${
           isActive
-            ? "bg-gradient-to-r from-indigo-500 to-purple-500 text-white"
+            ? "bg-gradient-to-r from-teal-500 to-teal-600 text-white"
             : "text-gray-700 hover:bg-gray-100"
         }`}
         aria-current={isActive ? "page" : undefined}
@@ -81,7 +77,6 @@ const NavItem = ({ href, label, icon, isActive }: NavItemProps) => {
   );
 };
 
-// Logo component for navigation bar
 const Logo = () => (
   <div className="flex items-center">
     <Link href="/">

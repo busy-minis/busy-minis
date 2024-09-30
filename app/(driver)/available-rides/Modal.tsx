@@ -1,7 +1,7 @@
-// components/Modal.tsx
 "use client";
 
 import React, { useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface ModalProps {
   isOpen: boolean;
@@ -26,7 +26,6 @@ const Modal: React.FC<ModalProps> = ({
       if (e.key === "Escape") {
         onClose();
       }
-      // Handle focus trapping
       if (e.key === "Tab" && modalRef.current) {
         const focusableElements =
           modalRef.current.querySelectorAll<HTMLElement>(
@@ -36,13 +35,11 @@ const Modal: React.FC<ModalProps> = ({
         const lastElement = focusableElements[focusableElements.length - 1];
 
         if (e.shiftKey) {
-          // Shift + Tab
           if (document.activeElement === firstElement) {
             e.preventDefault();
             lastElement.focus();
           }
         } else {
-          // Tab
           if (document.activeElement === lastElement) {
             e.preventDefault();
             firstElement.focus();
@@ -60,9 +57,7 @@ const Modal: React.FC<ModalProps> = ({
     if (isOpen) {
       document.addEventListener("keydown", handleKeyDown);
       document.addEventListener("mousedown", handleClickOutside);
-      // Prevent background scrolling
       document.body.style.overflow = "hidden";
-      // Focus the confirm button when modal opens
       confirmButtonRef.current?.focus();
     } else {
       document.body.style.overflow = "auto";
@@ -75,48 +70,54 @@ const Modal: React.FC<ModalProps> = ({
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
-
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 transition-opacity duration-300"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modal-title"
-      aria-describedby="modal-description"
-    >
-      <div
-        className="bg-white rounded-lg shadow-lg w-full max-w-sm sm:max-w-md mx-2 sm:mx-4 transform transition-transform duration-300"
-        ref={modalRef}
-      >
-        <div className="px-4 sm:px-6 py-4">
-          <h3
-            id="modal-title"
-            className="text-lg sm:text-xl font-semibold text-gray-900"
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-title"
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            transition={{ type: "spring", damping: 20, stiffness: 300 }}
+            className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden"
+            ref={modalRef}
           >
-            {title}
-          </h3>
-          <p id="modal-description" className="mt-2 text-gray-600">
-            {description}
-          </p>
-        </div>
-        <div className="flex justify-end px-4 sm:px-6 py-3 bg-gray-100 rounded-b-lg">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 mr-2 text-gray-700 bg-gray-200 rounded hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            ref={confirmButtonRef}
-            className="px-4 py-2 text-white bg-teal-600 rounded hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
-          >
-            Confirm
-          </button>
-        </div>
-      </div>
-    </div>
+            <div className="p-6">
+              <h2
+                id="modal-title"
+                className="text-2xl font-semibold text-gray-900 mb-4"
+              >
+                {title}
+              </h2>
+              <p className="text-gray-600 mb-6">{description}</p>
+              <div className="flex justify-end space-x-4">
+                <button
+                  onClick={onClose}
+                  className="px-4 py-2 text-gray-600 bg-gray-200 rounded hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={onConfirm}
+                  ref={confirmButtonRef}
+                  className="px-4 py-2 text-white bg-teal-600 rounded hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-colors"
+                >
+                  Confirm
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 

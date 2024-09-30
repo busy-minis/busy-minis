@@ -14,17 +14,15 @@ interface MobileMenuProps {
 const DriverMobile = ({ isLoggedIn, dashboardHref }: MobileMenuProps) => {
   const [open, setOpen] = useState(false);
 
-  // Sign-out function for mobile
   const handleSignOut = async () => {
     await logout();
-    window.location.href = "/login"; // Redirect after sign-out
+    window.location.href = "/login";
   };
 
   return (
     <nav className="lg:hidden">
-      {/* Open Menu Button */}
       <button
-        className="text-gray-800 dark:text-white p-2 focus:outline-none focus:ring-2 focus:ring-orange-500 rounded-md"
+        className="text-gray-800 dark:text-white p-2 focus:outline-none focus:ring-2 focus:ring-teal-500 rounded-md"
         onClick={() => setOpen(true)}
         aria-label="Open Menu"
       >
@@ -32,10 +30,8 @@ const DriverMobile = ({ isLoggedIn, dashboardHref }: MobileMenuProps) => {
       </button>
 
       <AnimatePresence>
-        {/* Fullscreen Sliding Menu */}
         {open && (
           <>
-            {/* Background Overlay */}
             <motion.div
               className="fixed inset-0 z-40 bg-black bg-opacity-70 backdrop-blur-sm"
               onClick={() => setOpen(false)}
@@ -45,26 +41,23 @@ const DriverMobile = ({ isLoggedIn, dashboardHref }: MobileMenuProps) => {
               transition={{ duration: 0.3 }}
             ></motion.div>
 
-            {/* Fullscreen Menu */}
             <motion.div
-              className="fixed inset-0 z-50 flex flex-col bg-gradient-to-br from-gray-900 to-gray-800 text-white"
+              className="fixed inset-0 z-50 flex flex-col bg-gradient-to-br from-teal-900 to-teal-800 text-white"
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
             >
-              {/* Close Button */}
               <div className="flex justify-end p-6">
                 <button
                   onClick={() => setOpen(false)}
                   aria-label="Close Menu"
-                  className="text-white hover:text-orange-500 transition-colors"
+                  className="text-white hover:text-teal-300 transition-colors"
                 >
                   <X size={32} weight="bold" />
                 </button>
               </div>
 
-              {/* Menu Items */}
               <motion.ul
                 className="flex flex-col items-center justify-center space-y-8 text-lg font-semibold flex-grow"
                 initial="hidden"
@@ -82,54 +75,21 @@ const DriverMobile = ({ isLoggedIn, dashboardHref }: MobileMenuProps) => {
                   },
                 }}
               >
-                {/* Browse Rides */}
-                <motion.li
-                  variants={{
-                    visible: { opacity: 1, y: 0 },
-                    hidden: { opacity: 0, y: 20 },
-                  }}
-                >
-                  <Link
-                    href="/available-rides"
-                    onClick={() => setOpen(false)}
-                    className="text-2xl transition-colors hover:text-orange-500"
-                  >
-                    Browse Rides
-                  </Link>
-                </motion.li>
-
-                {/* My Rides */}
-                <motion.li
-                  variants={{
-                    visible: { opacity: 1, y: 0 },
-                    hidden: { opacity: 0, y: 20 },
-                  }}
-                >
-                  <Link
-                    href="/accepted-rides"
-                    onClick={() => setOpen(false)}
-                    className="text-2xl transition-colors hover:text-orange-500"
-                  >
-                    My Rides
-                  </Link>
-                </motion.li>
-
-                {/* Profile */}
-                <motion.li
-                  variants={{
-                    visible: { opacity: 1, y: 0 },
-                    hidden: { opacity: 0, y: 20 },
-                  }}
-                >
-                  {/* <Link
-                    href="/profile"
-                    onClick={() => setOpen(false)}
-                    className="text-2xl transition-colors hover:text-orange-500"
-                  >
-                    Profile
-                  </Link> */}
-                </motion.li>
-
+                <MobileMenuItem
+                  href="/available-rides"
+                  label="Browse Rides"
+                  onClick={() => setOpen(false)}
+                />
+                <MobileMenuItem
+                  href="/accepted-rides"
+                  label="My Rides"
+                  onClick={() => setOpen(false)}
+                />
+                <MobileMenuItem
+                  href="/profile"
+                  label="Profile"
+                  onClick={() => setOpen(false)}
+                />
                 <motion.li
                   variants={{
                     visible: { opacity: 1, y: 0 },
@@ -141,7 +101,7 @@ const DriverMobile = ({ isLoggedIn, dashboardHref }: MobileMenuProps) => {
                       setOpen(false);
                       handleSignOut();
                     }}
-                    className="text-2xl text-red-500 hover:text-red-600"
+                    className="text-2xl text-red-400 hover:text-red-300 transition-colors"
                   >
                     Sign Out
                   </button>
@@ -154,5 +114,28 @@ const DriverMobile = ({ isLoggedIn, dashboardHref }: MobileMenuProps) => {
     </nav>
   );
 };
+
+interface MobileMenuItemProps {
+  href: string;
+  label: string;
+  onClick: () => void;
+}
+
+const MobileMenuItem = ({ href, label, onClick }: MobileMenuItemProps) => (
+  <motion.li
+    variants={{
+      visible: { opacity: 1, y: 0 },
+      hidden: { opacity: 0, y: 20 },
+    }}
+  >
+    <Link
+      href={href}
+      onClick={onClick}
+      className="text-2xl transition-colors hover:text-teal-300"
+    >
+      {label}
+    </Link>
+  </motion.li>
+);
 
 export default DriverMobile;

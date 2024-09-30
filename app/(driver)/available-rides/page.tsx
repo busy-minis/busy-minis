@@ -1,11 +1,10 @@
-// pages/driverdashboard/page.tsx
-
 import React from "react";
 import AvailableRidesFeed from "./AvailableRidesFeed";
 import { getRidesByStatus } from "@/utils/supabase/supabaseQueries";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/utils/supabase/server";
 import Link from "next/link";
+import { Car, Info } from "@phosphor-icons/react/dist/ssr";
 
 interface Rider {
   id: string;
@@ -34,11 +33,14 @@ export default async function DriverDashboard() {
   if (error || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-        <div className="text-center">
-          <p className="text-lg text-gray-600">Error: Unable to fetch user.</p>
+        <div className="text-center bg-white p-8 rounded-lg shadow-md">
+          <Info size={48} className="text-red-500 mx-auto mb-4" />
+          <p className="text-xl text-gray-800 mb-4">
+            Error: Unable to fetch user.
+          </p>
           <Link
             href="/login"
-            className="text-teal-600 hover:underline mt-2 block"
+            className="text-teal-600 hover:text-teal-800 transition-colors font-medium"
           >
             Go to Login
           </Link>
@@ -51,21 +53,34 @@ export default async function DriverDashboard() {
   revalidatePath("/available-rides");
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-6">
-      {/* Header Section */}
-      <div className="text-center mb-8">
-        <h2 className="text-4xl font-bold text-gray-900">Available Rides</h2>
-        <p className="text-md text-gray-600 max-w-2xl mx-auto mt-2">
-          Below is a list of rides available for you to accept. Once accepted,
-          these rides will move to your{" "}
-          <span className="font-semibold text-teal-600">My Rides</span> page.
-        </p>
-      </div>
+    <div className="min-h-screen bg-gray-50 p-6 md:p-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            Available Rides
+          </h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Browse and accept rides that fit your schedule. Once accepted, rides
+            will appear in your{" "}
+            <span className="font-semibold text-teal-600">My Rides</span>{" "}
+            section.
+          </p>
+        </div>
 
-      {/* Available Rides Feed */}
-      <section className="bg-white shadow-md rounded-lg p-6">
-        <AvailableRidesFeed rides={rides} user_id={user.id} />
-      </section>
+        <section className="bg-white shadow-lg rounded-xl p-6 md:p-8">
+          <AvailableRidesFeed rides={rides} user_id={user.id} />
+        </section>
+
+        <div className="mt-12 text-center">
+          <Link
+            href="/accepted-rides"
+            className="inline-flex items-center px-6 py-3 bg-teal-600 text-white font-semibold rounded-lg hover:bg-teal-700 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
+          >
+            <Car size={24} className="mr-2" />
+            View My Accepted Rides
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

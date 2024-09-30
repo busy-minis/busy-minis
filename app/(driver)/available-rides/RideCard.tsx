@@ -1,8 +1,7 @@
-// components/RideCard.tsx
 "use client";
 
 import React, { useState } from "react";
-import { MapPin, Users, Clock, DotsThree } from "@phosphor-icons/react";
+import { MapPin, Users, Clock, DotsThree, Car } from "@phosphor-icons/react";
 import dayjs from "dayjs";
 import Modal from "./Modal";
 
@@ -46,29 +45,37 @@ const RideCard: React.FC<RideCardProps> = ({ ride, handleAcceptRide }) => {
 
   return (
     <>
-      <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 flex flex-col justify-between">
+      <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 flex flex-col justify-between border border-gray-200">
         <div>
-          {/* Date and Passengers */}
-          <div className="flex justify-between items-center text-gray-600">
-            <span className="text-sm font-medium">{formattedDate}</span>
+          <div className="flex justify-between items-center text-gray-600 mb-3">
+            <span className="text-sm font-medium flex items-center">
+              <Clock
+                size={16}
+                className="mr-1 text-teal-600"
+                aria-hidden="true"
+              />
+              {formattedDate} at {formattedTime}
+            </span>
             <span className="text-sm flex items-center">
-              <Users size={16} className="mr-1" aria-hidden="true" />
+              <Users
+                size={16}
+                className="mr-1 text-teal-600"
+                aria-hidden="true"
+              />
               {ride.riders.length}{" "}
               {ride.riders.length > 1 ? "Passengers" : "Passenger"}
             </span>
           </div>
 
-          {/* Ride Title */}
-          <h3 className="mt-2 text-lg sm:text-xl font-semibold text-gray-900">
+          <h3 className="text-xl font-semibold text-gray-900 mb-3">
             Ride to {ride.dropoffAddress}
           </h3>
 
-          {/* Ride Details */}
-          <div className="mt-3 space-y-2">
+          <div className="space-y-3">
             <div className="flex items-center text-gray-600">
               <MapPin
                 size={20}
-                className="text-teal-600 mr-2"
+                className="text-teal-600 mr-2 flex-shrink-0"
                 aria-hidden="true"
               />
               <span className="font-light">Pickup: {ride.pickupAddress}</span>
@@ -77,25 +84,16 @@ const RideCard: React.FC<RideCardProps> = ({ ride, handleAcceptRide }) => {
             <div className="flex items-center text-gray-600">
               <MapPin
                 size={20}
-                className="text-red-600 mr-2"
+                className="text-red-600 mr-2 flex-shrink-0"
                 aria-hidden="true"
               />
               <span className="font-light">Dropoff: {ride.dropoffAddress}</span>
             </div>
 
             <div className="flex items-center text-gray-600">
-              <Clock
+              <Car
                 size={20}
-                className="text-blue-500 mr-2"
-                aria-hidden="true"
-              />
-              <span className="font-light">{formattedTime}</span>
-            </div>
-
-            <div className="flex items-center text-gray-600">
-              <DotsThree
-                size={20}
-                className="text-purple-500 mr-2"
+                className="text-blue-500 mr-2 flex-shrink-0"
                 aria-hidden="true"
               />
               <span className="font-light">
@@ -105,16 +103,15 @@ const RideCard: React.FC<RideCardProps> = ({ ride, handleAcceptRide }) => {
           </div>
         </div>
 
-        {/* Accept Ride Button */}
         <button
           onClick={openModal}
-          className="w-full mt-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500 flex items-center justify-center"
+          className="w-full mt-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500 flex items-center justify-center"
         >
+          <Car size={20} className="mr-2" />
           Accept Ride
         </button>
       </div>
 
-      {/* Confirmation Modal */}
       <Modal
         isOpen={isModalOpen}
         onClose={closeModal}
