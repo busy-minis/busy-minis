@@ -1,18 +1,44 @@
 "use client";
+
 import React, { useState, useEffect, useRef } from "react";
-import { CalendarCheck, CheckCircle } from "@phosphor-icons/react";
+import { format, parseISO, isBefore, startOfDay } from "date-fns";
+import { CalendarCheck, CheckCircle, X } from "lucide-react";
 import {
   getAvailableTimeSlots,
   bookOrientation,
   cancelOrientation,
   getUserOrientationStatus,
 } from "@/utils/supabase/supabaseQueries";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
 
 type TimeSlots = {
-  [key: string]: string[]; // Key is a date (string), value is an array of time slots (strings)
+  [key: string]: string[];
 };
 
-export default function OrientationPage(props: { user_id: string }) {
+export default function OrientationPage({ user_id }: { user_id: string }) {
   const [availableDates, setAvailableDates] = useState<string[]>([]);
   const [timeSlots, setTimeSlots] = useState<TimeSlots>({});
   const [selectedDate, setSelectedDate] = useState<string>("");
@@ -20,17 +46,15 @@ export default function OrientationPage(props: { user_id: string }) {
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [confirmedDate, setConfirmedDate] = useState<string>("");
   const [confirmedTime, setConfirmedTime] = useState<string>("");
-  const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
-  const [isLoading, setIsLoading] = useState(false); // State for loading spinner
-  const [toastMessage, setToastMessage] = useState<string>(""); // State for toast notification
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const cancelButtonRef = useRef<HTMLButtonElement | null>(null); // Ref for modal button
+  const cancelButtonRef = useRef<HTMLButtonElement>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     async function checkUserOrientationStatus() {
-      const { status, date, time } = await getUserOrientationStatus(
-        props.user_id
-      );
+      const { status, date, time } = await getUserOrientationStatus(user_id);
 
       if (status === "scheduled") {
         setIsConfirmed(true);
@@ -38,23 +62,20 @@ export default function OrientationPage(props: { user_id: string }) {
         setConfirmedTime(time);
       } else {
         const slotsByDate = await getAvailableTimeSlots();
-        setAvailableDates(Object.keys(slotsByDate));
+        const availableDatesArray = Object.keys(slotsByDate).filter((date) =>
+          isBefore(startOfDay(new Date()), parseISO(date))
+        );
+        setAvailableDates(availableDatesArray);
         setTimeSlots(slotsByDate);
 
-        if (Object.keys(slotsByDate).length > 0) {
-          setSelectedDate(Object.keys(slotsByDate)[0]);
+        if (availableDatesArray.length > 0) {
+          setSelectedDate(availableDatesArray[0]);
         }
       }
     }
 
     checkUserOrientationStatus();
-  }, [props.user_id]);
-
-  useEffect(() => {
-    if (isModalOpen) {
-      cancelButtonRef.current?.focus();
-    }
-  }, [isModalOpen]);
+  }, [user_id]);
 
   const handleDateChange = (date: string) => {
     setSelectedDate(date);
@@ -66,12 +87,15 @@ export default function OrientationPage(props: { user_id: string }) {
     setIsLoading(true);
 
     if (!selectedDate || !selectedTime) {
-      alert("Please select both a date and time.");
+      toast({
+        title: "Error",
+        description: "Please select both a date and time.",
+        variant: "destructive",
+      });
       setIsLoading(false);
       return;
     }
 
-    const user_id = props.user_id;
     const isBooked = await bookOrientation(user_id, selectedDate, selectedTime);
 
     setIsLoading(false);
@@ -79,13 +103,21 @@ export default function OrientationPage(props: { user_id: string }) {
       setIsConfirmed(true);
       setConfirmedDate(selectedDate);
       setConfirmedTime(selectedTime);
+      toast({
+        title: "Success",
+        description: "Orientation booked successfully!",
+      });
     } else {
-      alert("There was an error booking your orientation. Please try again.");
+      toast({
+        title: "Error",
+        description:
+          "There was an error booking your orientation. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
   const handleCancel = async () => {
-    const user_id = props.user_id;
     const isCanceled = await cancelOrientation(
       user_id,
       confirmedDate,
@@ -97,201 +129,142 @@ export default function OrientationPage(props: { user_id: string }) {
       setConfirmedDate("");
       setConfirmedTime("");
       setIsModalOpen(false);
-      showToast("Your orientation has been canceled.");
+      toast({
+        title: "Canceled",
+        description: "Your orientation has been canceled.",
+      });
     } else {
-      showToast("There was an error canceling your orientation.");
+      toast({
+        title: "Error",
+        description: "There was an error canceling your orientation.",
+        variant: "destructive",
+      });
     }
   };
 
-  function showToast(message: string) {
-    setToastMessage(message);
-    setTimeout(() => setToastMessage(""), 3000);
-  }
-
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-teal-50 to-teal-100">
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div className="fixed bottom-4 right-4 bg-teal-600 text-white px-4 py-2 rounded-lg shadow-md">
-          {toastMessage}
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-teal-100 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-3xl mx-auto">
+        <div className="text-center mb-12">
+          <CalendarCheck className="mx-auto h-16 w-16 text-teal-600" />
+          <h1 className="mt-6 text-4xl font-extrabold text-gray-900 sm:text-5xl">
+            {isConfirmed ? "Orientation Confirmed" : "Book Your Orientation"}
+          </h1>
+          <p className="mt-4 text-xl text-gray-600">
+            {isConfirmed
+              ? `Your orientation is scheduled for ${format(
+                  parseISO(confirmedDate),
+                  "MMMM d, yyyy"
+                )} at ${confirmedTime}.`
+              : "Schedule your orientation to get started with our service."}
+          </p>
         </div>
-      )}
 
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-teal-400 to-teal-100 opacity-70"></div>
-        <div className="absolute bottom-0 right-0 w-full h-1/2 bg-gradient-to-t from-orange-200 to-yellow-100 opacity-70"></div>
-      </div>
-
-      <section className="relative pt-24 pb-20 lg:pb-36">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-16">
-            <CalendarCheck size={64} className="text-teal-600 mx-auto mb-4" />
-            <h2 className="font-bold text-5xl sm:text-6xl text-gray-900 mb-6">
-              {isConfirmed ? "Orientation Confirmed" : "Book Your Orientation"}
-            </h2>
-            <p className="text-lg max-w-3xl mx-auto text-gray-600 leading-relaxed">
-              {isConfirmed
-                ? `Your orientation has been successfully booked! You will receive a call on ${formatDate(
-                    confirmedDate
-                  )} at ${confirmedTime} to verify your account.`
-                : "Before booking a ride, please complete an orientation session to ensure safety and reliability for your child’s transportation. Choose a convenient date and time below to schedule your orientation."}
-            </p>
-          </div>
-
-          {!isConfirmed ? (
-            <form
-              onSubmit={handleSubmit}
-              className="max-w-xl mx-auto bg-white p-8 rounded-3xl shadow-lg"
-            >
-              <div className="mb-8">
-                <label
-                  htmlFor="date"
-                  className="block text-lg font-semibold text-teal-900 mb-2"
-                >
-                  Select Orientation Date
-                </label>
-                <select
-                  id="date"
-                  className="w-full p-4 border border-gray-300 rounded-lg focus:ring-teal-600 focus:border-teal-600"
-                  value={selectedDate}
-                  onChange={(e) => handleDateChange(e.target.value)}
-                  required
-                >
-                  <option value="">Choose a date</option>
-                  {availableDates.map((date, index) => (
-                    <option key={index} value={date}>
-                      {formatDate(date)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="mb-8">
-                <label
-                  htmlFor="time"
-                  className="block text-lg font-semibold text-teal-900 mb-2"
-                >
-                  Select Orientation Time
-                </label>
-                <select
-                  id="time"
-                  className="w-full p-4 border border-gray-300 rounded-lg focus:ring-teal-600 focus:border-teal-600"
-                  value={selectedTime}
-                  onChange={(e) => setSelectedTime(e.target.value)}
-                  required
-                >
-                  <option value="">Choose a time</option>
-                  {timeSlots[selectedDate]?.map((time, index) => (
-                    <option key={index} value={time}>
-                      {time}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
+        <Card className="mt-8">
+          <CardHeader>
+            <CardTitle>
+              {isConfirmed ? "Orientation Details" : "Select Your Orientation"}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {!isConfirmed ? (
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div>
+                  <label
+                    htmlFor="date"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Select Date
+                  </label>
+                  <Select onValueChange={handleDateChange} value={selectedDate}>
+                    <SelectTrigger className="w-full mt-1">
+                      <SelectValue placeholder="Choose a date" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableDates.map((date) => (
+                        <SelectItem key={date} value={date}>
+                          {format(parseISO(date), "MMMM d, yyyy")}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label
+                    htmlFor="time"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Select Time
+                  </label>
+                  <Select onValueChange={setSelectedTime} value={selectedTime}>
+                    <SelectTrigger className="w-full mt-1">
+                      <SelectValue placeholder="Choose a time" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {timeSlots[selectedDate]?.map((time) => (
+                        <SelectItem key={time} value={time}>
+                          {time}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </form>
+            ) : (
               <div className="text-center">
-                <button
-                  type="submit"
-                  className={`${
-                    isLoading || !selectedDate || !selectedTime
-                      ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-teal-600 hover:bg-teal-700"
-                  } text-white px-8 py-4 rounded-full shadow-lg transition duration-300`}
-                  disabled={isLoading || !selectedDate || !selectedTime}
-                >
-                  {isLoading ? "Booking..." : "Confirm Orientation"}
-                </button>
+                <CheckCircle className="mx-auto h-12 w-12 text-green-500" />
+                <p className="mt-4 text-lg text-gray-600">
+                  You will receive a call on{" "}
+                  {format(parseISO(confirmedDate), "MMMM d, yyyy")} at{" "}
+                  {confirmedTime} to verify your account.
+                </p>
               </div>
-            </form>
-          ) : (
-            <div className="max-w-xl mx-auto bg-white p-8 rounded-3xl shadow-lg text-center">
-              <CheckCircle size={64} className="text-green-500 mx-auto mb-4" />
-              <h3 className="text-3xl font-semibold text-teal-900 mb-4">
-                Orientation Booked!
-              </h3>
-              <p className="text-lg text-gray-600 mb-8">
-                You have successfully booked your orientation on{" "}
-                {formatDate(confirmedDate)} at {confirmedTime}.
-              </p>
-              <p className="text-lg text-gray-600 mb-4">
-                You will receive a call on the selected date to verify your
-                account and finalize your setup. After verification, you’ll be
-                able to start booking rides for your child!
-              </p>
-              <button
+            )}
+          </CardContent>
+          <CardFooter className="flex justify-end">
+            {!isConfirmed ? (
+              <Button
+                type="submit"
+                onClick={handleSubmit}
+                disabled={isLoading || !selectedDate || !selectedTime}
+              >
+                {isLoading ? "Booking..." : "Confirm Orientation"}
+              </Button>
+            ) : (
+              <Button
+                variant="destructive"
                 onClick={() => setIsModalOpen(true)}
-                className="bg-red-600 text-white px-8 py-4 rounded-full shadow-lg hover:bg-red-700 transition duration-300"
               >
                 Cancel Orientation
-              </button>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {isModalOpen && (
-        <CancelModal
-          onClose={() => setIsModalOpen(false)}
-          onConfirm={handleCancel}
-          cancelButtonRef={cancelButtonRef}
-        />
-      )}
-    </div>
-  );
-}
-
-function formatDate(dateString: string) {
-  const options: Intl.DateTimeFormatOptions = {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  };
-  return new Date(dateString).toLocaleDateString("en-US", options);
-}
-
-type CancelModalProps = {
-  onClose: () => void;
-  onConfirm: () => void;
-  cancelButtonRef: React.RefObject<HTMLButtonElement>;
-};
-
-function CancelModal({
-  onClose,
-  onConfirm,
-  cancelButtonRef,
-}: CancelModalProps) {
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-      onClick={onClose}
-    >
-      <div
-        className="bg-white rounded-lg shadow-lg max-w-md w-full p-6"
-        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the modal
-      >
-        <h3 className="text-xl font-semibold text-gray-900 mb-4">
-          Cancel Orientation?
-        </h3>
-        <p className="text-gray-600 mb-6">
-          Are you sure you want to cancel your orientation? You can make a new
-          appointment if you change your mind.
-        </p>
-        <div className="flex justify-end space-x-4">
-          <button
-            onClick={onClose}
-            className="bg-gray-300 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-400 transition"
-          >
-            No, Keep It
-          </button>
-          <button
-            ref={cancelButtonRef}
-            onClick={onConfirm}
-            className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
-          >
-            Yes, Cancel
-          </button>
-        </div>
+              </Button>
+            )}
+          </CardFooter>
+        </Card>
       </div>
+
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cancel Orientation?</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to cancel your orientation? You can make a
+              new appointment if you change your mind.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsModalOpen(false)}>
+              No, Keep It
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleCancel}
+              ref={cancelButtonRef}
+            >
+              Yes, Cancel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

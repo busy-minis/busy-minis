@@ -1,4 +1,9 @@
-import React, { useEffect, useRef } from "react";
+"use client";
+
+import React, { useRef, useEffect } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import LoadGoogleMapsScript from "./LoadGoogleMapsScript";
 
 interface AddressAutocompleteProps {
   label: string;
@@ -10,9 +15,10 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
   onAddressSelect,
 }) => {
   const autocompleteRef = useRef<HTMLInputElement>(null);
+  const isGoogleMapsLoaded = LoadGoogleMapsScript();
 
   useEffect(() => {
-    if (!autocompleteRef.current) return;
+    if (!isGoogleMapsLoaded || !autocompleteRef.current) return;
 
     const autocomplete = new google.maps.places.Autocomplete(
       autocompleteRef.current,
@@ -23,26 +29,28 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
 
     autocomplete.addListener("place_changed", () => {
       const place = autocomplete.getPlace();
-      if (place.geometry && place.geometry.location) {
-        const address = place.formatted_address || "";
-        const lat = place.geometry.location.lat();
-        const lng = place.geometry.location.lng();
-        onAddressSelect(address, lat, lng);
-      } else {
-        const address = place.formatted_address || "";
-        onAddressSelect(address);
+      if (place.formatted_address) {
+        onAddressSelect(
+          place.formatted_address,
+          place.geometry?.location?.lat(),
+          place.geometry?.location?.lng()
+        );
       }
     });
-  }, [onAddressSelect]);
+
+    return () => {
+      google.maps.event.clearInstanceListeners(autocomplete);
+    };
+  }, [isGoogleMapsLoaded, onAddressSelect]);
 
   return (
-    <div className="mb-6">
-      <label className="block text-gray-700 font-semibold mb-2">{label}</label>
-      <input
+    <div>
+      <Label htmlFor={label}>{label}</Label>
+      <Input
         ref={autocompleteRef}
-        className="block w-full px-4 py-2 text-gray-900 bg-gray-200 rounded-lg border-2 border-transparent focus:border-orange-500 focus:bg-white focus:outline-none transition-colors duration-200"
-        placeholder={`Enter ${label.toLowerCase()}`}
-        required
+        type="text"
+        id={label}
+        placeholder="Enter an address"
       />
     </div>
   );

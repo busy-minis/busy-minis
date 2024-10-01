@@ -95,33 +95,42 @@ export const getTimeBlocks = async () => {
 };
 export const createRide = async (rideData: {
   user_id: string;
-  pickupDate: string;
-  pickupTime: string;
+  status: string;
+  driver_id?: string;
+  payment_status?: string;
+  total_cost?: string;
   pickupAddress: string;
+  dropoffAddress: string;
   pickupLat?: number;
   pickupLng?: number;
-  dropoffAddress: string;
   dropoffLat?: number;
   dropoffLng?: number;
-  weekly: boolean;
   riders: { name: string; age: string }[];
-  status: string;
+  pickupTime: string;
+  pickupDate: string;
+  distance?: number;
+  stops?: { address: string; lat?: number; lng?: number }[];
+  ride_link?: string;
+  weekly_ride_id?: string;
+  weekly: boolean;
+  payment_intent_id: string;
 }) => {
   try {
     const { data, error } = await supabase.from("rides").insert([rideData]);
 
     if (error) {
-      throw error;
+      console.error("Supabase error:", error);
+      throw new Error(`Failed to create ride: ${error.message}`);
     }
-    return data; // Return the inserted ride data
   } catch (error) {
     console.error("Error creating ride:", error);
     throw error;
   }
 };
-
 // Helper functions (ensure these are part of your actual codebase)
-const dayToOffset: { [key: string]: number } = {
+
+// Define the shape of formData
+const daysOfWeekMap: { [key: string]: number } = {
   Sunday: 0,
   Monday: 1,
   Tuesday: 2,
@@ -131,138 +140,138 @@ const dayToOffset: { [key: string]: number } = {
   Saturday: 6,
 };
 
-function addDaysAsText(startDate: Date, offset: number): string {
-  const resultDate = new Date(startDate);
-  resultDate.setDate(resultDate.getDate() + offset);
-  return resultDate.toISOString().split("T")[0]; // Returns date in YYYY-MM-DD format
-}
-interface Rider {
-  name: string;
-  age: string;
-}
-// Define the shape of formData
-interface FormData {
-  user_id: string;
-  status: string;
-  pickupDate: string;
-  end_date: string;
-  selectedTime: string;
-  selectedDays: string[];
-  pickupAddress: string;
-  pickupLat?: number;
-  pickupLng?: number;
-  dropoffAddress: string;
-  dropoffLat?: number;
-  dropoffLng?: number;
-  total_price: number;
-  renewal_date: string;
-  riders: Rider[];
-}
-
-// Define the type for a ride session
-interface RideSession {
-  weekly_ride_id: string;
-  user_id: string;
-  pickupDate: string;
-  pickupTime: string;
-  pickupAddress: string;
-  pickupLat?: number;
-  pickupLng?: number;
-  dropoffAddress: string;
-  dropoffLat?: number;
-  dropoffLng?: number;
-  riders: Rider[];
-  status: string;
-}
-
-export async function createWeeklyRide({ formData }: { formData: FormData }) {
-  const {
-    user_id,
-    pickupAddress,
-    dropoffAddress,
-    riders,
-    selectedTime,
-    selectedDays,
-    pickupLat,
-    pickupLng,
-    dropoffLat,
-    end_date,
-    total_price,
-    renewal_date,
-    dropoffLng,
-    pickupDate,
-  } = formData;
-
-  // Step 1: Insert into weekly_rides table
-  const { data: weeklyRide, error: weeklyRideError } = await supabase
-    .from("weekly_rides")
-    .insert({
-      user_id,
-      status: "active",
-      renewal_date,
-      pickupAddress,
-      dropoffAddress,
-      selectedDays,
-      riders,
-      start_date: pickupDate,
-      end_date,
-      weekly: true,
-      pickupTime: selectedTime,
-      total_price,
-    })
-    .select()
-    .single();
-
-  if (weeklyRideError) {
-    console.error("Error creating weekly ride:", weeklyRideError);
-    return { success: false, error: weeklyRideError };
+function getNextOccurrence(dayOfWeek: number, startDate: Date): Date {
+  const result = new Date(startDate);
+  result.setDate(result.getDate() + ((7 + dayOfWeek - startDate.getDay()) % 7));
+  if (result.toDateString() === startDate.toDateString()) {
+    result.setDate(result.getDate() + 7);
   }
+  return result;
+}
 
-  // Create ride sessions
-  const rideSessions: RideSession[] = []; // Explicitly typed as an array of RideSession
-  const startDate = new Date(pickupDate);
+function createRideSessions(
+  formData: WeeklyFormData,
+  weeklyRideId: string
+): {
+  rideSessions: any[];
+  endDate: string;
+} {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
-  selectedDays.forEach((day: string) => {
-    const currentDay = startDate.getDay(); // Day of the week for the pickupDate
-    const selectedDayOffset = dayToOffset[day];
+  const rideDates = formData.selectedDays
+    .map((day) => {
+      const dayIndex = daysOfWeekMap[day];
+      return getNextOccurrence(dayIndex, today);
+    })
+    .sort((a, b) => a.getTime() - b.getTime());
 
-    // Calculate the offset; if the selected day is the same as today, add 7 to skip to the next week
-    let offset = (selectedDayOffset - currentDay + 7) % 7;
+  const endDate = new Date(Math.max(...rideDates.map((d) => d.getTime())));
 
-    // If offset is 0 (meaning same day), we force it to be 7 to get the next occurrence
-    if (offset === 0) {
-      offset = 7;
+  const rideSessions = rideDates.map((date) => ({
+    pickupLat: formData.pickupLat,
+    pickupLng: formData.pickupLng,
+    dropoffLat: formData.dropoffLat,
+    dropoffLng: formData.dropoffLng,
+    weekly_ride_id: weeklyRideId,
+    user_id: formData.user_id,
+    payment_status: "paid",
+    distance: formData.distance,
+    pickupDate: date.toISOString().split("T")[0],
+    pickupTime: formData.selectedTime,
+    pickupAddress: formData.pickupAddress,
+    dropoffAddress: formData.dropoffAddress,
+    riders: formData.riders,
+    status: "pending",
+    weekly: true,
+  }));
+
+  return {
+    rideSessions,
+    endDate: endDate.toISOString().split("T")[0],
+  };
+}
+
+export async function createWeeklyRide({
+  formData,
+}: {
+  formData: WeeklyFormData;
+}) {
+  try {
+    // Insert the weekly ride
+    const { data: weeklyRideData, error: weeklyRideError } = await supabase
+      .from("weekly_rides")
+      .insert({
+        start_date: formData.pickupDate,
+        renewal_date: formData.renewal_date,
+        total_cost: formData.total_cost,
+        user_id: formData.user_id,
+        status: formData.status,
+        pickupAddress: formData.pickupAddress,
+        dropoffAddress: formData.dropoffAddress,
+        pickupTime: formData.selectedTime,
+        riders: formData.riders,
+        selectedDays: formData.selectedDays,
+        end_date: formData.end_date,
+        payment_intent_id: formData.payment_intent_id,
+        payment_status: formData.payment_status,
+      })
+      .select();
+
+    if (weeklyRideError) {
+      console.error("Error creating weekly ride:", weeklyRideError);
+      return { success: false, error: weeklyRideError };
     }
 
-    const sessionDate = addDaysAsText(startDate, offset); // Calculate the date
+    if (!weeklyRideData || weeklyRideData.length === 0) {
+      console.error("No data returned after creating weekly ride");
+      return {
+        success: false,
+        error: new Error("No data returned after creating weekly ride"),
+      };
+    }
 
-    rideSessions.push({
-      weekly_ride_id: weeklyRide.id,
-      user_id,
-      pickupDate: sessionDate, // Store the next occurrence of the day
-      pickupTime: selectedTime,
-      pickupAddress,
-      pickupLat,
-      pickupLng,
-      dropoffAddress,
-      dropoffLat,
-      dropoffLng,
-      riders,
-      status: "pending", // Session starts as 'available'
-    });
-  });
+    const weeklyRideId = weeklyRideData[0].id;
 
-  // Step 3: Insert all ride sessions into the ride_sessions table
-  const { error: rideSessionsError } = await supabase
-    .from("rides")
-    .insert(rideSessions);
+    // Create individual ride sessions
+    const { rideSessions, endDate } = createRideSessions(
+      formData,
+      weeklyRideId
+    );
 
-  if (rideSessionsError) {
-    console.error("Error creating ride sessions:", rideSessionsError);
-    return { success: false, error: rideSessionsError };
+    const { error: sessionsError } = await supabase
+      .from("rides")
+      .insert(rideSessions);
+
+    if (sessionsError) {
+      console.error("Error creating ride sessions:", sessionsError);
+      // If ride sessions fail, we should delete the weekly ride to maintain consistency
+      await supabase.from("weekly_rides").delete().eq("id", weeklyRideId);
+      return { success: false, error: sessionsError };
+    }
+
+    // Update the weekly ride with the correct end date
+    const { error: updateError } = await supabase
+      .from("weekly_rides")
+      .update({ end_date: endDate })
+      .eq("id", weeklyRideId);
+
+    if (updateError) {
+      console.error("Error updating weekly ride end date:", updateError);
+      // This is not a critical error, so we don't return here
+    }
+
+    return {
+      success: true,
+      data: {
+        weeklyRide: { ...weeklyRideData[0], end_date: endDate },
+        rideSessions: rideSessions,
+      },
+    };
+  } catch (error) {
+    console.error("Error in createWeeklyRide:", error);
+    return { success: false, error };
   }
-
-  return { success: true };
 }
 
 export const makeTimeBlock = async () => {
@@ -718,19 +727,24 @@ export const getAllTimeSlots = async () => {
     throw error;
   }
 };
+import { format, isAfter, startOfDay } from "date-fns";
+import { WeeklyFormData } from "@/app/types/types";
+
 export const getAvailableTimeSlots = async () => {
   try {
+    const today = startOfDay(new Date());
+
     const { data, error } = await supabase
       .from("time_blocks")
       .select("date, time_slot")
-      .eq("booked", false) // Only unbooked slots
-      .order("date", { ascending: true }); // Order by date
+      .eq("booked", false)
+      .gte("date", format(today, "yyyy-MM-dd")) // Only fetch dates from today onwards
+      .order("date", { ascending: true });
 
     if (error) {
       throw error;
     }
 
-    // Transform the data into a structure suitable for your component
     const slotsByDate: { [key: string]: string[] } = {};
     data.forEach((entry) => {
       const date = entry.date;

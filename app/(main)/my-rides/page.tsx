@@ -1,4 +1,3 @@
-// MyRides.tsx
 import React from "react";
 import SingleRides from "./singleRides";
 import WeeklyRides from "./weeklyRides";
@@ -9,13 +8,14 @@ import {
   getWeeklyRidesForUser,
 } from "@/utils/supabase/supabaseQueries";
 import { redirect } from "next/navigation";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CalendarDays, CalendarRange } from "lucide-react";
 
 export default async function MyRides() {
   revalidatePath("/my-rides");
 
   const supabase = createClient();
 
-  // Get the currently logged-in user
   const {
     data: { user },
     error,
@@ -25,31 +25,45 @@ export default async function MyRides() {
     redirect("/login");
   }
 
-  // Fetch rides for the logged-in user
   const rides = await getRidesForUser(user.id);
   const weeklyRides = await getWeeklyRidesForUser(user.id);
 
   return (
-    <div className=" px-0  min-h-screen">
-      <header className="bg-zinc-900 text-white ">
-        <div className="container  border-x-zinc-700   mx-auto px-4 py-6  ">
-          <h1 className="text-3xl font-semibold  tracking-tight text-teal-200">
-            My Rides
-          </h1>
-          {/* Optional: Add a user avatar or settings button here */}
-          <p className="text-zinc-400 text-lg mt-2">
+    <div className="min-h-screen bg-gray-100">
+      <header className="bg-white shadow-sm">
+        <div className="container mx-auto px-4 py-6">
+          <h1 className="text-2xl font-semibold text-gray-800">My Rides</h1>
+          <p className="text-gray-600 text-sm mt-1">
             Manage your booked rides below.
           </p>
         </div>
       </header>
-      <main className="py-8">
+      <main className="py-6">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-8"></div>
-
-          <div className="flex gap-4 justify-between ">
-            <SingleRides initialRides={rides} user_id={user.id} />
-            <WeeklyRides weekly_rides={weeklyRides} user_id={user.id} />
-          </div>
+          <Tabs defaultValue="single" className="w-full">
+            <TabsList className="w-full mb-6 bg-white rounded-lg shadow-sm p-1">
+              <TabsTrigger
+                value="single"
+                className="w-1/2 py-2 text-sm data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900"
+              >
+                <CalendarDays className="mr-2 h-4 w-4" />
+                Single Rides
+              </TabsTrigger>
+              <TabsTrigger
+                value="weekly"
+                className="w-1/2 py-2 text-sm data-[state=active]:bg-gray-100 data-[state=active]:text-gray-900"
+              >
+                <CalendarRange className="mr-2 h-4 w-4" />
+                Weekly Rides
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="single">
+              <SingleRides initialRides={rides} user_id={user.id} />
+            </TabsContent>
+            <TabsContent value="weekly">
+              <WeeklyRides weekly_rides={weeklyRides} user_id={user.id} />
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
     </div>

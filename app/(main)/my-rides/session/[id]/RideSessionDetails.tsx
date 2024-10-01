@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, addDays } from "date-fns";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -15,6 +15,10 @@ import {
   UserCheck,
   RotateCcw,
   ArrowRight,
+  Car,
+  Calendar,
+  MapPinned,
+  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,6 +33,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { motion } from "framer-motion";
 
 interface Driver {
   id: string;
@@ -46,6 +51,8 @@ interface Driver {
 
 interface RideSessionDetailsProps {
   rideSession: {
+    total_cost: number;
+    weekly: boolean;
     id: string;
     pickupDate: string;
     pickupTime: string;
@@ -123,19 +130,49 @@ export default function RideSessionDetails({
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase
-        .from("rides")
-        .update({ status: "cancelled" })
-        .eq("id", rideSession.id);
+      if (!rideSession.weekly) {
+        // Process refund for single rides
+        const refundResponse = await fetch("/api/refund", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ rideId: rideSession.id }),
+        });
 
-      if (error) throw error;
+        if (!refundResponse.ok) {
+          throw new Error("Failed to process refund");
+        }
 
-      setStatus("cancelled");
+        const refundResult = await refundResponse.json();
+
+        if (refundResult.success) {
+          setStatus("refunded");
+          toast({
+            title: "Ride Cancelled and Refunded",
+            description:
+              "Your ride has been cancelled and refunded successfully. The refund will appear in your account within 5-10 business days.",
+          });
+        } else {
+          throw new Error("Refund failed");
+        }
+      } else {
+        // For weekly rides, just cancel without refund
+        const { error } = await supabase
+          .from("rides")
+          .update({ status: "cancelled" })
+          .eq("id", rideSession.id);
+
+        if (error) throw error;
+
+        setStatus("cancelled");
+        toast({
+          title: "Ride Cancelled",
+          description: "Your weekly ride has been cancelled successfully.",
+        });
+      }
+
       setShowCancelModal(false);
-      toast({
-        title: "Ride Cancelled",
-        description: "Your ride has been cancelled successfully.",
-      });
       router.refresh();
     } catch (error) {
       console.error(error);
@@ -173,6 +210,14 @@ export default function RideSessionDetails({
           color: "bg-orange-100 text-orange-800",
           description: "Waiting for a driver to accept your ride.",
         };
+      case "refunded":
+        return {
+          text: "Refunded",
+          icon: <RotateCcw className="h-5 w-5 text-green-500" />,
+          color: "bg-green-100 text-green-800",
+          description:
+            "Your ride has been cancelled and refunded. The refund will appear in your account within 5-10 business days.",
+        };
       case "accepted":
         return {
           text: "Accepted",
@@ -199,24 +244,31 @@ export default function RideSessionDetails({
 
   const statusInfo = getStatusInfo(status);
 
+  // Fix for date discrepancy
+  const adjustedDate = addDays(new Date(rideSession.pickupDate), 1);
+
   return (
-    <div className="container mx-auto py-8">
-      <div className="flex justify-end mb-4">
+    <div className="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="flex justify-end mb-4"
+      >
         <Button onClick={() => router.refresh()} variant="outline">
           <RotateCcw className="mr-2 h-4 w-4" />
           Refresh
         </Button>
-      </div>
+      </motion.div>
 
       <Dialog open={showCancelModal} onOpenChange={setShowCancelModal}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Confirm Cancellation</DialogTitle>
             <DialogDescription>
-              Are you sure you want to cancel this ride?{" "}
-              <span className="font-semibold text-red-600">
-                You may not be refunded.
-              </span>
+              {rideSession.weekly
+                ? "Are you sure you want to cancel this weekly ride? You will not be refunded for weekly rides."
+                : "Are you sure you want to cancel this ride? You will be refunded the full amount."}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -234,168 +286,213 @@ export default function RideSessionDetails({
         </DialogContent>
       </Dialog>
 
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle>Ride Details</CardTitle>
-            <p className="text-2xl font-semibold">
-              {format(
-                parseISO(`2021-01-01T${rideSession.pickupTime}`),
-                "hh:mm a"
-              )}
-            </p>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <p className="font-semibold">Ride ID:</p>
-              <p>{rideSession.id}</p>
-            </div>
-            <div>
-              <p className="font-semibold">Date:</p>
-              <p>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Card className=" shadow-lg">
+          <CardHeader>
+            <div className="flex justify-between items-center">
+              <CardTitle className="text-2xl font-bold text-zinc-800">
+                Ride Details
+              </CardTitle>
+              <p className="text-3xl font-semibold text-zinc-700">
                 {format(
-                  new Date(rideSession.pickupDate),
-                  "EEEE, MMMM dd, yyyy"
+                  parseISO(`2021-01-01T${rideSession.pickupTime}`),
+                  "hh:mm a"
                 )}
               </p>
             </div>
-            <div>
-              <p className="font-semibold">Pickup Address:</p>
-              <p>{rideSession.pickupAddress}</p>
-            </div>
-            <div>
-              <p className="font-semibold">Drop-off Address:</p>
-              <p>{rideSession.dropoffAddress}</p>
-            </div>
-          </div>
-          <div className="mt-4">
-            <p className="font-semibold">Rider(s):</p>
-            <p>
-              {rideSession.riders && rideSession.riders.length > 0
-                ? rideSession.riders.map((rider: any, index: number) => (
-                    <span key={index}>
-                      {rider.name}
-                      {index < rideSession.riders.length - 1 && ", "}
-                    </span>
-                  ))
-                : "No riders added."}
-            </p>
-          </div>
-
-          <div className="mt-6 flex items-center justify-center">
-            <Badge
-              variant="outline"
-              className={`${statusInfo.color} text-lg px-3 py-1`}
-            >
-              {statusInfo.icon}
-              <span className="ml-2">{statusInfo.text}</span>
-            </Badge>
-          </div>
-
-          {statusInfo.description && (
-            <p className="mt-4 text-center text-sm text-gray-600">
-              {statusInfo.description}
-            </p>
-          )}
-
-          {currentDriver && status.toLowerCase() === "accepted" && (
-            <Card className="mt-6">
-              <CardHeader>
-                <CardTitle>Driver Information</CardTitle>
-              </CardHeader>
-              <CardContent className="flex items-center space-x-4">
-                <Avatar className="h-20 w-20">
-                  <AvatarImage
-                    src={currentDriver.photo_url}
-                    alt={`${currentDriver.first_name} ${currentDriver.last_name}`}
-                  />
-                  <AvatarFallback>
-                    {currentDriver.first_name[0]}
-                    {currentDriver.last_name[0]}
-                  </AvatarFallback>
-                </Avatar>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="flex items-center space-x-2">
+                <Car className="h-5 w-5 text-zinc-600" />
                 <div>
-                  <p>
-                    <span className="font-semibold">Name:</span>{" "}
-                    {currentDriver.first_name} {currentDriver.last_name}
-                  </p>
-                  <p>
-                    <span className="font-semibold">Email:</span>{" "}
-                    {currentDriver.email}
-                  </p>
-                  <p>
-                    <span className="font-semibold">Phone:</span>{" "}
-                    {currentDriver.phone_number}
-                  </p>
-                  <p>
-                    <span className="font-semibold">Vehicle:</span>{" "}
-                    {currentDriver.vehicle_year} {currentDriver.vehicle_brand} (
-                    {currentDriver.vehicle_color}) -{" "}
-                    {currentDriver.license_plate}
+                  <p className="font-semibold text-zinc-800">Ride ID:</p>
+                  <p className="text-zinc-600">{rideSession.id}</p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Calendar className="h-5 w-5 text-zinc-600" />
+                <div>
+                  <p className="font-semibold text-zinc-800">Date:</p>
+                  <p className="text-zinc-600">
+                    {format(adjustedDate, "EEEE, MMMM dd, yyyy")}
                   </p>
                 </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {status.toLowerCase() === "ongoing" && (
-            <Card className="mt-6">
-              <CardHeader>
-                <CardTitle>Real-Time Tracking</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="mb-4">
-                  You can track your ride in real-time using the button below.
+              </div>
+              <div className="flex items-center space-x-2">
+                <MapPinned className="h-5 w-5 text-zinc-600" />
+                <div>
+                  <p className="font-semibold text-zinc-800">Pickup Address:</p>
+                  <p className="text-zinc-600">{rideSession.pickupAddress}</p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <MapPin className="h-5 w-5 text-zinc-600" />
+                <div>
+                  <p className="font-semibold text-zinc-800">
+                    Drop-off Address:
+                  </p>
+                  <p className="text-zinc-600">{rideSession.dropoffAddress}</p>
+                </div>
+              </div>
+            </div>
+            <div className="mt-4 flex items-center space-x-2">
+              <Users className="h-5 w-5 text-zinc-600" />
+              <div>
+                <p className="font-semibold text-zinc-800">Rider(s):</p>
+                <p className="text-zinc-600">
+                  {rideSession.riders && rideSession.riders.length > 0
+                    ? rideSession.riders.map((rider: any, index: number) => (
+                        <span key={index}>
+                          {rider.name}
+                          {index < rideSession.riders.length - 1 && ", "}
+                        </span>
+                      ))
+                    : "No riders added."}
                 </p>
-                <Button asChild>
+              </div>
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+              className="mt-6 flex items-center justify-center"
+            >
+              <Badge
+                variant="outline"
+                className={`${statusInfo.color} text-lg px-3 py-1 shadow-md`}
+              >
+                {statusInfo.icon}
+                <span className="ml-2">{statusInfo.text}</span>
+              </Badge>
+            </motion.div>
+
+            {statusInfo.description && (
+              <p className="mt-4 text-center text-sm text-indigo-700">
+                {statusInfo.description}
+              </p>
+            )}
+
+            {currentDriver && status.toLowerCase() === "accepted" && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.5 }}
+              >
+                <Card className="mt-6 bg-white">
+                  <CardHeader>
+                    <CardTitle className="text-xl font-semibold text-indigo-800">
+                      Driver Information
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex items-center space-x-4">
+                    <Avatar className="h-20 w-20 border-2 border-indigo-500">
+                      <AvatarImage
+                        src={currentDriver.photo_url}
+                        alt={`${currentDriver.first_name} ${currentDriver.last_name}`}
+                      />
+                      <AvatarFallback className="bg-indigo-200 text-indigo-700">
+                        {currentDriver.first_name[0]}
+                        {currentDriver.last_name[0]}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="text-indigo-800">
+                        <span className="font-semibold">Name:</span>{" "}
+                        {currentDriver.first_name} {currentDriver.last_name}
+                      </p>
+                      <p className="text-indigo-700">
+                        <span className="font-semibold">Email:</span>{" "}
+                        {currentDriver.email}
+                      </p>
+                      <p className="text-indigo-700">
+                        <span className="font-semibold">Phone:</span>{" "}
+                        {currentDriver.phone_number}
+                      </p>
+                      <p className="text-indigo-700">
+                        <span className="font-semibold">Vehicle:</span>{" "}
+                        {currentDriver.vehicle_year}{" "}
+                        {currentDriver.vehicle_brand} (
+                        {currentDriver.vehicle_color}) -{" "}
+                        {currentDriver.license_plate}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+
+            {status.toLowerCase() === "ongoing" && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6, duration: 0.5 }}
+              >
+                <Card className="mt-6 bg-white">
+                  <CardHeader>
+                    <CardTitle className="text-xl font-semibold text-indigo-800">
+                      Real-Time Tracking
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="mb-4 text-indigo-700">
+                      You can track your ride in real-time using the button
+                      below.
+                    </p>
+                    <Button
+                      asChild
+                      className="bg-indigo-600 hover:bg-indigo-700"
+                    >
+                      <a
+                        href={rideSession.ride_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Open in Google Maps
+                      </a>
+                    </Button>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+
+            <div className="mt-6 space-y-4">
+              {status.toLowerCase() === "ongoing" && (
+                <Button
+                  asChild
+                  className="w-full bg-indigo-600 hover:bg-indigo-700"
+                >
                   <a
                     href={rideSession.ride_link}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    Open in Google Maps
+                    View Ongoing Ride
+                    <ArrowRight className="ml-2 h-4 w-4" />
                   </a>
                 </Button>
-              </CardContent>
-            </Card>
-          )}
-
-          <div className="mt-6 space-y-4">
-            {status.toLowerCase() !== "cancelled" &&
-              status.toLowerCase() !== "completed" && (
-                <>
-                  {status.toLowerCase() === "ongoing" ? (
-                    <Button asChild className="w-full">
-                      <Link href={`/my-rides/session/${rideSession.id}`}>
-                        View Ongoing Ride
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Link>
-                    </Button>
-                  ) : (
-                    <p className="text-sm text-gray-600 text-center">
-                      The link to location tracking will be available when the
-                      driver has picked up the passenger.
-                    </p>
-                  )}
-                </>
               )}
-            <Button
-              variant="destructive"
-              className="w-full"
-              onClick={() => setShowCancelModal(true)}
-              disabled={
-                isSubmitting ||
-                status.toLowerCase() === "cancelled" ||
-                status.toLowerCase() === "completed"
-              }
-            >
-              Cancel Ride
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+              {status.toLowerCase() !== "cancelled" &&
+                status.toLowerCase() !== "completed" &&
+                status.toLowerCase() !== "refunded" && (
+                  <Button
+                    variant="destructive"
+                    className="w-full"
+                    onClick={() => setShowCancelModal(true)}
+                    disabled={isSubmitting}
+                  >
+                    Cancel Ride
+                  </Button>
+                )}
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
   );
 }

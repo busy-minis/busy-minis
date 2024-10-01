@@ -6,6 +6,8 @@ import { getUserOrientationStatus } from "@/utils/supabase/supabaseQueries";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 export default async function page() {
+  revalidatePath("/schedule-ride");
+
   const supabase = createClient();
   const {
     data: { user },
@@ -16,7 +18,6 @@ export default async function page() {
     redirect("/login");
   }
   const currentUser = await getUserOrientationStatus(user.id);
-  revalidatePath("/driverdashboard/available-rides");
 
   if (currentUser.status !== "verified") {
     return <OrientationPage user_id={user.id} />;

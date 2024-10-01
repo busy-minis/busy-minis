@@ -1,7 +1,6 @@
-// SingleRides.tsx
 "use client";
 import React, { useState } from "react";
-import { Trash, Eye } from "@phosphor-icons/react";
+import { Trash2, Eye, MapPin, Clock } from "lucide-react";
 import Link from "next/link";
 import {
   cancelRideById,
@@ -9,7 +8,8 @@ import {
 } from "@/utils/supabase/supabaseQueries";
 import ConfirmationModal from "./Modal";
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
+import { motion } from "framer-motion";
+import { useToast } from "@/hooks/use-toast";
 
 interface SingleRidesProps {
   initialRides: any[];
@@ -24,6 +24,7 @@ export default function SingleRides({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [rideToCancel, setRideToCancel] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   const handleCancel = async (id: string) => {
     setIsLoading(true);
@@ -32,10 +33,18 @@ export default function SingleRides({
       const updatedRides = await getRidesForUser(user_id);
       setRides(updatedRides);
       setIsModalOpen(false);
-      alert("Ride successfully cancelled.");
+      toast({
+        title: "Ride Cancelled",
+        description: "Your ride has been successfully cancelled.",
+        variant: "default",
+      });
     } catch (error) {
       console.error("Failed to cancel the ride:", error);
-      alert("Failed to cancel the ride. Please try again.");
+      toast({
+        title: "Error",
+        description: "Failed to cancel the ride. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -73,7 +82,6 @@ export default function SingleRides({
     });
   };
 
-  // Function to determine badge color based on status
   const getStatusBadge = (status: string) => {
     switch (status.toLowerCase()) {
       case "pending":
@@ -91,76 +99,71 @@ export default function SingleRides({
 
   return (
     <div className="w-full">
-      <header className="mb-6 ">
-        <h2 className="text-2xl font-semibold text-gray-800">Single Rides</h2>
-      </header>
-      <section className="">
+      <section className="space-y-4">
         {rides.length > 0 ? (
-          <ul className="space-y-6">
-            {rides.map((ride: any) => (
-              <li
+          <ul className="space-y-4">
+            {rides.map((ride: any, index: number) => (
+              <motion.li
                 key={ride.id}
-                className="border bg-zinc-900 border-gray-200 rounded-lg p-4 flex flex-col sm:flex-row justify-between items-start  hover:shadow-md transition-shadow duration-300"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.1 }}
+                className="bg-white rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow duration-300"
               >
-                <div className="border mr-4 border-zinc-700 p-2 bg-zinc-950 rounded-xl">
-                  <Image
-                    src={"/car.png"}
-                    alt="car"
-                    width={50}
-                    height={50}
-                    className="  "
-                  />
-                </div>
-
-                <div className="mb-4 sm:mb-0 flex-1">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
-                    <p className="text-lg font-medium text-zinc-50">
-                      {formatDate(ride.pickupDate)} at{" "}
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <p className="text-lg font-semibold text-gray-800">
+                      {formatDate(ride.pickupDate)}
+                    </p>
+                    <p className="text-gray-600 flex items-center">
+                      <Clock className="mr-1 h-4 w-4" />
                       {formatTime(ride.pickupTime)}
                     </p>
-                    <span
-                      className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${getStatusBadge(
-                        ride.status
-                      )}`}
-                    >
-                      {ride.status.charAt(0).toUpperCase() +
-                        ride.status.slice(1)}
-                    </span>
                   </div>
-                  <div className="mt-4">
-                    <p className="text-sm text-zinc-300">
-                      <span className="font-semibold">From:</span>{" "}
-                      {ride.pickupAddress}
-                    </p>
-                    <p className="text-sm text-zinc-300">
-                      <span className="font-semibold">To:</span>{" "}
-                      {ride.dropoffAddress}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex space-x-4">
-                  <Link href={`/my-rides/session/${ride.id}`}>
-                    <div className="flex items-center text-sm font-medium text-teal-600 hover:text-teal-800 transition-colors duration-200">
-                      <Eye size={20} className="mr-1" aria-hidden="true" />
-                      <span>View</span>
-                    </div>
-                  </Link>
-                  <button
-                    onClick={() => openModal(ride.id)}
-                    className="flex items-center text-sm font-medium text-red-600 hover:text-red-800 transition-colors duration-200"
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadge(
+                      ride.status
+                    )}`}
                   >
-                    <Trash size={20} className="mr-1" aria-hidden="true" />
-                    <span>Cancel</span>
-                  </button>
+                    {ride.status.charAt(0).toUpperCase() + ride.status.slice(1)}
+                  </span>
                 </div>
-              </li>
+                <div className="space-y-2 mb-4">
+                  <p className="text-gray-700 flex items-center">
+                    <MapPin className="mr-2 h-4 w-4 text-gray-500" />
+                    <span className="font-medium">From:</span>{" "}
+                    {ride.pickupAddress}
+                  </p>
+                  <p className="text-gray-700 flex items-center">
+                    <MapPin className="mr-2 h-4 w-4 text-gray-500" />
+                    <span className="font-medium">To:</span>{" "}
+                    {ride.dropoffAddress}
+                  </p>
+                </div>
+                <div className="flex justify-end space-x-2">
+                  <Link href={`/my-rides/session/${ride.id}`}>
+                    <Button variant="outline" size="sm">
+                      <Eye className="mr-2 h-4 w-4" />
+                      View
+                    </Button>
+                  </Link>
+                  <Button
+                    onClick={() => openModal(ride.id)}
+                    variant="destructive"
+                    size="sm"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Cancel
+                  </Button>
+                </div>
+              </motion.li>
             ))}
           </ul>
         ) : (
-          <div className="text-center">
-            <p className="text-gray-600">No single rides booked.</p>
-            <Link href={"/schedule-ride/single-ride"}>
-              <Button className="mt-4 inline-block bg-teal-600 text-white px-5 py-2 rounded-md hover:bg-teal-700 transition-colors duration-200">
+          <div className="text-center py-8 bg-white rounded-lg shadow-sm">
+            <p className="text-gray-600 mb-4">No single rides booked.</p>
+            <Link href="/schedule-ride/single-ride">
+              <Button className="bg-black text-white hover:bg-gray-800">
                 Book a Single Ride
               </Button>
             </Link>

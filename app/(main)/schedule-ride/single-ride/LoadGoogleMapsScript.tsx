@@ -1,18 +1,38 @@
-import { useEffect } from "react";
+"use client";
 
-export default function LoadGoogleMapsScript() {
+import { useEffect, useState } from "react";
+
+declare global {
+  interface Window {
+    initGoogleMaps: () => void;
+  }
+}
+
+const LoadGoogleMapsScript = () => {
+  const [isLoaded, setIsLoaded] = useState(false);
+
   useEffect(() => {
-    const loadScript = (url: string) => {
-      const script = document.createElement("script");
-      script.src = url;
-      script.async = true;
-      document.head.appendChild(script);
+    if (typeof window.google !== "undefined") {
+      setIsLoaded(true);
+      return;
+    }
+
+    window.initGoogleMaps = () => {
+      setIsLoaded(true);
     };
 
-    loadScript(
-      `https://maps.googleapis.com/maps/api/js?key=AIzaSyCUa2HZ94Us1drPt-7bdpWaEB-Eaa4lzlg&libraries=places`
-    );
+    const script = document.createElement("script");
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places&callback=initGoogleMaps`;
+    script.async = true;
+    script.defer = true;
+    document.head.appendChild(script);
+
+    return () => {
+      document.head.removeChild(script);
+    };
   }, []);
 
-  return null;
-}
+  return isLoaded;
+};
+
+export default LoadGoogleMapsScript;

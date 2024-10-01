@@ -1,10 +1,10 @@
-// WeeklyRides.tsx
 "use client";
-import { PencilSimple } from "@phosphor-icons/react";
+import { PencilIcon, MapPin, Clock, CalendarDays } from "lucide-react";
 import Link from "next/link";
 import React from "react";
-import { isAfter } from "date-fns";
+import { isAfter, format, parseISO } from "date-fns";
 import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 
 interface WeeklyRide {
   id: string;
@@ -32,7 +32,6 @@ export default function WeeklyRides({
 }: WeeklyRidesProps) {
   const currentDate = new Date();
 
-  // Function to determine badge color based on status
   const getStatusBadge = (status: string) => {
     switch (status.toLowerCase()) {
       case "pending":
@@ -48,19 +47,8 @@ export default function WeeklyRides({
     }
   };
 
-  // Function to determine days badge color (optional)
   const getDaysBadge = (day: string) => {
-    const colors = [
-      "bg-blue-100 text-blue-800",
-      "bg-green-100 text-green-800",
-      "bg-purple-100 text-purple-800",
-      "bg-indigo-100 text-indigo-800",
-      "bg-pink-100 text-pink-800",
-      "bg-yellow-100 text-yellow-800",
-      "bg-red-100 text-red-800",
-    ];
-    const dayIndex = new Date(day).getDay(); // 0 (Sun) to 6 (Sat)
-    return colors[dayIndex % colors.length];
+    return "bg-gray-100 text-gray-800";
   };
 
   const formatTime = (time24: string) => {
@@ -74,111 +62,112 @@ export default function WeeklyRides({
     });
   };
 
+  const formatRenewalDate = (dateString: string) => {
+    const date = parseISO(dateString);
+    return format(date, "MMMM d, yyyy");
+  };
+
   return (
-    <div className="w-full ">
-      <header className="mb-6">
-        <h2 className="text-2xl font-semibold text-gray-800">Weekly Rides</h2>
-      </header>
-      <section className="">
+    <div className="w-full">
+      <section className="space-y-4">
         {weekly_rides.length > 0 ? (
-          <ul className="space-y-6">
-            {weekly_rides.map((weeklyRide) => {
+          <ul className="space-y-4">
+            {weekly_rides.map((weeklyRide, index) => {
               const rideEndDate = weeklyRide.end_date || null;
               const isRideDiscontinued = rideEndDate
                 ? isAfter(currentDate, new Date(rideEndDate))
                 : false;
 
               return (
-                <li
+                <motion.li
                   key={weeklyRide.id}
-                  className="border bg-zinc-900 text-zinc-400 rounded-lg p-4   transition-shadow duration-300"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.1 }}
+                  className="bg-white rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow duration-300"
                 >
-                  <div className="">
-                    <main className="flex justify-between">
-                      <div className="text-base font-medium text-teal-200">
-                        Renewal Date : {weeklyRide.renewal_date}
-                      </div>
+                  <div className="flex flex-col sm:flex-row justify-between items-start mb-4">
+                    <div>
+                      <p className="text-base sm:text-lg font-semibold text-gray-800 flex items-center">
+                        <CalendarDays className="mr-2 h-4 w-4 sm:h-5 sm:w-5 text-gray-500" />
+                        <span className="text-sm sm:text-base">
+                          Renewal: {formatRenewalDate(weeklyRide.renewal_date)}
+                        </span>
+                      </p>
                       <p
-                        className={`inline-block pointer-events-none px-2 py-1 rounded-full text-xs font-semibold ${getStatusBadge(
+                        className={`mt-2 inline-block px-2 py-1 rounded-full text-xs font-medium ${getStatusBadge(
                           weeklyRide.status
                         )}`}
                       >
                         {weeklyRide.status.charAt(0).toUpperCase() +
                           weeklyRide.status.slice(1)}
                       </p>
-                    </main>
-
-                    <section className="flex flex-col sm:flex-row sm:justify-between items-center mt-4  w-full ">
-                      <div className="flex gap-1 w-fit">
-                        {weeklyRide.selectedDays.map(
-                          (day: string, index: number) => (
-                            <span
-                              key={index}
-                              className={`text-zinc-100 px-3 py-1 w-full border border-zinc-700 p-1 rounded-xl text-xs  ${getDaysBadge(
-                                day
-                              )}`}
-                            >
-                              {day}
-                            </span>
-                          )
-                        )}
-                      </div>
-                    </section>
-
-                    <div className="mt-4">
-                      <div className="flex flex-col sm:flex-row sm:space-x-8 text-xs">
-                        <div className="mb-4 sm:mb-0">
-                          <p className="text-sm border-b border-b-zinc-600 pb-1 font-semibold text-zinc-100">
-                            Pickup Location
-                          </p>
-                          <p className=" mt-2">{weeklyRide.pickupAddress}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm  border-b border-b-zinc-600 pb-1 font-semibold text-zinc-100">
-                            Drop-off Location
-                          </p>
-                          <p className="mt-2 ">{weeklyRide.dropoffAddress}</p>
-                        </div>
-                      </div>
-                      <section className="flex mt-16 justify-between items-center">
-                        <p className="text-sm  ">
-                          <span className="font-semibold text-zinc-100 ">
-                            Pickup Time:
-                          </span>{" "}
-                          {formatTime(weeklyRide.pickupTime)}
-                        </p>
-                        <Link
-                          href={`/my-rides/weekly-ride/manage?id=${weeklyRide.id}`}
-                        >
-                          <Button className="flex items-center text-sm font-medium bg-teal-100 text-teal-600 hover:bg-teal-200 px-4 py-2 rounded-md transition-colors duration-200">
-                            <PencilSimple
-                              size={20}
-                              className="mr-1"
-                              aria-hidden="true"
-                            />
-                            <span>Manage</span>
-                          </Button>
-                        </Link>
-                      </section>
-
-                      {isRideDiscontinued && (
-                        <p className="text-sm text-yellow-600 mt-2">
-                          Ride discontinued. Payment required to continue.
-                        </p>
+                    </div>
+                    <div className="flex flex-wrap gap-1 mt-2 sm:mt-0">
+                      {weeklyRide.selectedDays.map(
+                        (day: string, index: number) => (
+                          <span
+                            key={index}
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${getDaysBadge(
+                              day
+                            )}`}
+                          >
+                            {day.slice(0, 3)}
+                          </span>
+                        )
                       )}
                     </div>
                   </div>
-                </li>
+
+                  <div className="space-y-2 mb-4">
+                    <div className="flex items-center text-gray-700">
+                      <MapPin className="h-4 w-4 text-gray-500 mr-2 flex-shrink-0" />
+                      <div>
+                        <p className="font-medium text-sm">Pickup</p>
+                        <p className="text-sm">{weeklyRide.pickupAddress}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center text-gray-700">
+                      <MapPin className="h-4 w-4 text-gray-500 mr-2 flex-shrink-0" />
+                      <div>
+                        <p className="font-medium text-sm">Drop-off</p>
+                        <p className="text-sm">{weeklyRide.dropoffAddress}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                    <p className="text-gray-700 flex items-center text-sm mb-2 sm:mb-0">
+                      <Clock className="mr-2 h-4 w-4 text-gray-500" />
+                      <span className="font-medium">Pickup Time:</span>{" "}
+                      {formatTime(weeklyRide.pickupTime)}
+                    </p>
+                    <Link
+                      href={`/my-rides/weekly-ride/manage?id=${weeklyRide.id}`}
+                    >
+                      <Button variant="outline" size="sm">
+                        <PencilIcon className="mr-2 h-4 w-4" />
+                        Manage
+                      </Button>
+                    </Link>
+                  </div>
+
+                  {isRideDiscontinued && (
+                    <p className="mt-4 text-red-600 bg-red-50 p-2 rounded-md text-sm">
+                      Ride discontinued. Payment required to continue.
+                    </p>
+                  )}
+                </motion.li>
               );
             })}
           </ul>
         ) : (
-          <div className="text-center">
-            <p className="text-gray-600">No weekly rides booked.</p>
-            <Link href={"/schedule-ride/weekly-ride"}>
-              <div className="mt-4 inline-block bg-teal-600 text-white px-5 py-2 rounded-md hover:bg-teal-700 transition-colors duration-200">
+          <div className="text-center py-8 bg-white rounded-lg shadow-sm">
+            <p className="text-gray-600 mb-4">No weekly rides booked.</p>
+            <Link href="/schedule-ride/weekly-ride">
+              <Button className="bg-black text-white hover:bg-gray-800">
                 Book a Weekly Ride
-              </div>
+              </Button>
             </Link>
           </div>
         )}

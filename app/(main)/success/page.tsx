@@ -1,22 +1,41 @@
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { CheckCircle } from "lucide-react";
 
 export default function SuccessPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black to-gray-900 flex flex-col items-center justify-center space-y-8 p-6">
-      <div className="bg-black rounded-xl shadow-lg p-10 text-center max-w-lg border border-gray-700">
-        <h1 className="text-5xl font-extrabold text-white mb-4">
-          Payment Successful!
-        </h1>
-        <p className="text-gray-400 mb-6 text-lg">
-          Your payment has been processed successfully. You can now view and
-          manage your rides.
-        </p>
-        <Link href="/my-rides">
-          <div className="bg-gradient-to-r from-teal-500 to-orange-500 text-white font-semibold py-3 px-12 rounded-full shadow-lg hover:from-teal-600 hover:to-orange-600 transition duration-300 cursor-pointer">
-            Go to Your Rides
+    <div className="min-h-screen bg-gradient-to-br from-background to-secondary flex flex-col items-center justify-center p-4 sm:p-6">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <div className="flex justify-center mb-4">
+            <CheckCircle className="h-12 w-12 text-primary" />
           </div>
-        </Link>
-      </div>
+          <CardTitle className="text-2xl sm:text-3xl font-bold text-center">
+            Payment Successful!
+          </CardTitle>
+          <CardDescription className="text-center">
+            Your payment has been processed successfully.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-center text-muted-foreground">
+            You can now view and manage your new ride.
+          </p>
+        </CardContent>
+        <CardFooter className="flex justify-center">
+          <Link href="/my-rides" passHref>
+            <Button className="w-full sm:w-auto">Go to Your Rides</Button>
+          </Link>
+        </CardFooter>
+      </Card>
     </div>
   );
 }

@@ -2,7 +2,10 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { loadStripe } from "@stripe/stripe-js";
-import { ArrowRight } from "lucide-react";
+import { format, addDays, compareAsc } from "date-fns";
+
+import { Elements } from "@stripe/react-stripe-js";
+import { ArrowRight, ArrowLeft } from "lucide-react";
 import { createWeeklyRide } from "@/utils/supabase/supabaseQueries";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,8 +22,15 @@ import Stops from "./components/Stops";
 import Time from "./components/Time";
 import DaySelector from "./components/DaySelector";
 import Review from "./components/Review";
+import { GoogleMapsApiProvider } from "./components/GoogleMapsApiProvider";
+import CheckoutForm from "./components/CheckoutForm";
+import { useToast } from "@/hooks/use-toast";
+import { WeeklyFormData } from "@/app/types/types";
+import { useRouter } from "next/navigation";
 
-const stripePromise = loadStripe("your-stripe-public-key-here");
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
+);
 
 const daysOfWeekMap: { [key: string]: number } = {
   Sunday: 0,
@@ -43,37 +53,23 @@ interface Stop {
   lng?: number;
 }
 
-interface FormData {
-  renewal_date: string;
-  user_id: string;
-  status: string;
-  end_date: string;
-  pickupDate: string;
-  pickupAddress: string;
-  pickupLat?: number;
-  total_price: number;
-  pickupLng?: number;
-  stops: Stop[];
-  dropoffAddress: string;
-  dropoffLat?: number;
-  dropoffLng?: number;
-  riders: Rider[];
-  selectedTime: string;
-  selectedDays: string[];
-}
-
 export default function WeeklyRideBookingPage({ userId }: { userId: string }) {
   const [totalPrice, setTotalPrice] = useState(13);
-  const [formData, setFormData] = useState<FormData>({
+  const [distance, setDistance] = useState<number>(0);
+
+  const [formData, setFormData] = useState<WeeklyFormData>({
     renewal_date: "",
     user_id: userId,
     status: "pending",
     end_date: "",
     pickupDate: "",
-    total_price: totalPrice,
     pickupAddress: "",
     pickupLat: undefined,
     pickupLng: undefined,
+    total_cost: 0,
+    distance: distance,
+    payment_status: "",
+    payment_intent_id: "",
     stops: [],
     dropoffAddress: "",
     dropoffLat: undefined,
@@ -88,9 +84,9 @@ export default function WeeklyRideBookingPage({ userId }: { userId: string }) {
   const [page, setPage] = useState(1);
   const [regularPrice, setRegularPrice] = useState(0);
   const [savings, setSavings] = useState(0);
-  const [distance, setDistance] = useState<number | null>(null);
   const [loadingDistance, setLoadingDistance] = useState(false);
-
+  const [clientSecret, setClientSecret] = useState("");
+  const { toast } = useToast();
   const calculateDistance = useCallback(() => {
     if (
       window.google &&
@@ -218,45 +214,72 @@ export default function WeeklyRideBookingPage({ userId }: { userId: string }) {
     if (selectedDays.length === 0) return null;
 
     const today = new Date();
+    today.setHours(0, 0, 0, 0);
     const todayDay = today.getDay();
 
-    let minOffset = 7;
+    let nextPickupDate = new Date(today);
+    let daysToAdd = 7;
+
     selectedDays.forEach((day) => {
       const selectedDayOffset = daysOfWeekMap[day];
       let offset = (selectedDayOffset - todayDay + 7) % 7;
-      if (offset === 0) offset = 7;
-      if (offset < minOffset) minOffset = offset;
+      if (offset === 0) offset = 7; // If it's today, move to next week
+      if (offset < daysToAdd) daysToAdd = offset;
     });
 
-    const nextPickupDate = new Date();
-    nextPickupDate.setDate(today.getDate() + minOffset);
+    nextPickupDate.setDate(today.getDate() + daysToAdd);
     return nextPickupDate.toISOString().split("T")[0];
   };
-
-  function calculateRenewalDate(
-    pickupDate: string,
-    selectedDays: string[]
+  function calculateLastRideDate(
+    selectedDays: string[],
+    pickupDate: string
   ): string {
-    const dates = selectedDays.map((day) => {
-      const targetDay = daysOfWeekMap[day];
-      const initialDate = new Date(pickupDate);
-      const currentDay = initialDate.getDay();
+    console.log("calculateLastRideDate - Input:", { selectedDays, pickupDate });
 
-      let dayDifference = targetDay - currentDay;
-      if (dayDifference < 0) dayDifference += 7;
-      if (dayDifference === 0) dayDifference = 7;
+    if (
+      !Array.isArray(selectedDays) ||
+      selectedDays.length === 0 ||
+      !pickupDate
+    ) {
+      console.log(
+        "calculateLastRideDate - Invalid input, returning empty string"
+      );
+      return "";
+    }
 
-      const nextDate = new Date(initialDate);
-      nextDate.setDate(initialDate.getDate() + dayDifference);
+    const formattedDays = selectedDays
+      .map((day) => {
+        const date = getNextDate(pickupDate, day);
+        console.log(`Formatted day for ${day}:`, format(date, "yyyy-MM-dd"));
+        return { day, date };
+      })
+      .sort((a, b) => compareAsc(a.date, b.date));
 
-      return nextDate;
-    });
-
-    const renewalDate = dates.reduce((latest, current) =>
-      current > latest ? current : latest
+    console.log(
+      "calculateLastRideDate - Formatted and sorted days:",
+      formattedDays
     );
 
-    return renewalDate.toISOString().split("T")[0];
+    // Get the last date from formattedDays
+    const lastDate = formattedDays[formattedDays.length - 1].date;
+    console.log(
+      "calculateLastRideDate - Last date:",
+      format(lastDate, "yyyy-MM-dd")
+    );
+
+    return format(lastDate, "yyyy-MM-dd");
+  }
+
+  function getNextDate(pickupDate: string, day: string): Date {
+    const targetDay = daysOfWeekMap[day];
+    const initialDate = new Date(pickupDate);
+    const currentDay = initialDate.getDay();
+
+    const dayDifference = (targetDay - currentDay + 7) % 7 || 7;
+    const nextDate = addDays(initialDate, dayDifference);
+
+    console.log(`getNextDate - For ${day}:`, format(nextDate, "yyyy-MM-dd"));
+    return nextDate;
   }
 
   const validateForm = () => {
@@ -280,169 +303,240 @@ export default function WeeklyRideBookingPage({ userId }: { userId: string }) {
   };
 
   const handleDaySelection = (day: string) => {
+    console.log("handleDaySelection - Selected day:", day);
+
     setFormData((prevData) => {
       const updatedDays = prevData.selectedDays.includes(day)
         ? prevData.selectedDays.filter((selectedDay) => selectedDay !== day)
         : [...prevData.selectedDays, day];
 
-      const pickupDate = calculateNextPickupDate(updatedDays) || "";
+      console.log("handleDaySelection - Updated selected days:", updatedDays);
 
-      const renewalDate =
+      const pickupDate = calculateNextPickupDate(updatedDays) || "";
+      console.log("handleDaySelection - Calculated pickup date:", pickupDate);
+
+      const lastRideDate =
         pickupDate && updatedDays.length > 0
-          ? calculateRenewalDate(pickupDate, updatedDays)
+          ? calculateLastRideDate(updatedDays, pickupDate)
           : "";
+
+      console.log(
+        "handleDaySelection - Calculated last ride date:",
+        lastRideDate
+      );
 
       return {
         ...prevData,
         selectedDays: updatedDays,
         pickupDate,
-        renewal_date: renewalDate,
+        end_date: lastRideDate,
       };
     });
   };
-
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!validateForm()) return;
     calculateDistance();
-    setPage(2);
+    if (page === 1) {
+      setPage(2);
+    } else if (page === 2) {
+      await createPaymentIntent();
+      setPage(3);
+    }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.pickupDate) {
-      setDateError("Please select at least one day.");
-      return;
-    }
+  const handleBack = () => {
+    setPage(page - 1);
+  };
+  const router = useRouter();
 
+  const createPaymentIntent = async () => {
     try {
-      await createWeeklyRide({ formData });
+      const response = await fetch("/api/create-payment-weekly-intent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          price: totalPrice,
+          rideData: formData,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to create payment intent");
+      }
+      const data = await response.json();
+      setClientSecret(data.clientSecret);
+    } catch (error) {
+      console.error("Error creating Payment Intent:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create payment intent. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
-      const stripe = await stripePromise;
-
-      if (stripe) {
-        const response = await fetch("/api/create-checkout-session", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            price: totalPrice,
-            rideData: formData,
-          }),
+  const handlePaymentSuccess = async (paymentIntent: any) => {
+    try {
+      const rideData: WeeklyFormData = {
+        ...formData,
+        total_cost: totalPrice,
+        payment_status: "paid",
+        payment_intent_id: paymentIntent.id,
+        user_id: userId,
+        status: "active",
+        renewal_date: formData.end_date,
+        end_date: formData.end_date, // Use renewal_date as the end_date
+      };
+      const result = await createWeeklyRide({ formData: rideData });
+      if (result.success) {
+        toast({
+          title: "Success",
+          description: "Your weekly ride has been booked successfully!",
+          variant: "default",
         });
-
-        const session = await response.json();
-        await stripe.redirectToCheckout({ sessionId: session.id });
+        router.push("/success");
+      } else {
+        throw new Error("Failed to create weekly ride");
       }
     } catch (error) {
-      console.error("Error during submission:", error);
+      console.error("Failed to create weekly ride:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create weekly ride. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-200 py-12">
-      <div className="container mx-auto px-4">
-        <Card className="max-w-4xl mx-auto">
-          <CardHeader>
-            <CardTitle className="text-3xl font-bold text-center">
-              Weekly Ride Booking
-            </CardTitle>
-            <CardDescription className="text-center">
-              Schedule your rides weekly with up to a 10% discount.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-8">
-              {page === 1 ? (
-                <>
-                  <Riders
-                    riders={formData.riders}
-                    onRidersChange={(riders) =>
-                      setFormData({ ...formData, riders })
-                    }
-                  />
+    <GoogleMapsApiProvider>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-200 py-12">
+        <div className="container mx-auto px-4">
+          <Card className="max-w-4xl mx-auto">
+            <CardHeader>
+              <CardTitle className="text-3xl font-bold text-center">
+                Weekly Ride Booking
+              </CardTitle>
+              <CardDescription className="text-center">
+                Schedule your rides weekly with up to a 10% discount.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div onSubmit={(e) => e.preventDefault()} className="space-y-8">
+                {page === 1 && (
+                  <>
+                    <Riders
+                      riders={formData.riders}
+                      onRidersChange={(riders) =>
+                        setFormData({ ...formData, riders })
+                      }
+                    />
 
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-xl">
-                        Pickup and Dropoff
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <AddressAutocomplete
-                        label="Pickup Address"
-                        value={formData.pickupAddress}
-                        onAddressSelect={(address, lat, lng) =>
-                          setFormData({
-                            ...formData,
-                            pickupAddress: address,
-                            pickupLat: lat,
-                            pickupLng: lng,
-                          })
-                        }
-                      />
-                      <AddressAutocomplete
-                        label="Dropoff Address"
-                        value={formData.dropoffAddress}
-                        onAddressSelect={(address, lat, lng) =>
-                          setFormData({
-                            ...formData,
-                            dropoffAddress: address,
-                            dropoffLat: lat,
-                            dropoffLng: lng,
-                          })
-                        }
-                      />
-                    </CardContent>
-                  </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-xl">
+                          Pickup and Dropoff
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <AddressAutocomplete
+                          label="Pickup Address"
+                          value={formData.pickupAddress}
+                          onAddressSelect={(address, lat, lng) =>
+                            setFormData({
+                              ...formData,
+                              pickupAddress: address,
+                              pickupLat: lat,
+                              pickupLng: lng,
+                            })
+                          }
+                        />
+                        <AddressAutocomplete
+                          label="Dropoff Address"
+                          value={formData.dropoffAddress}
+                          onAddressSelect={(address, lat, lng) =>
+                            setFormData({
+                              ...formData,
+                              dropoffAddress: address,
+                              dropoffLat: lat,
+                              dropoffLng: lng,
+                            })
+                          }
+                        />
+                      </CardContent>
+                    </Card>
 
-                  <Stops
-                    stops={formData.stops}
-                    onStopsChange={(stops) =>
-                      setFormData({ ...formData, stops })
-                    }
-                  />
+                    <Stops
+                      stops={formData.stops}
+                      onStopsChange={(stops) =>
+                        setFormData({ ...formData, stops })
+                      }
+                    />
 
-                  <Time
-                    selectedTime={formData.selectedTime}
-                    onTimeChange={(time) =>
-                      setFormData({ ...formData, selectedTime: time })
-                    }
-                    timeWarning={timeWarning}
-                    setTimeWarning={setTimeWarning}
-                    dateError={dateError}
-                  />
+                    <Time
+                      selectedTime={formData.selectedTime}
+                      onTimeChange={(time) =>
+                        setFormData({ ...formData, selectedTime: time })
+                      }
+                      timeWarning={timeWarning}
+                      setTimeWarning={setTimeWarning}
+                      dateError={dateError}
+                    />
 
-                  <DaySelector
-                    selectedDays={formData.selectedDays}
-                    onDaySelection={handleDaySelection}
-                  />
+                    <DaySelector
+                      selectedDays={formData.selectedDays}
+                      onDaySelection={handleDaySelection}
+                    />
 
-                  {validationError && (
-                    <Alert variant="destructive">
-                      <AlertDescription>{validationError}</AlertDescription>
-                    </Alert>
-                  )}
+                    {validationError && (
+                      <Alert variant="destructive">
+                        <AlertDescription>{validationError}</AlertDescription>
+                      </Alert>
+                    )}
 
-                  <Button onClick={handleNext} className="w-full">
-                    Review Booking
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </>
-              ) : (
-                <Review
-                  formData={formData}
-                  totalPrice={totalPrice}
-                  regularPrice={regularPrice}
-                  savings={savings}
-                  distance={distance}
-                  setPage={setPage}
-                />
-              )}
-            </form>
-          </CardContent>
-        </Card>
+                    <Button onClick={handleNext} className="w-full">
+                      Review Booking
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </>
+                )}
+
+                {page === 2 && (
+                  <>
+                    <Review
+                      formData={formData}
+                      totalPrice={totalPrice}
+                      regularPrice={regularPrice}
+                      savings={savings}
+                      distance={distance}
+                    />
+                    <div className="flex justify-between">
+                      <Button onClick={handleBack}>
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Back
+                      </Button>
+                      <Button type="button" onClick={handleNext}>
+                        Proceed to Payment
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </div>
+                  </>
+                )}
+
+                {page === 3 && clientSecret && (
+                  <Elements stripe={stripePromise} options={{ clientSecret }}>
+                    <CheckoutForm
+                      formData={formData}
+                      clientSecret={clientSecret}
+                      onSuccess={handlePaymentSuccess}
+                      totalPrice={totalPrice}
+                    />
+                  </Elements>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </div>
+    </GoogleMapsApiProvider>
   );
 }
