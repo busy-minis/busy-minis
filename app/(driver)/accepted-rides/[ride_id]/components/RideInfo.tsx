@@ -1,29 +1,37 @@
-// components/RideInfo.tsx
 "use client";
 
 import { User } from "@phosphor-icons/react";
 import React from "react";
 
-// Define TypeScript interfaces for better type safety
-interface Rider {
+interface Passenger {
   name: string;
   age: number;
 }
 
 interface Ride {
+  id: string;
+  distance: number;
   pickupAddress: string;
   dropoffAddress: string;
-  pickupDate: string;
   pickupTime: string;
-  riders: Rider[];
-  distance: number; // Distance in miles
+  pickupDate: string;
+  status: string;
+  weekly: boolean;
+  pickupLat: number;
+  pickupLng: number;
+  dropoffLat: number;
+  dropoffLng: number;
+  payment_intent_id: string;
+  payment_status: string;
+  total_cost: number;
+  refund_id: string;
+  riders: Passenger[];
 }
 
 interface RideInfoProps {
   rideData: Ride;
 }
 
-// Utility function to format date and time
 const formatDateTime = (date: string, time: string): string => {
   const dateTime = new Date(`${date}T${time}`);
   return dateTime.toLocaleString("en-US", {
@@ -39,16 +47,13 @@ const formatDateTime = (date: string, time: string): string => {
 const RideInfo: React.FC<RideInfoProps> = ({ rideData }) => {
   return (
     <div className="space-y-6">
-      {/* Pickup and Dropoff Locations */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        {/* Pickup Location */}
         <div className="bg-teal-50 p-5 rounded-lg shadow-sm">
           <h3 className="text-lg font-semibold text-gray-800">
             Pickup Location
           </h3>
           <p className="text-gray-700 mt-2">{rideData.pickupAddress}</p>
         </div>
-        {/* Dropoff Location */}
         <div className="bg-teal-50 p-5 rounded-lg shadow-sm">
           <h3 className="text-lg font-semibold text-gray-800">
             Dropoff Location
@@ -57,23 +62,19 @@ const RideInfo: React.FC<RideInfoProps> = ({ rideData }) => {
         </div>
       </div>
 
-      {/* Ride Time and Distance */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        {/* Ride Time */}
         <div className="bg-gray-50 p-5 rounded-lg shadow-sm">
           <h3 className="text-lg font-semibold text-gray-800">Ride Time</h3>
           <p className="text-gray-700 mt-2">
             {formatDateTime(rideData.pickupDate, rideData.pickupTime)}
           </p>
         </div>
-        {/* Distance */}
         <div className="bg-gray-50 p-5 rounded-lg shadow-sm">
           <h3 className="text-lg font-semibold text-gray-800">Distance</h3>
           <p className="text-gray-700 mt-2">{rideData.distance} miles</p>
         </div>
       </div>
 
-      {/* Passenger Information */}
       <div className="bg-gray-50 p-5 rounded-lg shadow-sm">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">Passengers</h3>
         <ul className="space-y-3">
@@ -86,6 +87,19 @@ const RideInfo: React.FC<RideInfoProps> = ({ rideData }) => {
             </li>
           ))}
         </ul>
+      </div>
+
+      <div className="bg-gray-50 p-5 rounded-lg shadow-sm">
+        <h3 className="text-lg font-semibold text-gray-800">Payment Details</h3>
+        <p className="text-gray-700 mt-2">
+          Total Cost: ${rideData.total_cost.toFixed(2)}
+        </p>
+        <p className="text-gray-700">
+          Payment Status: {rideData.payment_status}
+        </p>
+        {rideData.refund_id && (
+          <p className="text-gray-700">Refund ID: {rideData.refund_id}</p>
+        )}
       </div>
     </div>
   );

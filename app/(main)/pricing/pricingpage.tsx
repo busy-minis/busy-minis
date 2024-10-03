@@ -28,16 +28,12 @@ export default function PricingPage() {
 
   useEffect(() => {
     const baseFare = selectedRideType === "single" ? 16 : 13;
-    const bookingFee = 3;
+
     const additionalMiles = miles > 5 ? (miles - 5) * 2 : 0;
     const additionalPassengers = passengers > 1 ? (passengers - 1) * 5 : 0;
     const additionalStops = stops * 5;
     const calculatedPrice =
-      baseFare +
-      bookingFee +
-      additionalMiles +
-      additionalPassengers +
-      additionalStops;
+      baseFare + additionalMiles + additionalPassengers + additionalStops;
 
     setTotalPrice(calculatedPrice);
   }, [selectedRideType, passengers, stops, miles]);

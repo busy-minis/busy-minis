@@ -23,7 +23,7 @@ export default function RidePage({ userId }: any) {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [modalAction, setModalAction] = useState<
-    "start" | "end" | "updateLink" | null
+    "start" | "end" | "updateLink" | "cancel" | null
   >(null);
   const [rideStarted, setRideStarted] = useState(false);
   const [googleMapsLink, setGoogleMapsLink] = useState<string>("");
@@ -79,6 +79,8 @@ export default function RidePage({ userId }: any) {
         }
         await updateRideLink(rideId, linkInputValue);
         setGoogleMapsLink(linkInputValue);
+      } else if (modalAction === "cancel") {
+        await handleCancelRide();
       }
     } catch (err) {
       setError("Failed to perform the action.");
@@ -102,6 +104,67 @@ export default function RidePage({ userId }: any) {
   const handleUpdateLink = () => {
     setModalAction("updateLink");
     setShowModal(true);
+  };
+
+  const handleCancelRide = async () => {
+    if (!rideData) {
+      return;
+    }
+    if (!rideId) {
+      setError("Invalid ride ID.");
+      return;
+    }
+
+    try {
+      if (!rideData.weekly) {
+        // For non-weekly rides, initiate a refund and cancel
+        const response = await fetch("/api/cancel-ride", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ rideId, isWeekly: false }),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          setRideData((prevData) => ({
+            ...prevData!,
+            status: "cancelled",
+            payment_status: "refunded",
+            refund_id: data.refund.id,
+          }));
+          setError(null);
+        } else {
+          throw new Error(data.error || "Failed to cancel ride");
+        }
+      } else {
+        // For weekly rides, just cancel without refund
+        const response = await fetch("/api/cancel-ride", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ rideId, isWeekly: true }),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          setRideData((prevData) => ({
+            ...prevData!,
+            status: "cancelled",
+          }));
+          setError(null);
+        } else {
+          throw new Error(data.error || "Failed to cancel ride");
+        }
+      }
+    } catch (err) {
+      setError("Failed to cancel ride. Please try again.");
+      console.error("Cancel ride error:", err);
+    }
   };
 
   if (loading) {
@@ -146,6 +209,12 @@ export default function RidePage({ userId }: any) {
           >
             {rideStarted ? "Ride is Ongoing" : "Ride Not Started"}
           </p>
+          <p className="mt-2 font-semibold text-blue-600">
+            {rideData.weekly ? "Weekly Ride" : "One-time Ride"}
+          </p>
+          <p className="mt-2 font-semibold text-purple-600">
+            Status: {rideData.status}
+          </p>
         </div>
 
         {rideStarted && (
@@ -184,6 +253,12 @@ export default function RidePage({ userId }: any) {
           onStart={handleStartRide}
           onEnd={handleEndRide}
           rideStarted={rideStarted}
+          isWeekly={rideData.weekly}
+          onCancel={() => {
+            setModalAction("cancel");
+            setShowModal(true);
+          }}
+          status={rideData.status}
         />
       </div>
 
@@ -196,16 +271,22 @@ export default function RidePage({ userId }: any) {
               ? "Start Ride"
               : modalAction === "end"
               ? "End Ride Confirmation"
+              : modalAction === "cancel"
+              ? "Cancel Ride Confirmation"
               : "Update Google Maps Link"
           }
           message={
             modalAction === "start"
               ? "Please paste your Google Maps link to share your location."
               : modalAction === "end"
-              ? "Are you at the destination? Ending the ride will prevent access to this page."
+              ? rideData.weekly
+                ? "Are you at the destination? This will end today's ride."
+                : "Are you at the destination? Ending the ride will prevent access to this page."
+              : modalAction === "cancel"
+              ? "Are you sure you want to cancel this ride? This action cannot be undone."
               : "Please paste the new Google Maps link."
           }
-          requireInput={modalAction !== "end"}
+          requireInput={modalAction === "start" || modalAction === "updateLink"}
         />
       )}
     </div>

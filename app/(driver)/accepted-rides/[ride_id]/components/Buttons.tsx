@@ -1,38 +1,50 @@
 "use client";
 
 import React from "react";
+import { Button } from "@/components/ui/button";
 
 interface ButtonsProps {
   onStart: () => void;
   onEnd: () => void;
+  onCancel: () => void;
   rideStarted: boolean;
+  isWeekly: boolean;
+  status: string;
 }
 
-const Buttons: React.FC<ButtonsProps> = ({ onStart, onEnd, rideStarted }) => {
+const Buttons: React.FC<ButtonsProps> = ({
+  onStart,
+  onEnd,
+  onCancel,
+  rideStarted,
+  isWeekly,
+  status,
+}) => {
+  const isRefunded = status === "refunded";
+
   return (
     <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
-      <button
+      <Button
         onClick={onStart}
-        disabled={rideStarted}
-        className={`w-full py-3 px-4 rounded-md transition-colors duration-200 ${
-          rideStarted
-            ? "bg-gray-400 text-gray-200 cursor-not-allowed"
-            : "bg-teal-600 text-white hover:bg-teal-700"
-        }`}
+        disabled={rideStarted || isRefunded}
+        variant={rideStarted ? "secondary" : "default"}
+        className="w-full"
       >
         {rideStarted ? "Ride Started" : "Start Ride"}
-      </button>
-      <button
+      </Button>
+      <Button
         onClick={onEnd}
-        disabled={!rideStarted}
-        className={`w-full py-3 px-4 rounded-md transition-colors duration-200 ${
-          rideStarted
-            ? "bg-red-600 text-white hover:bg-red-700"
-            : "bg-gray-400 text-gray-200 cursor-not-allowed"
-        }`}
+        disabled={!rideStarted || isRefunded}
+        variant="destructive"
+        className="w-full"
       >
         End Ride
-      </button>
+      </Button>
+      {!isWeekly && !rideStarted && !isRefunded && (
+        <Button onClick={onCancel} variant="outline" className="w-full">
+          Cancel Ride
+        </Button>
+      )}
     </div>
   );
 };

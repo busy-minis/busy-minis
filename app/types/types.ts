@@ -6,10 +6,17 @@ export interface Ride {
   pickupTime: string;
   pickupDate: string;
   status: string;
+  weekly: boolean;
   pickupLat: number;
   pickupLng: number;
   dropoffLat: number;
+  payment_intent_id: string;
+  payment_status: string;
+
   dropoffLng: number;
+  total_cost: number;
+  refund_id: string;
+
   riders: Passenger[];
 }
 
