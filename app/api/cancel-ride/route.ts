@@ -1,5 +1,4 @@
-// pages/api/cancel-ride.ts
-import { NextApiRequest, NextApiResponse } from "next";
+import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import Stripe from "stripe";
 
@@ -7,17 +6,10 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-06-20",
 });
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
-
-  const { rideId, isWeekly } = req.body;
-
+export async function POST(request: NextRequest) {
   try {
+    const { rideId, isWeekly } = await request.json();
+
     const supabase = createClient();
 
     // Fetch the ride details
@@ -28,7 +20,7 @@ export default async function handler(
       .single();
 
     if (rideError || !ride) {
-      return res.status(404).json({ error: "Ride not found" });
+      return NextResponse.json({ error: "Ride not found" }, { status: 404 });
     }
 
     let refund;
@@ -58,9 +50,12 @@ export default async function handler(
       throw updateError;
     }
 
-    res.status(200).json({ success: true, refund: refund || null });
+    return NextResponse.json({ success: true, refund: refund || null });
   } catch (error) {
     console.error("Error cancelling ride:", error);
-    res.status(500).json({ error: "Failed to cancel ride" });
+    return NextResponse.json(
+      { error: "Failed to cancel ride" },
+      { status: 500 }
+    );
   }
 }

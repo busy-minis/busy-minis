@@ -202,12 +202,6 @@ export default async function ProfilePage({
               Accepted Rides
             </Link>
           </Button>
-          <Button asChild variant="outline">
-            <Link href="/edit-profile">
-              <PencilSimple size={20} className="mr-2" />
-              Edit Profile
-            </Link>
-          </Button>
         </div>
       </div>
     </div>

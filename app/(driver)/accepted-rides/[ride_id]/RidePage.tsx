@@ -107,66 +107,51 @@ export default function RidePage({ userId }: any) {
   };
 
   const handleCancelRide = async () => {
-    if (!rideData) {
-      return;
-    }
-    if (!rideId) {
-      setError("Invalid ride ID.");
+    if (!rideData || !rideId) {
+      setError("Invalid ride data or ID.");
       return;
     }
 
     try {
-      if (!rideData.weekly) {
-        // For non-weekly rides, initiate a refund and cancel
-        const response = await fetch("/api/cancel-ride", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ rideId, isWeekly: false }),
-        });
+      const response = await fetch("/api/cancel-ride", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ rideId, isWeekly: rideData.weekly }),
+      });
 
-        const data = await response.json();
+      const data = await response.json();
 
-        if (data.success) {
+      if (data.success) {
+        if (rideData.weekly) {
+          setRideData((prevData) => ({
+            ...prevData!,
+            status: "cancelled",
+          }));
+          setError(null);
+          alert(
+            "Weekly ride cancelled. No refund will be issued for weekly rides."
+          );
+        } else {
           setRideData((prevData) => ({
             ...prevData!,
             status: "cancelled",
             payment_status: "refunded",
-            refund_id: data.refund.id,
+            refund_id: data.refund?.id,
           }));
           setError(null);
-        } else {
-          throw new Error(data.error || "Failed to cancel ride");
+          alert("Ride cancelled and refunded successfully.");
         }
+        router.push("/"); // Redirect to home page after cancellation
       } else {
-        // For weekly rides, just cancel without refund
-        const response = await fetch("/api/cancel-ride", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ rideId, isWeekly: true }),
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-          setRideData((prevData) => ({
-            ...prevData!,
-            status: "cancelled",
-          }));
-          setError(null);
-        } else {
-          throw new Error(data.error || "Failed to cancel ride");
-        }
+        throw new Error(data.error || "Failed to cancel ride");
       }
     } catch (err) {
       setError("Failed to cancel ride. Please try again.");
       console.error("Cancel ride error:", err);
     }
   };
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">

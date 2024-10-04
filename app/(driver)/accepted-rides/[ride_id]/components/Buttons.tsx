@@ -21,12 +21,13 @@ const Buttons: React.FC<ButtonsProps> = ({
   status,
 }) => {
   const isRefunded = status === "refunded";
+  const isCancelled = status === "cancelled";
 
   return (
     <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
       <Button
         onClick={onStart}
-        disabled={rideStarted || isRefunded}
+        disabled={rideStarted || isRefunded || isCancelled}
         variant={rideStarted ? "secondary" : "default"}
         className="w-full"
       >
@@ -34,13 +35,13 @@ const Buttons: React.FC<ButtonsProps> = ({
       </Button>
       <Button
         onClick={onEnd}
-        disabled={!rideStarted || isRefunded}
+        disabled={!rideStarted || isRefunded || isCancelled}
         variant="destructive"
         className="w-full"
       >
         End Ride
       </Button>
-      {!isWeekly && !rideStarted && !isRefunded && (
+      {!isRefunded && !isCancelled && (
         <Button onClick={onCancel} variant="outline" className="w-full">
           Cancel Ride
         </Button>

@@ -139,6 +139,10 @@ export default function WeeklyRideBookingPage({ userId }: { userId: string }) {
             }
             const distanceInMiles = (totalDistance / 1000) * 0.621371;
             setDistance(distanceInMiles);
+            setFormData((prevData) => ({
+              ...prevData,
+              distance: distanceInMiles,
+            }));
           }
         } else {
           console.error("Error calculating route:", status);
@@ -384,7 +388,8 @@ export default function WeeklyRideBookingPage({ userId }: { userId: string }) {
         user_id: userId,
         status: "active",
         renewal_date: formData.end_date,
-        end_date: formData.end_date, // Use renewal_date as the end_date
+        end_date: formData.end_date,
+        distance: distance, // Ensure distance is included here
       };
       const result = await createWeeklyRide({ formData: rideData });
       if (result.success) {
@@ -406,7 +411,6 @@ export default function WeeklyRideBookingPage({ userId }: { userId: string }) {
       });
     }
   };
-
   return (
     <GoogleMapsApiProvider>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-200 py-12">

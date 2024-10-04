@@ -88,19 +88,6 @@ const RideInfo: React.FC<RideInfoProps> = ({ rideData }) => {
           ))}
         </ul>
       </div>
-
-      <div className="bg-gray-50 p-5 rounded-lg shadow-sm">
-        <h3 className="text-lg font-semibold text-gray-800">Payment Details</h3>
-        <p className="text-gray-700 mt-2">
-          Total Cost: ${rideData.total_cost.toFixed(2)}
-        </p>
-        <p className="text-gray-700">
-          Payment Status: {rideData.payment_status}
-        </p>
-        {rideData.refund_id && (
-          <p className="text-gray-700">Refund ID: {rideData.refund_id}</p>
-        )}
-      </div>
     </div>
   );
 };

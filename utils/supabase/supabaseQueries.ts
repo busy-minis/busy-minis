@@ -176,7 +176,7 @@ function createRideSessions(
     weekly_ride_id: weeklyRideId,
     user_id: formData.user_id,
     payment_status: "paid",
-    distance: formData.distance,
+    distance: formData.distance, // Ensure this is correctly passed from formData
     pickupDate: date.toISOString().split("T")[0],
     pickupTime: formData.selectedTime,
     pickupAddress: formData.pickupAddress,
