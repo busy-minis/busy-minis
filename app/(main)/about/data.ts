@@ -1,13 +1,13 @@
 export const faqData = [
-  {
-    question: "Can I request the same driver?",
-    answer:
-      "Yes, you can request a specific driver when booking. If the requested driver is unavailable, the ride will be released to other drivers in the area. All regular ride customers will have the same driver each week.",
-  },
+  // {
+  //   question: "Can I request the same driver?",
+  //   answer:
+  //     "Yes, you can request a specific driver when booking. If the requested driver is unavailable, the ride will be released to other drivers in the area. All regular ride customers will have the same driver each week.",
+  // },
   {
     question: "How much does a ride cost?",
     answer:
-      "Rides start at $19 plus a $3 booking fee. The total fare depends on mileage, the number of passengers and stops, and any excess wait or additional travel miles. You can easily get a quote through our website.",
+      "Rides start at $16 plus . The total fare depends on mileage, the number of passengers and stops, and any excess wait or additional travel miles. You can easily get a quote through our website.",
   },
   {
     question: "How does the booking process work?",
@@ -36,8 +36,7 @@ export const faqData = [
   },
   {
     question: "How will I know when my ride is claimed?",
-    answer:
-      "You will receive a notification once a driver claims your ride. You can also check ride status on the website.",
+    answer: "You can check ride status on the website.",
   },
   {
     question: "Does Busy Minis offer discounts?",

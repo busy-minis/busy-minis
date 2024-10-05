@@ -1,5 +1,19 @@
 "use client";
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { CheckCircle2, XCircle } from "lucide-react";
 
 export default function ContactPage() {
   const [email, setEmail] = useState("");
@@ -7,11 +21,29 @@ export default function ContactPage() {
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState<boolean | null>(null);
+  const [submitCount, setSubmitCount] = useState(0);
+  const [lastSubmitTime, setLastSubmitTime] = useState(0);
+
+  useEffect(() => {
+    const storedCount = localStorage.getItem("submitCount");
+    const storedTime = localStorage.getItem("lastSubmitTime");
+    if (storedCount) setSubmitCount(parseInt(storedCount, 10));
+    if (storedTime) setLastSubmitTime(parseInt(storedTime, 10));
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!email || !subject || !message) return;
+    if (!email || !subject || !message) {
+      alert("Please fill in all fields.");
+      return;
+    }
+
+    const now = Date.now();
+    if (submitCount >= 5 && now - lastSubmitTime < 3600000) {
+      alert("Please wait an hour before submitting again.");
+      return;
+    }
 
     setIsSubmitting(true);
 
@@ -29,6 +61,13 @@ export default function ContactPage() {
         setEmail("");
         setSubject("");
         setMessage("");
+        setSubmitCount((prevCount) => {
+          const newCount = prevCount + 1;
+          localStorage.setItem("submitCount", newCount.toString());
+          return newCount;
+        });
+        setLastSubmitTime(now);
+        localStorage.setItem("lastSubmitTime", now.toString());
       } else {
         setSubmitSuccess(false);
       }
@@ -40,99 +79,79 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-teal-50">
-      <section className="relative flex flex-col items-center justify-center py-16 px-4 sm:px-6 lg:px-8">
-        {/* Decorative Background Elements */}
-        <div className="absolute z-20 top-0 left-0 w-1/4 h-1/4 bg-gradient-to-r from-teal-400 to-teal-600 rounded-full blur-2xl opacity-20 "></div>
-        <div className="absolute bottom-0 right-0 w-1/4 h-1/4 bg-gradient-to-r from-orange-300 to-yellow-500 rounded-full blur-3xl opacity-20 z-20"></div>
-
-        <div className="w-full max-w-lg bg-white p-10 rounded-lg shadow-xl border border-zinc-300 relative z-20">
-          <h2 className="text-3xl font-semibold text-center text-gray-800 mb-6">
+    <div className="min-h-screen flex flex-col justify-center items-center bg-zinc-100  p-4">
+      <Card className="w-full max-w-lg">
+        <CardHeader>
+          <CardTitle className="text-3xl font-bold text-center text-zinc-700">
             Contact Us
-          </h2>
-          <p className="text-center text-gray-600 mb-8">
-            Have questions? We’d love to hear from you. Please send us a message
-            below.
-          </p>
+          </CardTitle>
+          <CardDescription className="text-center">
+            Have questions? We&apos;d love to hear from you. Please send us a
+            message below.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Email Address
-              </label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="email">Email Address</Label>
+              <Input
                 type="email"
                 id="email"
-                name="email"
-                className="mt-2 block w-full p-3 text-gray-700 bg-gray-50 border border-gray-300 rounded-lg focus:ring-teal-500 focus:border-teal-500"
                 placeholder="you@example.com"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
-            <div>
-              <label
-                htmlFor="subject"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Subject
-              </label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="subject">Subject</Label>
+              <Input
                 type="text"
                 id="subject"
-                name="subject"
-                className="mt-2 block w-full p-3 text-gray-700 bg-gray-50 border border-gray-300 rounded-lg focus:ring-teal-500 focus:border-teal-500"
-                placeholder="Subject"
+                placeholder="Your subject"
                 required
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
               />
             </div>
-            <div>
-              <label
-                htmlFor="message"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Message
-              </label>
-              <textarea
+            <div className="space-y-2">
+              <Label htmlFor="message">Message</Label>
+              <Textarea
                 id="message"
-                name="message"
-                rows={5}
-                className="mt-2 block w-full p-3 text-gray-700 bg-gray-50 border border-gray-300 rounded-lg focus:ring-teal-500 focus:border-teal-500"
-                placeholder="Write your message..."
+                placeholder="Write your message here..."
                 required
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-              ></textarea>
+                className="min-h-[120px]"
+              />
             </div>
-            <button
-              type="submit"
-              className={`w-full py-3 text-white font-semibold rounded-lg shadow-lg ${
-                isSubmitting
-                  ? "bg-teal-400 cursor-not-allowed"
-                  : "bg-teal-500 hover:bg-teal-600 transition duration-300"
-              }`}
-              disabled={isSubmitting}
-            >
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? "Sending..." : "Send Message"}
-            </button>
-            {submitSuccess === true && (
-              <p className="text-green-600 text-center mt-4">
-                Message sent successfully!
-              </p>
-            )}
-            {submitSuccess === false && (
-              <p className="text-red-600 text-center mt-4">
-                Failed to send message. Please try again.
-              </p>
-            )}
+            </Button>
           </form>
-        </div>
-      </section>
+          {submitSuccess === true && (
+            <Alert
+              variant="default"
+              className="mt-6 bg-green-50 border-green-200"
+            >
+              <CheckCircle2 className="h-4 w-4 text-green-600" />
+              <AlertTitle>Success</AlertTitle>
+              <AlertDescription>
+                Your message has been sent successfully!
+              </AlertDescription>
+            </Alert>
+          )}
+          {submitSuccess === false && (
+            <Alert variant="destructive" className="mt-6">
+              <XCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>
+                Failed to send message. Please try again.
+              </AlertDescription>
+            </Alert>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

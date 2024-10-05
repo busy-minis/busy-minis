@@ -1,5 +1,5 @@
 import React from "react";
-import { CheckCircle, Clock, XCircle } from "lucide-react";
+import { CheckCircle, Clock, XCircle, RefreshCcw } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
 import { getCompletedOrCanceledRides } from "@/utils/supabase/supabaseQueries";
 import { redirect } from "next/navigation";
@@ -48,6 +48,12 @@ export default async function RideHistory() {
           text: "Canceled",
           color: "bg-red-100 text-red-800",
         };
+      case "refunded":
+        return {
+          icon: <RefreshCcw className="h-4 w-4 text-blue-500" />,
+          text: "Refunded",
+          color: "bg-blue-100 text-blue-800",
+        };
       default:
         return {
           icon: <Clock className="h-4 w-4 text-gray-500" />,
@@ -58,7 +64,7 @@ export default async function RideHistory() {
   };
 
   return (
-    <div className="container mx-auto py-10">
+    <div className="container min-h-screen mx-auto py-10">
       <Card className="mb-8">
         <CardHeader>
           <CardTitle className="text-2xl font-bold">Ride History</CardTitle>
@@ -86,7 +92,9 @@ export default async function RideHistory() {
             {rides.map((ride, index) => (
               <TableRow key={index}>
                 <TableCell>{ride.pickupDate}</TableCell>
-                <TableCell>Single Ride</TableCell>
+                <TableCell>
+                  {ride.weekly ? "Weekly Ride" : "Single Ride"}
+                </TableCell>
                 <TableCell>{ride.pickupAddress}</TableCell>
                 <TableCell>{ride.dropoffAddress}</TableCell>
                 <TableCell>
@@ -117,7 +125,7 @@ export default async function RideHistory() {
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="font-medium">Ride Type:</span>
-                  <span>Single Ride</span>
+                  <span>{ride.weekly ? "Weekly Ride" : "Single Ride"}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="font-medium">Pickup:</span>

@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { List, X } from "@phosphor-icons/react";
+import { logout } from "@/utils/supabase/logout";
 
 const MobileNav = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -25,6 +26,11 @@ const MobileNav = () => {
     }
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
+
+  const handleSignOut = async () => {
+    await logout();
+    window.location.href = "/login"; // Redirect to login page after sign-out
+  };
 
   return (
     <nav className="lg:hidden">
@@ -90,13 +96,12 @@ const MobileNav = () => {
               </Link>
             </li>
             <li>
-              <Link
-                href="/"
-                className="block hover:text-gray-300"
-                onClick={() => setIsOpen(false)}
+              <button
+                onClick={handleSignOut}
+                className="block hover:text-gray-300 w-full text-left"
               >
                 Sign Out
-              </Link>
+              </button>
             </li>
           </ul>
         </div>

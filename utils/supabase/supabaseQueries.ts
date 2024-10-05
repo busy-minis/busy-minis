@@ -375,7 +375,7 @@ export const getCompletedOrCanceledRides = async (userId: string) => {
     const { data, error } = await supabase
       .from("rides") // querying from rides table
       .select("*")
-      .in("status", ["completed", "canceled"]) // filter by status 'completed' or 'canceled'
+      .in("status", ["completed", "canceled", "refunded"]) // filter by status 'completed' or 'canceled'
       .eq("user_id", userId); // filter by user ID
 
     if (error) {
