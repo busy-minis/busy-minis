@@ -5,7 +5,7 @@ export function generateExpiringLink(): string {
 
   // Token format: timestamp
   const token = `${expiryTime}`;
-  const link = `localhost:3000/driver-application?token=${token}`;
+  const link = `https://busyminis.com/driver-application?token=${token}`;
 
   return link;
 }
