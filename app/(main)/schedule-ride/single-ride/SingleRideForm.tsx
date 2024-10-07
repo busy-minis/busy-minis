@@ -41,9 +41,8 @@ import { useToast } from "@/hooks/use-toast";
 import LoadGoogleMapsScript from "./LoadGoogleMapsScript";
 
 const stripePromise = loadStripe(
-  "pk_test_51Pq0V6AU6tLKej0RgL8EyqnGLr2FSrqtraFvpHgSi6R5jGL2J2BhRJJmumdajy3WgzuNlnZK6drMlrLAtw5cixYP00kozGoK19"
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
 );
-
 interface Rider {
   name: string;
   age: string;

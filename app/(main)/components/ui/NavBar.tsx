@@ -14,7 +14,6 @@ export const NavBar = async () => {
   const user = authData?.user;
 
   // If user is not authenticated or user.email is missing, show login and schedule ride
-
   if (!user || !user.email || authError) {
     return (
       <nav className="border-b flex z-40 sticky top-0 lg:bg-white/50 bg-white/90 lg:backdrop-blur-lg justify-between items-center px-4 sm:px-12 py-1 shadow-md md:shadow-none">
@@ -28,14 +27,12 @@ export const NavBar = async () => {
       </nav>
     );
   }
-  const { data: driverData, error: driverError } = await supabase
-    .from("drivers")
-    .select("driver")
-    .eq("email", user.email)
-    .single();
 
-  // If the user is a driver, log to the console
-  if (driverData?.driver) {
+  // Check user's role from metadata
+  const userRole = user.user_metadata?.role;
+
+  // If the user is not a driver, redirect them
+  if (userRole == "driver") {
     redirect("/available-rides");
   }
 
@@ -44,15 +41,15 @@ export const NavBar = async () => {
       <Logo />
       <NavItems isLoggedIn={true} />
       <div className="hidden lg:flex items-center space-x-6">
-        <LinkButton href="/schedule-ride" label="Schedule a Ride" />
-        {/* <LinkButton href={dashboardHref} label={dashboardLabel} primary /> */}
+        <LinkButton href="/schedule-ride" label="Schedule Ride" />
         <Logout />
       </div>
-      <MobileMenu isLoggedIn={true} dashboardHref={"Dashboard"} />
+      <MobileMenu isLoggedIn={true} />
     </nav>
   );
 };
 
+// ... rest of the code remains the same
 // Reusable LinkButton Component
 interface LinkButtonProps {
   href: string;

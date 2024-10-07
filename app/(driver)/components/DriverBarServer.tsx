@@ -9,28 +9,25 @@ export const DriverBarServer = async () => {
   const { data: authData, error: authError } = await supabase.auth.getUser();
   const user = authData?.user;
 
-  // If no user is authenticated, redirect to login
+  // If no user is authenticated or there's an error, redirect to login
   if (!user || !user.email || authError) {
     redirect("/login");
     return null;
   }
 
-  // Check if the user is a driver by querying the drivers table
-  const { data: driverData, error: driverError } = await supabase
-    .from("drivers")
-    .select("driver")
-    .eq("email", user.email)
-    .single();
+  // Retrieve the user's role from metadata
+  const userRole = user.user_metadata?.role;
 
-  // Redirect to /403 if the user is not a driver
-  if (!driverData?.driver || driverError) {
+  // If the user is not a driver, redirect to the 403 Forbidden page
+  if (userRole !== "driver") {
     redirect("/403");
     return null;
   }
 
+  // If the user is a driver, render the DriverBarClient component
   return (
     <div>
-      {/* Render the Client-Side Navigation */}
+      {/* Render the Client-Side Driver Navigation */}
       <DriverBarClient />
     </div>
   );

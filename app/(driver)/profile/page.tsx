@@ -1,18 +1,5 @@
-// app/profile/page.tsx
 import { createClient } from "@/utils/supabase/server";
 import Link from "next/link";
-import Image from "next/image";
-import {
-  MapPin,
-  Flag,
-  Users,
-  Camera,
-  Phone,
-  Car,
-  EnvelopeSimple,
-  Calendar,
-  PencilSimple,
-} from "@phosphor-icons/react/dist/ssr";
 import { Metadata } from "next";
 import PhotoForm from "./PhotoForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +7,18 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  MapPin,
+  Flag,
+  Users,
+  Car,
+  Calendar,
+  Camera,
+  Phone,
+} from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { CheckCircle2 } from "lucide-react";
+import { EnvelopeSimple } from "@phosphor-icons/react/dist/ssr";
 
 interface Driver {
   id: string;
@@ -106,26 +105,35 @@ export default async function ProfilePage({
         <Card className="overflow-hidden">
           <CardHeader className="bg-gradient-to-r from-teal-500 to-teal-600 text-white p-6">
             <div className="flex items-center space-x-4">
-              <Avatar className="w-24 h-24 border-4 border-white">
-                <AvatarImage
-                  src={driverData.photo_url || "/default-avatar.png"}
-                  alt="Profile Photo"
-                />
-                <AvatarFallback>
-                  {driverData.first_name[0]}
-                  {driverData.last_name[0]}
-                </AvatarFallback>
-              </Avatar>
+              <div className="relative">
+                <Avatar className="w-24 h-24 border-4 border-white">
+                  <AvatarImage
+                    src={driverData.photo_url || "/default-avatar.png"}
+                    alt="Profile Photo"
+                  />
+                  <AvatarFallback>
+                    {driverData.first_name[0]}
+                    {driverData.last_name[0]}
+                  </AvatarFallback>
+                </Avatar>
+                <label
+                  htmlFor="profilePhoto"
+                  className="absolute bottom-0 right-0 bg-white rounded-full p-2 shadow-lg cursor-pointer"
+                >
+                  <Camera className="w-5 h-5 text-teal-500" />
+                </label>
+                <PhotoForm />
+              </div>
               <div>
                 <CardTitle className="text-3xl font-bold">
                   {driverData.first_name} {driverData.last_name}
                 </CardTitle>
                 <p className="text-teal-100 flex items-center mt-1">
-                  <EnvelopeSimple size={16} className="mr-2" />
+                  <EnvelopeSimple className="mr-2 h-4 w-4" />
                   {driverData.email}
                 </p>
                 <p className="text-teal-100 flex items-center mt-1">
-                  <Phone size={16} className="mr-2" />
+                  <Phone className="mr-2 h-4 w-4" />
                   {driverData.phone_number}
                 </p>
               </div>
@@ -133,39 +141,47 @@ export default async function ProfilePage({
           </CardHeader>
           <CardContent className="p-6">
             {successMessage && (
-              <div className="mb-4 p-4 bg-green-100 text-green-700 rounded animate-fade-in">
-                {successMessage}
-              </div>
+              <Alert
+                variant="default"
+                className="mb-4 border-green-500 bg-green-50"
+              >
+                <CheckCircle2 className="h-4 w-4 text-green-500" />
+                <AlertTitle className="text-green-700">Success</AlertTitle>
+                <AlertDescription className="text-green-600">
+                  {successMessage}
+                </AlertDescription>
+              </Alert>
             )}
             {errorMessage && (
-              <div className="mb-4 p-4 bg-red-100 text-red-700 rounded animate-fade-in">
-                {errorMessage}
-              </div>
+              <Alert variant="destructive" className="mb-4">
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{errorMessage}</AlertDescription>
+              </Alert>
             )}
             <div className="space-y-6">
               <div>
                 <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                  <Car size={24} className="mr-2 text-teal-500" />
+                  <Car className="mr-2 h-6 w-6 text-teal-500" />
                   Vehicle Information
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <InfoItem
-                    icon={<Car size={20} className="text-teal-500" />}
+                    icon={<Car className="h-5 w-5 text-teal-500" />}
                     label="License Plate"
                     value={driverData.license_plate}
                   />
                   <InfoItem
-                    icon={<MapPin size={20} className="text-amber-500" />}
+                    icon={<MapPin className="h-5 w-5 text-amber-500" />}
                     label="Vehicle Brand"
                     value={driverData.vehicle_brand}
                   />
                   <InfoItem
-                    icon={<Flag size={20} className="text-blue-500" />}
+                    icon={<Flag className="h-5 w-5 text-blue-500" />}
                     label="Vehicle Year"
                     value={driverData.vehicle_year}
                   />
                   <InfoItem
-                    icon={<Users size={20} className="text-purple-500" />}
+                    icon={<Users className="h-5 w-5 text-purple-500" />}
                     label="Vehicle Color"
                     value={driverData.vehicle_color}
                   />
@@ -174,7 +190,7 @@ export default async function ProfilePage({
               <Separator />
               <div>
                 <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                  <Calendar size={24} className="mr-2 text-teal-500" />
+                  <Calendar className="mr-2 h-6 w-6 text-teal-500" />
                   Account Information
                 </h3>
                 <p className="text-gray-600">
@@ -192,13 +208,13 @@ export default async function ProfilePage({
         <div className="flex justify-center space-x-4">
           <Button asChild variant="default">
             <Link href="/available-rides">
-              <MapPin size={20} className="mr-2" />
+              <MapPin className="mr-2 h-5 w-5" />
               Available Rides
             </Link>
           </Button>
           <Button asChild variant="secondary">
             <Link href="/accepted-rides">
-              <Flag size={20} className="mr-2" />
+              <Flag className="mr-2 h-5 w-5" />
               Accepted Rides
             </Link>
           </Button>

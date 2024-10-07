@@ -26,6 +26,7 @@ export async function createDriver(formData: FormData) {
         first_name: firstName,
         last_name: lastName,
         phone_number: phoneNumber, // Optional to store phone in the profile
+        role: "driver",
       },
     },
   });
@@ -55,7 +56,7 @@ export async function createDriver(formData: FormData) {
       phone_number: phoneNumber, // New phone number field
       license_plate: licensePlate,
       vehicle_brand: vehicleBrand,
-      vechile_color: vehicleColor,
+      vehicle_color: vehicleColor,
       vehicle_year: vehicleYear,
     },
   ]);
