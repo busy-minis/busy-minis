@@ -72,7 +72,7 @@ export default function Hero() {
               </Button>
             </Link>
 
-            <Link href="/">
+            <Link href="/about">
               <Button
                 variant="outline"
                 className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-teal-700 transition-all duration-300 text-base py-6 px-8 rounded-full font-semibold shadow-lg hover:shadow-xl hover:scale-105"
