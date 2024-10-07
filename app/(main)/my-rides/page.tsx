@@ -5,6 +5,7 @@ import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import {
   getRidesForUser,
+  getUserOrientationStatus,
   getWeeklyRidesForUser,
 } from "@/utils/supabase/supabaseQueries";
 import { redirect } from "next/navigation";
@@ -23,6 +24,11 @@ export default async function MyRides() {
 
   if (error || !user) {
     redirect("/login");
+  }
+  const currentUser = await getUserOrientationStatus(user.id);
+
+  if (currentUser.status !== "verified") {
+    redirect("/orientation");
   }
 
   const rides = await getRidesForUser(user.id);

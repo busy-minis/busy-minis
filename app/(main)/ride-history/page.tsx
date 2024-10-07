@@ -3,6 +3,8 @@ import { CheckCircle, Clock, XCircle, RefreshCcw } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
 import { getCompletedOrCanceledRides } from "@/utils/supabase/supabaseQueries";
 import { redirect } from "next/navigation";
+import { getUserOrientationStatus } from "@/utils/supabase/supabaseQueries";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -24,6 +26,12 @@ export default async function RideHistory() {
 
   if (error || !user) {
     redirect("/login");
+  }
+
+  const currentUser = await getUserOrientationStatus(user.id);
+
+  if (currentUser.status !== "verified") {
+    redirect("/orientation");
   }
 
   const rides = await getCompletedOrCanceledRides(user.id);

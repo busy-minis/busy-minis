@@ -57,7 +57,7 @@ export default function LoginPage() {
         setErrors({ general: result.error });
       } else {
         setErrors({});
-        window.location.href = "/my-rides";
+        window.location.href = "/";
       }
     } catch (error) {
       setErrors({ general: "An unexpected error occurred. Please try again." });
