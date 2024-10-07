@@ -30,9 +30,34 @@ export async function POST(request: Request) {
       paymentIntent.amount
     );
 
-    return NextResponse.json({ clientSecret: paymentIntent.client_secret });
+    // Create a response with no-cache headers
+    const response = NextResponse.json({
+      clientSecret: paymentIntent.client_secret,
+    });
+
+    // Set cache control headers
+    response.headers.set("Cache-Control", "no-store, max-age=0");
+    response.headers.set("Pragma", "no-cache");
+    response.headers.set("Expires", "0");
+
+    return response;
   } catch (err) {
     console.error("API: Error creating Payment Intent:", err);
-    return new NextResponse("Error creating Payment Intent", { status: 500 });
+
+    // Create an error response with no-cache headers
+    const errorResponse = new NextResponse("Error creating Payment Intent", {
+      status: 500,
+    });
+
+    // Set cache control headers for error response
+    errorResponse.headers.set("Cache-Control", "no-store, max-age=0");
+    errorResponse.headers.set("Pragma", "no-cache");
+    errorResponse.headers.set("Expires", "0");
+
+    return errorResponse;
   }
 }
+
+export const config = {
+  runtime: "edge",
+};
