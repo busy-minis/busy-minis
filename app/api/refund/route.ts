@@ -23,10 +23,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Ride not found" }, { status: 404 });
     }
 
+    // Convert total_cost to cents and round to the nearest integer
+    const amountInCents = Math.round(ride.total_cost * 100);
+
     // Process the refund
     const refund = await stripe.refunds.create({
       payment_intent: ride.payment_intent_id,
-      amount: ride.total_cost, // Refund the full amount
+      amount: amountInCents, // Use the converted amount in cents
     });
 
     // Update the ride status in the database
