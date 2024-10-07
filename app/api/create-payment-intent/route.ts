@@ -1,4 +1,3 @@
-// app/api/create-payment-intent/route.ts
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
@@ -10,8 +9,11 @@ export async function POST(request: Request) {
   try {
     const { price, rideData } = await request.json();
 
+    // Convert price to cents and ensure it's an integer
+    const amount = Math.round(price * 100);
+
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(price * 100), // Stripe expects amount in cents
+      amount: amount, // Use the converted amount
       currency: "usd",
       metadata: {
         rideData: JSON.stringify(rideData),
