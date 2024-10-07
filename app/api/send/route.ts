@@ -1,26 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
-import { EmailTemplate } from "@/app/(main)/components/email-template";
 import { Resend } from "resend";
+import { EmailTemplate } from "@/app/(main)/components/email-template";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, subject, message } = await req.json();
+    const { name, email, subject, message } = await req.json();
 
     const { data, error } = await resend.emails.send({
-      from: "Acme <onboarding@resend.dev>",
-      to: ["delivered@resend.dev"], // Replace with your desired recipient
-      subject: subject,
-      react: EmailTemplate({ firstName: email, message: message }), // Update your EmailTemplate to handle message
+      from: "Contact Form <onboarding@resend.dev>",
+      to: ["busyminis3@gmail.com"],
+      subject: `New Contact Form Submission: ${subject}`,
+      react: EmailTemplate({ name, email, subject, message }),
     });
 
     if (error) {
       return NextResponse.json({ error }, { status: 500 });
     }
 
-    return NextResponse.json(data);
+    return NextResponse.json({ success: true });
   } catch (error) {
-    return NextResponse.json({ error }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }

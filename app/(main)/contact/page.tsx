@@ -16,6 +16,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { CheckCircle2, XCircle } from "lucide-react";
 
 export default function ContactPage() {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
@@ -34,7 +35,7 @@ export default function ContactPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!email || !subject || !message) {
+    if (!name || !email || !subject || !message) {
       alert("Please fill in all fields.");
       return;
     }
@@ -53,11 +54,12 @@ export default function ContactPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, subject, message }),
+        body: JSON.stringify({ name, email, subject, message }),
       });
 
       if (response.ok) {
         setSubmitSuccess(true);
+        setName("");
         setEmail("");
         setSubject("");
         setMessage("");
@@ -79,7 +81,7 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-zinc-100  p-4">
+    <div className="min-h-screen flex flex-col justify-center items-center bg-zinc-100 p-4">
       <Card className="w-full max-w-lg">
         <CardHeader>
           <CardTitle className="text-3xl font-bold text-center text-zinc-700">
@@ -92,6 +94,17 @@ export default function ContactPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                type="text"
+                id="name"
+                placeholder="Your name"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email Address</Label>
               <Input

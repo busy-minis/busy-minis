@@ -30,6 +30,7 @@ export async function signup(formData: FormData): Promise<SignupResponse> {
         first_name: data.firstName,
         last_name: data.lastName,
         phone_number: data.phoneNumber, // Added phone number to user metadata
+        role: "user",
       },
     },
   });
