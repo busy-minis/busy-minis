@@ -16,7 +16,7 @@ export const NavBar = async () => {
   // If user is not authenticated or user.email is missing, show login and schedule ride
   if (!user || !user.email || authError) {
     return (
-      <nav className="border-b flex z-40 sticky top-0 lg:bg-white/50 bg-white/90 lg:backdrop-blur-lg justify-between items-center px-4 sm:px-12 py-1 shadow-md md:shadow-none">
+      <nav className="border-b flex z-40 sticky top-0  bg-white  justify-between items-center px-4 sm:px-12 py-1 shadow-md md:shadow-none">
         <Logo />
         <NavItems isLoggedIn={false} />
         <div className="hidden lg:flex items-center space-x-6">
@@ -37,7 +37,7 @@ export const NavBar = async () => {
   }
 
   return (
-    <nav className="border-b flex z-40 sticky top-0 lg:bg-white/50 bg-white/90 lg:backdrop-blur-lg justify-between items-center px-12 py-1 shadow-md md:shadow-none">
+    <nav className="border-b flex z-40 sticky top-0 bg-white justify-between items-center px-12 py-1 shadow-md md:shadow-none">
       <Logo />
       <NavItems isLoggedIn={true} />
       <div className="hidden lg:flex items-center space-x-6">

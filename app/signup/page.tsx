@@ -1,12 +1,23 @@
-// app/signup/page.tsx
-
 "use client";
 
 import { FormEvent, useState } from "react";
-import { signup } from "./actions"; // Import your updated signup function
+import { signup } from "./actions";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardFooter,
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { CheckCircle2, AlertCircle } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function SignupPage() {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -101,313 +112,251 @@ export default function SignupPage() {
   };
 
   return (
-    <section className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8 space-y-6">
-        {/* Logo */}
-        <div className="flex justify-center">
-          <Link href="/">
-            {/* Removed <a> tag */}
-            <Image
-              src="/logo-small.png"
-              alt="Logo"
-              width={100}
-              height={100}
-              priority
-              className="object-contain"
-            />
-          </Link>
-        </div>
-
-        {/* Signup Form */}
-        <div>
-          <h2 className="text-2xl font-semibold text-gray-800 text-center mb-2">
-            Create Your Account
-          </h2>
-          <p className="text-center text-gray-600 mb-6">
-            Join us and enjoy our reliable transportation services!
-          </p>
-
-          {/* Success Message */}
-          {formSuccess && (
-            <div className="mb-4 p-4 text-green-700 bg-green-100 rounded flex items-center">
-              <svg
-                className="h-5 w-5 mr-2"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5 13l4 4L19 7"
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-theme-orange-light via-theme-teal-dark to-theme-yellow-light p-4">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-md"
+      >
+        <Card className="bg-white shadow-xl border-none">
+          <CardHeader className="space-y-1">
+            <div className="flex justify-center mb-6">
+              <Link href="/">
+                <Image
+                  src="/logo-large.png"
+                  alt="Logo"
+                  width={240}
+                  height={180}
+                  priority
+                  className="object-contain"
                 />
-              </svg>
-              <span>{formSuccess}</span>
+              </Link>
             </div>
-          )}
+            <CardTitle className="text-2xl font-bold text-center text-theme-teal-dark">
+              Create Your Account
+            </CardTitle>
+            <CardDescription className="text-center text-theme-teal-dark">
+              Join us and enjoy our reliable transportation services!
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {formSuccess && (
+              <Alert className="mb-4 bg-theme-teal text-white">
+                <CheckCircle2 className="h-4 w-4" />
+                <AlertDescription>{formSuccess}</AlertDescription>
+              </Alert>
+            )}
 
-          {/* General Error Message */}
-          {errors.general && (
-            <div className="mb-4 p-4 text-red-700 bg-red-100 rounded">
-              {errors.general}
-            </div>
-          )}
+            {errors.general && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{errors.general}</AlertDescription>
+              </Alert>
+            )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* First Name */}
-            <div>
-              <label
-                htmlFor="firstName"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                First Name
-              </label>
-              <input
-                type="text"
-                id="firstName"
-                name="firstName"
-                className={`w-full px-3 py-2 border ${
-                  errors.firstName ? "border-red-500" : "border-gray-300"
-                } rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500`}
-                placeholder="John"
-                required
-                onChange={handleInputChange}
-                aria-describedby={
-                  errors.firstName ? "firstName-error" : undefined
-                }
-                aria-invalid={!!errors.firstName}
-              />
-              {errors.firstName && (
-                <p id="firstName-error" className="mt-1 text-sm text-red-600">
-                  {errors.firstName}
-                </p>
-              )}
-            </div>
-
-            {/* Last Name */}
-            <div>
-              <label
-                htmlFor="lastName"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Last Name
-              </label>
-              <input
-                type="text"
-                id="lastName"
-                name="lastName"
-                className={`w-full px-3 py-2 border ${
-                  errors.lastName ? "border-red-500" : "border-gray-300"
-                } rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500`}
-                placeholder="Doe"
-                required
-                onChange={handleInputChange}
-                aria-describedby={
-                  errors.lastName ? "lastName-error" : undefined
-                }
-                aria-invalid={!!errors.lastName}
-              />
-              {errors.lastName && (
-                <p id="lastName-error" className="mt-1 text-sm text-red-600">
-                  {errors.lastName}
-                </p>
-              )}
-            </div>
-
-            {/* Email */}
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Email Address
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                className={`w-full px-3 py-2 border ${
-                  errors.email ? "border-red-500" : "border-gray-300"
-                } rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500`}
-                placeholder="you@example.com"
-                required
-                onChange={handleInputChange}
-                aria-describedby={errors.email ? "email-error" : undefined}
-                aria-invalid={!!errors.email}
-              />
-              {errors.email && (
-                <p id="email-error" className="mt-1 text-sm text-red-600">
-                  {errors.email}
-                </p>
-              )}
-            </div>
-
-            {/* Phone Number */}
-            <div>
-              <label
-                htmlFor="phoneNumber"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Phone Number
-              </label>
-              <input
-                type="tel"
-                id="phoneNumber"
-                name="phone_number"
-                className={`w-full px-3 py-2 border ${
-                  errors.phone_number ? "border-red-500" : "border-gray-300"
-                } rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500`}
-                placeholder="+1 555 555 5555"
-                required
-                onChange={handleInputChange}
-                aria-describedby={
-                  errors.phone_number ? "phone_number-error" : undefined
-                }
-                aria-invalid={!!errors.phone_number}
-              />
-              {errors.phone_number && (
-                <p
-                  id="phone_number-error"
-                  className="mt-1 text-sm text-red-600"
-                >
-                  {errors.phone_number}
-                </p>
-              )}
-            </div>
-
-            {/* Password */}
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Password
-              </label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                className={`w-full px-3 py-2 border ${
-                  errors.password ? "border-red-500" : "border-gray-300"
-                } rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500`}
-                placeholder="••••••••"
-                required
-                onChange={handleInputChange}
-                aria-describedby={
-                  errors.password ? "password-error" : undefined
-                }
-                aria-invalid={!!errors.password}
-              />
-              {errors.password && (
-                <p id="password-error" className="mt-1 text-sm text-red-600">
-                  {errors.password}
-                </p>
-              )}
-            </div>
-
-            {/* Confirm Password */}
-            <div>
-              <label
-                htmlFor="confirm-password"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Confirm Password
-              </label>
-              <input
-                type="password"
-                id="confirm-password"
-                name="confirm-password"
-                className={`w-full px-3 py-2 border ${
-                  errors["confirm-password"]
-                    ? "border-red-500"
-                    : "border-gray-300"
-                } rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500`}
-                placeholder="••••••••"
-                required
-                onChange={handleInputChange}
-                aria-describedby={
-                  errors["confirm-password"]
-                    ? "confirm-password-error"
-                    : undefined
-                }
-                aria-invalid={!!errors["confirm-password"]}
-              />
-              {errors["confirm-password"] && (
-                <p
-                  id="confirm-password-error"
-                  className="mt-1 text-sm text-red-600"
-                >
-                  {errors["confirm-password"]}
-                </p>
-              )}
-            </div>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className={`w-full py-2 px-4 bg-orange-600 text-white rounded-md shadow-md hover:bg-orange-700 transition-colors duration-300 flex items-center justify-center ${
-                loading ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-            >
-              {loading ? (
-                <>
-                  <svg
-                    className="animate-spin h-5 w-5 mr-3 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName" className="text-theme-teal-dark">
+                    First Name
+                  </Label>
+                  <Input
+                    id="firstName"
+                    name="firstName"
+                    placeholder="John"
+                    required
+                    onChange={handleInputChange}
+                    aria-describedby={
+                      errors.firstName ? "firstName-error" : undefined
+                    }
+                    aria-invalid={!!errors.firstName}
+                    className="border-theme-teal/30 text-theme-teal-dark  placeholder-theme-teal-dark/50"
+                  />
+                  {errors.firstName && (
+                    <p
+                      id="firstName-error"
+                      className="text-sm text-theme-orange"
+                    >
+                      {errors.firstName}
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lastName" className="text-theme-teal-dark">
+                    Last Name
+                  </Label>
+                  <Input
+                    id="lastName"
+                    name="lastName"
+                    placeholder="Doe"
+                    required
+                    onChange={handleInputChange}
+                    aria-describedby={
+                      errors.lastName ? "lastName-error" : undefined
+                    }
+                    aria-invalid={!!errors.lastName}
+                    className="border-theme-teal/30 text-theme-teal-dark placeholder-theme-teal-dark/50"
+                  />
+                  {errors.lastName && (
+                    <p
+                      id="lastName-error"
+                      className="text-sm text-theme-orange"
+                    >
+                      {errors.lastName}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-theme-teal-dark">
+                  Email Address
+                </Label>
+                <Input
+                  type="email"
+                  id="email"
+                  name="email"
+                  placeholder="you@example.com"
+                  required
+                  onChange={handleInputChange}
+                  aria-describedby={errors.email ? "email-error" : undefined}
+                  aria-invalid={!!errors.email}
+                  className="border-theme-teal/30 text-theme-teal-dark placeholder-theme-teal-dark/50"
+                />
+                {errors.email && (
+                  <p id="email-error" className="text-sm text-theme-orange">
+                    {errors.email}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phoneNumber" className="text-theme-teal-dark">
+                  Phone Number
+                </Label>
+                <Input
+                  type="tel"
+                  id="phoneNumber"
+                  name="phone_number"
+                  placeholder="+1 555 555 5555"
+                  required
+                  onChange={handleInputChange}
+                  aria-describedby={
+                    errors.phone_number ? "phone_number-error" : undefined
+                  }
+                  aria-invalid={!!errors.phone_number}
+                  className="border-theme-teal/30 text-theme-teal-dark placeholder-theme-teal-dark/50"
+                />
+                {errors.phone_number && (
+                  <p
+                    id="phone_number-error"
+                    className="text-sm text-theme-orange"
                   >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8v8H4z"
-                    ></path>
-                  </svg>
-                  Signing Up...
-                </>
-              ) : (
-                "Sign Up"
-              )}
-            </button>
-          </form>
-
-          {/* Already have an account? */}
-          <p className="mt-6 text-center text-sm text-gray-600">
-            Already have an account?{" "}
-            <Link
-              href="/login"
-              className="text-orange-600 font-medium hover:underline"
-            >
-              Login here
-            </Link>
-          </p>
-        </div>
-      </div>
-    </section>
-  );
-
-  // Logo Component (if still needed)
-  const Logo = () => (
-    <div className="flex items-center justify-center mb-6">
-      <Image
-        src="/logo-small.png"
-        alt="Logo"
-        width={100}
-        height={100}
-        priority
-        className="object-contain"
-      />
+                    {errors.phone_number}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-theme-teal-dark">
+                  Password
+                </Label>
+                <Input
+                  type="password"
+                  id="password"
+                  name="password"
+                  placeholder="••••••••"
+                  required
+                  onChange={handleInputChange}
+                  aria-describedby={
+                    errors.password ? "password-error" : undefined
+                  }
+                  aria-invalid={!!errors.password}
+                  className="border-theme-teal/30 text-theme-teal-dark placeholder-theme-teal-dark/50"
+                />
+                {errors.password && (
+                  <p id="password-error" className="text-sm text-theme-orange">
+                    {errors.password}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label
+                  htmlFor="confirm-password"
+                  className="text-theme-teal-dark"
+                >
+                  Confirm Password
+                </Label>
+                <Input
+                  type="password"
+                  id="confirm-password"
+                  name="confirm-password"
+                  placeholder="••••••••"
+                  required
+                  onChange={handleInputChange}
+                  aria-describedby={
+                    errors["confirm-password"]
+                      ? "confirm-password-error"
+                      : undefined
+                  }
+                  aria-invalid={!!errors["confirm-password"]}
+                  className="border-theme-teal/30 text-theme-teal-dark placeholder-theme-teal-dark/50"
+                />
+                {errors["confirm-password"] && (
+                  <p
+                    id="confirm-password-error"
+                    className="text-sm text-theme-orange"
+                  >
+                    {errors["confirm-password"]}
+                  </p>
+                )}
+              </div>
+              <Button
+                className="w-full bg-theme-orange hover:bg-theme-orange-light text-white font-semibold py-2 px-4 rounded-md transition duration-300 ease-in-out"
+                type="submit"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <svg
+                      className="animate-spin h-5 w-5 mr-3"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v8H4z"
+                      ></path>
+                    </svg>
+                    Signing Up...
+                  </>
+                ) : (
+                  "Sign Up"
+                )}
+              </Button>
+            </form>
+          </CardContent>
+          <CardFooter>
+            <p className="text-center text-sm text-theme-teal-dark w-full">
+              Already have an account?{" "}
+              <Link
+                href="/login"
+                className="font-medium text-theme-orange hover:text-theme-orange-light transition-colors duration-300"
+              >
+                Login here
+              </Link>
+            </p>
+          </CardFooter>
+        </Card>
+      </motion.div>
     </div>
   );
 }

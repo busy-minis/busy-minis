@@ -1,10 +1,22 @@
 "use client";
 
-import { List, X, Car, ClockCounterClockwise } from "@phosphor-icons/react"; // Add appropriate icons
 import React, { useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { logout } from "@/utils/supabase/logout";
+import {
+  Menu,
+  X,
+  Car,
+  Clock,
+  Home,
+  CreditCard,
+  Info,
+  Mail,
+  LogOut,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface MobileMenuProps {
   isLoggedIn: boolean;
@@ -14,192 +26,128 @@ interface MobileMenuProps {
 const MobileMenu = ({ isLoggedIn, dashboardHref }: MobileMenuProps) => {
   const [open, setOpen] = useState(false);
 
-  // Sign-out function for mobile
   const handleSignOut = async () => {
     await logout();
-    window.location.href = "/login"; // Redirect after sign-out
+    window.location.href = "/login";
   };
 
   return (
-    <nav className="lg:hidden">
-      {/* Open Menu Button */}
-      <button
-        className="text-gray-800 dark:text-white p-2 focus:outline-none focus:ring-2 focus:ring-orange-500 rounded-md"
+    <div className="lg:hidden">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="text-gray-700"
         onClick={() => setOpen(true)}
         aria-label="Open Menu"
       >
-        <List size={32} weight="bold" />
-      </button>
+        <Menu className="h-6 w-6" />
+      </Button>
 
       <AnimatePresence>
-        {/* Fullscreen Sliding Menu */}
         {open && (
           <>
-            {/* Background Overlay */}
             <motion.div
-              className="fixed inset-0 z-40 bg-black bg-opacity-70 backdrop-blur-sm"
-              onClick={() => setOpen(false)}
+              className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-            ></motion.div>
+              onClick={() => setOpen(false)}
+            />
 
-            {/* Fullscreen Menu */}
             <motion.div
-              className="fixed inset-0 z-50 flex flex-col bg-gradient-to-br from-gray-900 to-gray-800 text-white"
+              className="fixed inset-y-0 right-0 z-50 w-full max-w-sm bg-white shadow-xl"
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
             >
-              {/* Close Button */}
-              <div className="flex justify-end p-6">
-                <button
+              <div className="flex h-16 items-center justify-between px-6">
+                <span className="text-lg font-semibold">Menu</span>
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={() => setOpen(false)}
                   aria-label="Close Menu"
-                  className="text-white hover:text-orange-500 transition-colors"
                 >
-                  <X size={32} weight="bold" />
-                </button>
+                  <X className="h-6 w-6" />
+                </Button>
               </div>
 
-              {/* Menu Items */}
-              <motion.ul
-                className="flex flex-col items-center justify-center space-y-8 text-lg font-semibold flex-grow"
-                initial="hidden"
-                animate="visible"
-                exit="hidden"
-                variants={{
-                  visible: {
-                    opacity: 1,
-                    transition: {
-                      staggerChildren: 0.1,
-                    },
-                  },
-                  hidden: {
-                    opacity: 0,
-                  },
-                }}
-              >
-                {[
-                  { href: "/", label: "Home" },
-                  { href: "/pricing", label: "Pricing" },
-                  { href: "/about", label: "About" },
-
-                  { href: "/contact", label: "Contact" },
-                ].map((item) => (
-                  <motion.li
-                    key={item.href}
-                    variants={{
-                      visible: { opacity: 1, y: 0 },
-                      hidden: { opacity: 0, y: 20 },
-                    }}
-                  >
+              <ScrollArea className="h-[calc(100vh-4rem)] pb-10">
+                <div className="space-y-4 py-4">
+                  {[
+                    { href: "/", label: "Home", icon: Home },
+                    { href: "/pricing", label: "Pricing", icon: CreditCard },
+                    { href: "/about", label: "About", icon: Info },
+                    { href: "/contact", label: "Contact", icon: Mail },
+                  ].map((item) => (
                     <Link
+                      key={item.href}
                       href={item.href}
+                      className="flex items-center space-x-2 px-6 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900"
                       onClick={() => setOpen(false)}
-                      className="text-2xl transition-colors hover:text-orange-500"
                     >
-                      {item.label}
+                      <item.icon className="h-5 w-5" />
+                      <span>{item.label}</span>
                     </Link>
-                  </motion.li>
-                ))}
+                  ))}
 
-                {/* Conditionally Rendered Dashboard/Sign Out */}
-                {isLoggedIn ? (
-                  <>
-                    <motion.li
-                      variants={{
-                        visible: { opacity: 1, y: 0 },
-                        hidden: { opacity: 0, y: 20 },
-                      }}
-                    >
+                  {isLoggedIn ? (
+                    <>
                       <Link
-                        href={"/my-rides"}
+                        href="/my-rides"
+                        className="flex items-center space-x-2 px-6 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900"
                         onClick={() => setOpen(false)}
-                        className="text-2xl text-white hover:text-orange-400 flex items-center transition-colors"
                       >
-                        <Car size={28} className="mr-2 text-orange-500" />
-                        My Rides
+                        <Car className="h-5 w-5" />
+                        <span>My Rides</span>
                       </Link>
-                    </motion.li>
-
-                    <motion.li
-                      variants={{
-                        visible: { opacity: 1, y: 0 },
-                        hidden: { opacity: 0, y: 20 },
-                      }}
-                    >
                       <Link
                         href="/ride-history"
+                        className="flex items-center space-x-2 px-6 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900"
                         onClick={() => setOpen(false)}
-                        className="text-2xl text-white hover:text-orange-400 flex items-center transition-colors"
                       >
-                        <ClockCounterClockwise
-                          size={28}
-                          className="mr-2 text-orange-500"
-                        />
-                        Ride History
+                        <Clock className="h-5 w-5" />
+                        <span>Ride History</span>
                       </Link>
-                    </motion.li>
-
-                    <motion.li
-                      variants={{
-                        visible: { opacity: 1, y: 0 },
-                        hidden: { opacity: 0, y: 20 },
-                      }}
-                    >
                       <button
                         onClick={() => {
                           setOpen(false);
                           handleSignOut();
                         }}
-                        className="text-2xl text-red-500 hover:text-red-600"
+                        className="flex w-full items-center space-x-2 px-6 py-3 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 hover:text-red-700"
                       >
-                        Sign Out
+                        <LogOut className="h-5 w-5" />
+                        <span>Sign Out</span>
                       </button>
-                    </motion.li>
-                  </>
-                ) : (
-                  <motion.li
-                    variants={{
-                      visible: { opacity: 1, y: 0 },
-                      hidden: { opacity: 0, y: 20 },
-                    }}
-                  >
+                    </>
+                  ) : (
                     <Link
                       href="/login"
+                      className="flex items-center space-x-2 px-6 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900"
                       onClick={() => setOpen(false)}
-                      className="text-2xl transition-colors hover:text-orange-500"
                     >
-                      Login
+                      <LogOut className="h-5 w-5" />
+                      <span>Login</span>
                     </Link>
-                  </motion.li>
-                )}
-              </motion.ul>
+                  )}
+                </div>
+              </ScrollArea>
 
-              {/* Bottom CTA */}
-              <motion.div
-                className="p-8 text-center"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ delay: 0.5 }}
-              >
-                <Link
-                  href="/schedule-ride"
+              <div className="absolute bottom-0 left-0 right-0 p-6">
+                <Button
+                  className="w-full bg-theme-orange text-white shadow-md hover:shadow-lg"
                   onClick={() => setOpen(false)}
-                  className="inline-block px-6 py-3 text-lg font-semibold bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+                  asChild
                 >
-                  Schedule a Ride
-                </Link>
-              </motion.div>
+                  <Link href="/schedule-ride">Schedule a Ride</Link>
+                </Button>
+              </div>
             </motion.div>
           </>
         )}
       </AnimatePresence>
-    </nav>
+    </div>
   );
 };
 
