@@ -105,32 +105,59 @@ export default function SingleRideBooking({ userId }: { userId: string }) {
   const { toast } = useToast();
 
   const calculateTotalPrice = useCallback(() => {
+    console.log("Starting price calculation");
+    console.log("Initial distance:", distance);
+
     const calculateCost = () => {
       const miles = distance;
-      const baseRate = 0;
+      const baseRate = 16; // Set base rate to $16
       let totalCost = baseRate;
+
+      console.log("Base rate:", baseRate);
 
       if (miles !== null && miles > 5) {
         const additionalMiles = miles - 5;
         totalCost += additionalMiles * 2;
+        console.log("Additional miles cost:", additionalMiles * 2);
       }
 
       return Math.round(totalCost * 100) / 100;
     };
 
-    let price = 16;
-    if (isSameDay) price += 25;
+    let price = calculateCost();
+    console.log("Price after distance calculation:", price);
+
+    if (isSameDay) {
+      price += 25;
+      console.log("Added same-day fee. New price:", price);
+    }
     if (formData.stops && formData.stops.length > 0) {
-      price += formData.stops.length * 5;
+      const stopsCost = formData.stops.length * 5;
+      price += stopsCost;
+      console.log(
+        `Added ${formData.stops.length} stops cost. New price:`,
+        price
+      );
     }
-    if (isOffPeak) price += 15;
+    if (isOffPeak) {
+      price += 15;
+      console.log("Added off-peak fee. New price:", price);
+    }
     if (formData.riders.length > 1) {
-      price += (formData.riders.length - 1) * 5;
+      const additionalRidersCost = (formData.riders.length - 1) * 5;
+      price += additionalRidersCost;
+      console.log(
+        `Added cost for ${
+          formData.riders.length - 1
+        } additional riders. New price:`,
+        price
+      );
     }
-    if (distance) {
-      price += calculateCost();
-    }
-    setTotalPrice(price);
+
+    const finalPrice = Math.round(price * 100) / 100;
+    console.log("Final calculated price:", finalPrice);
+
+    setTotalPrice(finalPrice);
   }, [isSameDay, isOffPeak, formData.riders, distance, formData.stops]);
 
   useEffect(() => {
