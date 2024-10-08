@@ -184,9 +184,6 @@ export default function RidePage({ userId }: any) {
         <h2 className="text-3xl font-extrabold text-gray-900">Ride Details</h2>
 
         <div className="bg-teal-100 p-4 sm:p-6 rounded-lg">
-          <h3 className="text-lg font-semibold text-teal-900">
-            Ride ID: <span className="text-teal-800">{rideData.id}</span>
-          </h3>
           <p
             className={`mt-2 font-semibold ${
               rideStarted ? "text-green-600" : "text-red-600"
@@ -194,9 +191,7 @@ export default function RidePage({ userId }: any) {
           >
             {rideStarted ? "Ride is Ongoing" : "Ride Not Started"}
           </p>
-          <p className="mt-2 font-semibold text-blue-600">
-            {rideData.weekly ? "Weekly Ride" : "One-time Ride"}
-          </p>
+
           <p className="mt-2 font-semibold text-purple-600">
             Status: {rideData.status}
           </p>
@@ -238,7 +233,6 @@ export default function RidePage({ userId }: any) {
           onStart={handleStartRide}
           onEnd={handleEndRide}
           rideStarted={rideStarted}
-          isWeekly={rideData.weekly}
           onCancel={() => {
             setModalAction("cancel");
             setShowModal(true);

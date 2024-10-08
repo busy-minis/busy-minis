@@ -3,11 +3,12 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { acceptRide } from "@/utils/supabase/supabaseQueries";
-import { MapPin, SpinnerGap, Calendar, Recycle } from "@phosphor-icons/react";
+import { MapPin, Loader2, Calendar, RefreshCw } from "lucide-react";
 import RideCard from "./RideCard";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify";
 import dayjs from "dayjs";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface Rider {
   id: string;
@@ -91,42 +92,42 @@ export default function AvailableRidesFeed({
   const hasRides = rides && filterUpcomingRides(rides).length > 0;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {isLoading ? (
-        <div className="flex flex-col items-center justify-center bg-white rounded-lg shadow-md p-8">
-          <SpinnerGap
-            size={48}
-            className="animate-spin text-teal-600 mb-4"
-            aria-hidden="true"
-          />
-          <p className="text-lg text-gray-700">Loading available rides...</p>
-        </div>
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center p-8">
+            <Loader2 className="w-12 h-12 animate-spin text-teal-600 mb-4" />
+            <p className="text-lg text-gray-700">Loading available rides...</p>
+          </CardContent>
+        </Card>
       ) : !hasRides ? (
-        <div className="flex flex-col items-center justify-center bg-white rounded-lg shadow-md p-8">
-          <MapPin size={48} className="text-gray-400 mb-4" />
-          <p className="text-lg text-gray-700 mb-4">
-            No upcoming rides available at the moment.
-          </p>
-          <button
-            onClick={() => {
-              setIsLoading(true);
-              router.refresh();
-              setTimeout(() => processRides(), 1000);
-            }}
-            className="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500 flex items-center"
-          >
-            <Recycle size={20} className="mr-2" />
-            Refresh
-          </button>
-        </div>
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center p-8">
+            <MapPin className="w-12 h-12 text-gray-400 mb-4" />
+            <p className="text-lg text-gray-700 mb-4">
+              No upcoming rides available at the moment.
+            </p>
+            <Button
+              onClick={() => {
+                setIsLoading(true);
+                router.refresh();
+                setTimeout(() => processRides(), 1000);
+              }}
+              className="flex items-center"
+            >
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Refresh
+            </Button>
+          </CardContent>
+        </Card>
       ) : (
         Object.keys(groupedRides).map((date) => (
           <div key={date} className="space-y-4">
-            <h2 className="text-2xl font-semibold text-teal-600 border-b pb-2 flex items-center">
-              <Calendar size={24} className="mr-2" />
+            <h2 className="text-xl sm:text-2xl font-semibold text-teal-600 border-b pb-2 flex items-center">
+              <Calendar className="mr-2 h-5 w-5 sm:h-6 sm:w-6" />
               {date}
             </h2>
-            <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {groupedRides[date].map((ride) => (
                 <RideCard
                   key={ride.id}
@@ -138,7 +139,6 @@ export default function AvailableRidesFeed({
           </div>
         ))
       )}
-      <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
     </div>
   );
 }

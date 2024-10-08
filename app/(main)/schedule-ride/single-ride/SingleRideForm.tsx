@@ -209,6 +209,8 @@ export default function SingleRideBooking({ userId }: { userId: string }) {
 
   const createPaymentIntent = async () => {
     try {
+      console.log("Creating payment intent with total price:", totalPrice);
+
       const response = await fetch("/api/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -217,12 +219,25 @@ export default function SingleRideBooking({ userId }: { userId: string }) {
           rideData: formData,
         }),
       });
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Failed to create payment intent");
       }
+
       const data = await response.json();
+      console.log("Received client secret:", data.clientSecret);
       setClientSecret(data.clientSecret);
+
+      // Log the payment intent details
+      const paymentIntentResponse = await fetch(
+        `/api/get-payment-intent?client_secret=${data.clientSecret}`,
+        {
+          method: "GET",
+        }
+      );
+      const paymentIntentData = await paymentIntentResponse.json();
+      console.log("Payment Intent details:", paymentIntentData);
     } catch (error) {
       console.error("Error creating Payment Intent:", error);
       toast({
@@ -449,8 +464,15 @@ export default function SingleRideBooking({ userId }: { userId: string }) {
     if (validateForm()) {
       setLoading(true);
       try {
+        // Calculate distance
         await calculateDistance();
+
+        // Recalculate total price after distance is updated
+        calculateTotalPrice();
+
+        // Create payment intent with updated total price
         await createPaymentIntent();
+
         setShowReview(true);
       } catch (error) {
         console.error("Error during form submission:", error);
@@ -475,6 +497,7 @@ export default function SingleRideBooking({ userId }: { userId: string }) {
         <h1 className="text-4xl sm:text-5xl font-bold text-center text-zinc-800 mb-8">
           Book a Single Ride
         </h1>
+        <p>{totalPrice}</p>
 
         {!showReview ? (
           <Card className="max-w-3xl mx-auto">
