@@ -71,6 +71,9 @@ interface FormData {
   stops: Stop[];
   distance: number;
 }
+interface goobly {
+  hello: string;
+}
 
 export default function SingleRideBooking({ userId }: { userId: string }) {
   const isGoogleMapsLoaded = LoadGoogleMapsScript();
