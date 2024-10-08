@@ -57,7 +57,3 @@ export async function POST(request: Request) {
     return errorResponse;
   }
 }
-
-export const config = {
-  runtime: "edge",
-};
