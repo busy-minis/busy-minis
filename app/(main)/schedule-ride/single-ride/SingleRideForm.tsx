@@ -43,6 +43,7 @@ import LoadGoogleMapsScript from "./LoadGoogleMapsScript";
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
 );
+
 interface Rider {
   name: string;
   age: string;
@@ -75,7 +76,7 @@ export default function SingleRideBooking({ userId }: { userId: string }) {
   const isGoogleMapsLoaded = LoadGoogleMapsScript();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [showReview, setShowReview] = useState(false);
+  const [step, setStep] = useState(1); // 1: Form, 2: Review, 3: Payment
   const [formData, setFormData] = useState<FormData>({
     user_id: userId,
     status: "pending",
@@ -105,60 +106,26 @@ export default function SingleRideBooking({ userId }: { userId: string }) {
   const { toast } = useToast();
 
   const calculateTotalPrice = useCallback(() => {
-    console.log("Starting price calculation");
-    console.log("Initial distance:", distance);
+    let price = 16; // Base rate
 
-    const calculateCost = () => {
-      const miles = distance;
-      const baseRate = 16; // Set base rate to $16
-      let totalCost = baseRate;
-
-      console.log("Base rate:", baseRate);
-
-      if (miles !== null && miles > 5) {
-        const additionalMiles = miles - 5;
-        totalCost += additionalMiles * 2;
-        console.log("Additional miles cost:", additionalMiles * 2);
-      }
-
-      return Math.round(totalCost * 100) / 100;
-    };
-
-    let price = calculateCost();
-    console.log("Price after distance calculation:", price);
-
-    if (isSameDay) {
-      price += 25;
-      console.log("Added same-day fee. New price:", price);
-    }
-    if (formData.stops && formData.stops.length > 0) {
-      const stopsCost = formData.stops.length * 5;
-      price += stopsCost;
-      console.log(
-        `Added ${formData.stops.length} stops cost. New price:`,
-        price
-      );
-    }
-    if (isOffPeak) {
-      price += 15;
-      console.log("Added off-peak fee. New price:", price);
-    }
-    if (formData.riders.length > 1) {
-      const additionalRidersCost = (formData.riders.length - 1) * 5;
-      price += additionalRidersCost;
-      console.log(
-        `Added cost for ${
-          formData.riders.length - 1
-        } additional riders. New price:`,
-        price
-      );
+    if (distance !== null && distance > 5) {
+      const additionalMiles = distance - 5;
+      price += additionalMiles * 2;
     }
 
-    const finalPrice = Math.round(price * 100) / 100;
-    console.log("Final calculated price:", finalPrice);
+    if (isSameDay) price += 25;
+    if (formData.stops.length > 0) price += formData.stops.length * 5;
+    if (isOffPeak) price += 15;
+    if (formData.riders.length > 1) price += (formData.riders.length - 1) * 5;
 
-    setTotalPrice(finalPrice);
-  }, [isSameDay, isOffPeak, formData.riders, distance, formData.stops]);
+    setTotalPrice(Math.round(price * 100) / 100);
+  }, [
+    isSameDay,
+    isOffPeak,
+    formData.riders.length,
+    distance,
+    formData.stops.length,
+  ]);
 
   useEffect(() => {
     calculateTotalPrice();
@@ -167,12 +134,8 @@ export default function SingleRideBooking({ userId }: { userId: string }) {
   const validateForm = () => {
     const errors: string[] = [];
 
-    if (!formData.pickupDate) {
-      errors.push("Pickup Date is required.");
-    }
-    if (!formData.pickupTime) {
-      errors.push("Pickup Time is required.");
-    }
+    if (!formData.pickupDate) errors.push("Pickup Date is required.");
+    if (!formData.pickupTime) errors.push("Pickup Time is required.");
 
     formData.riders.forEach((rider, index) => {
       if (!rider.name) errors.push(`Rider ${index + 1} Name is required.`);
@@ -193,7 +156,7 @@ export default function SingleRideBooking({ userId }: { userId: string }) {
       errors.push("Dropoff address is required.");
     }
 
-    formData.stops.forEach((stop: Stop, index: number) => {
+    formData.stops.forEach((stop, index) => {
       if (!stop.address || !stop.lat || !stop.lng) {
         errors.push(`Stop ${index + 1} address is incomplete.`);
       }
@@ -209,8 +172,6 @@ export default function SingleRideBooking({ userId }: { userId: string }) {
 
   const createPaymentIntent = async () => {
     try {
-      console.log("Creating payment intent with total price:", totalPrice);
-
       const response = await fetch("/api/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -226,18 +187,7 @@ export default function SingleRideBooking({ userId }: { userId: string }) {
       }
 
       const data = await response.json();
-      console.log("Received client secret:", data.clientSecret);
       setClientSecret(data.clientSecret);
-
-      // Log the payment intent details
-      const paymentIntentResponse = await fetch(
-        `/api/get-payment-intent?client_secret=${data.clientSecret}`,
-        {
-          method: "GET",
-        }
-      );
-      const paymentIntentData = await paymentIntentResponse.json();
-      console.log("Payment Intent details:", paymentIntentData);
     } catch (error) {
       console.error("Error creating Payment Intent:", error);
       toast({
@@ -250,30 +200,6 @@ export default function SingleRideBooking({ userId }: { userId: string }) {
       });
     } finally {
       setLoading(false);
-    }
-  };
-  const handlePaymentIntentUpdate = async () => {
-    try {
-      const response = await fetch("/api/update-payment-intent", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          paymentIntentId: clientSecret.split("_secret_")[0],
-          amount: totalPrice,
-        }),
-      });
-      if (!response.ok) {
-        throw new Error("Failed to update payment intent");
-      }
-      const data = await response.json();
-      setClientSecret(data.clientSecret);
-    } catch (error) {
-      console.error("Error updating Payment Intent:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update payment intent. Please try again.",
-        variant: "destructive",
-      });
     }
   };
 
@@ -304,6 +230,7 @@ export default function SingleRideBooking({ userId }: { userId: string }) {
       setLoading(false);
     }
   };
+
   const today = format(new Date(), "yyyy-MM-dd");
 
   const handleInputChange = (
@@ -464,16 +391,9 @@ export default function SingleRideBooking({ userId }: { userId: string }) {
     if (validateForm()) {
       setLoading(true);
       try {
-        // Calculate distance
         await calculateDistance();
-
-        // Recalculate total price after distance is updated
         calculateTotalPrice();
-
-        // Create payment intent with updated total price
-        await createPaymentIntent();
-
-        setShowReview(true);
+        setStep(2); // Move to review page
       } catch (error) {
         console.error("Error during form submission:", error);
         toast({
@@ -487,6 +407,23 @@ export default function SingleRideBooking({ userId }: { userId: string }) {
     }
   };
 
+  const handleReviewSubmit = async () => {
+    setLoading(true);
+    try {
+      await createPaymentIntent();
+      setStep(3); // Move to payment page
+    } catch (error) {
+      console.error("Error creating payment intent:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create payment intent. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!isGoogleMapsLoaded) {
     return <div>Loading Google Maps...</div>;
   }
@@ -497,9 +434,8 @@ export default function SingleRideBooking({ userId }: { userId: string }) {
         <h1 className="text-4xl sm:text-5xl font-bold text-center text-zinc-800 mb-8">
           Book a Single Ride
         </h1>
-        <p>{totalPrice}</p>
 
-        {!showReview ? (
+        {step === 1 && (
           <Card className="max-w-3xl mx-auto">
             <CardHeader>
               <CardTitle>Ride Booking</CardTitle>
@@ -510,13 +446,12 @@ export default function SingleRideBooking({ userId }: { userId: string }) {
             <CardContent>
               <form onSubmit={handleSubmit}>
                 <div className="space-y-4">
-                  {/* Pickup Date and Time */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="pickupDate">Pickup Date</Label>
                       <div className="relative">
                         <Calendar
-                          className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                          className="absolute left-3  top-1/2 transform -translate-y-1/2 text-gray-400"
                           size={18}
                         />
                         <Input
@@ -549,7 +484,6 @@ export default function SingleRideBooking({ userId }: { userId: string }) {
                     </div>
                   </div>
 
-                  {/* Alerts for Pickup Time Constraints */}
                   {isSameDay && (
                     <Alert>
                       <AlertCircle className="h-4 w-4" />
@@ -589,7 +523,6 @@ export default function SingleRideBooking({ userId }: { userId: string }) {
 
                   <Separator className="my-4" />
 
-                  {/* Riders Information */}
                   <div className="space-y-4">
                     {formData.riders.map((rider: Rider, index: number) => (
                       <div key={index} className="space-y-4">
@@ -668,7 +601,6 @@ export default function SingleRideBooking({ userId }: { userId: string }) {
 
                   <Separator className="my-4" />
 
-                  {/* Addresses */}
                   <AddressAutocomplete
                     label="Pickup Address"
                     onAddressSelect={(address, lat, lng) =>
@@ -682,7 +614,6 @@ export default function SingleRideBooking({ userId }: { userId: string }) {
                     }
                   />
 
-                  {/* Stops */}
                   {formData.stops.map((stop: Stop, index: number) => (
                     <div key={index} className="space-y-2">
                       <AddressAutocomplete
@@ -726,7 +657,6 @@ export default function SingleRideBooking({ userId }: { userId: string }) {
                     Add Stop
                   </Button>
 
-                  {/* Validation Errors */}
                   {validationErrors.length > 0 && (
                     <Alert variant="destructive">
                       <AlertCircle className="h-4 w-4" />
@@ -743,29 +673,27 @@ export default function SingleRideBooking({ userId }: { userId: string }) {
 
                 <CardFooter className="flex justify-end mt-8">
                   <Button type="submit" disabled={loading}>
-                    {loading ? "Processing..." : "Continue to Payment"}
+                    {loading ? "Processing..." : "Continue to Review"}
                   </Button>
                 </CardFooter>
               </form>
             </CardContent>
           </Card>
-        ) : (
+        )}
+
+        {step === 2 && (
           <Card className="max-w-3xl mx-auto">
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
-                <span>Review & Payment</span>
-                <Button variant="outline" onClick={() => setShowReview(false)}>
+                <span>Review Your Ride Details</span>
+                <Button variant="outline" onClick={() => setStep(1)}>
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Back
                 </Button>
               </CardTitle>
-              <CardDescription>
-                Review your ride details and proceed to payment.
-              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
-                {/* Ride Summary */}
                 <div className="bg-white p-6 rounded-lg shadow-md">
                   <h3 className="text-xl font-semibold mb-4 text-gray-800">
                     Ride Summary
@@ -803,7 +731,6 @@ export default function SingleRideBooking({ userId }: { userId: string }) {
                   </div>
                 </div>
 
-                {/* Route Summary */}
                 <div className="bg-white p-6 rounded-lg shadow-md">
                   <h4 className="text-xl font-semibold mb-4 text-gray-800">
                     Route
@@ -841,7 +768,6 @@ export default function SingleRideBooking({ userId }: { userId: string }) {
                   </ol>
                 </div>
 
-                {/* Distance */}
                 {distance !== null && (
                   <div className="bg-green-50 p-4 rounded-lg shadow-md">
                     <p className="text-green-800 font-medium">
@@ -850,7 +776,6 @@ export default function SingleRideBooking({ userId }: { userId: string }) {
                   </div>
                 )}
 
-                {/* Total Cost */}
                 <div className="bg-gray-50 p-6 rounded-lg shadow-md">
                   <h4 className="text-2xl font-semibold text-gray-800 mb-2">
                     Total Cost: ${totalPrice.toFixed(2)}
@@ -859,23 +784,32 @@ export default function SingleRideBooking({ userId }: { userId: string }) {
                     This includes all fees and additional charges.
                   </p>
                 </div>
-
-                {/* Payment Form */}
-                {clientSecret && (
-                  <div className="bg-white p-6 rounded-lg shadow-md">
-                    <h4 className="text-xl font-semibold mb-4 text-gray-800">
-                      Payment
-                    </h4>
-                    <Elements stripe={stripePromise} options={{ clientSecret }}>
-                      <CheckoutForm
-                        clientSecret={clientSecret}
-                        onSuccess={handlePaymentSuccess}
-                        totalPrice={totalPrice}
-                      />
-                    </Elements>
-                  </div>
-                )}
               </div>
+            </CardContent>
+            <CardFooter className="flex justify-end">
+              <Button onClick={handleReviewSubmit} disabled={loading}>
+                {loading ? "Processing..." : "Continue to Payment"}
+              </Button>
+            </CardFooter>
+          </Card>
+        )}
+
+        {step === 3 && clientSecret && (
+          <Card className="max-w-3xl mx-auto">
+            <CardHeader>
+              <CardTitle>Payment</CardTitle>
+              <CardDescription>
+                Complete your payment to book the ride
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Elements stripe={stripePromise} options={{ clientSecret }}>
+                <CheckoutForm
+                  clientSecret={clientSecret}
+                  onSuccess={handlePaymentSuccess}
+                  totalPrice={totalPrice}
+                />
+              </Elements>
             </CardContent>
           </Card>
         )}
